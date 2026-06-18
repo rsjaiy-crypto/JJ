@@ -374,7 +374,7 @@ get_header();
                 <?php esc_html_e( 'South Africa', 'jaiye-journeys' ); ?>
               </p>
               <p class="trip-card__dates">
-                <time datetime="2027-01"><?php esc_html_e( 'January 2027', 'jaiye-journeys' ); ?></time>
+                <time datetime="2028-01"><?php esc_html_e( 'January 2028', 'jaiye-journeys' ); ?></time>
               </p>
               <a
                 href="<?php echo esc_url( home_url( '/trips/jj-cape-town/' ) ); ?>"
@@ -407,7 +407,7 @@ get_header();
                 <?php esc_html_e( 'Essaouira, Morocco', 'jaiye-journeys' ); ?>
               </p>
               <p class="trip-card__dates">
-                <time datetime="2027-04"><?php esc_html_e( 'April 2027', 'jaiye-journeys' ); ?></time>
+                <time datetime="2027-05"><?php esc_html_e( 'May 2027', 'jaiye-journeys' ); ?></time>
               </p>
               <a
                 href="<?php echo esc_url( home_url( '/trips/btl-chapter-1/' ) ); ?>"
@@ -440,7 +440,7 @@ get_header();
                 <?php esc_html_e( 'Indonesia', 'jaiye-journeys' ); ?>
               </p>
               <p class="trip-card__dates">
-                <time datetime="2027-05"><?php esc_html_e( 'May 2027', 'jaiye-journeys' ); ?></time>
+                <time datetime="2028-05"><?php esc_html_e( 'May 2028', 'jaiye-journeys' ); ?></time>
               </p>
               <a
                 href="<?php echo esc_url( home_url( '/trips/jj-bali/' ) ); ?>"
