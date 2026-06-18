@@ -219,9 +219,6 @@ get_header();
             <?php esc_html_e( 'Travel That Feels Like You', 'jaiye-journeys' ); ?>
           </h2>
           <p class="fp-about__body">
-            <?php esc_html_e( 'I love my life', 'jaiye-journeys' ); ?>
-          </p>
-          <p class="fp-about__body">
             <?php esc_html_e( 'Jaiye Journeys was born out of a simple belief: travel should be a joy from the very first step of planning, not a source of overwhelm. Founded by Steph, a passionate traveller and detail-obsessed planner, we take care of every logistical layer so your only job is to show up and enjoy.', 'jaiye-journeys' ); ?>
           </p>
           <p class="fp-about__body">
@@ -347,9 +344,7 @@ get_header();
                 <time datetime="2026-09"><?php esc_html_e( 'September / October 2026', 'jaiye-journeys' ); ?></time>
               </p>
               <a
-                href="https://tally.so/r/Gxq2JL"
-                target="_blank"
-                rel="noopener"
+                href="<?php echo esc_url( home_url( '/trips/the-prologue/' ) ); ?>"
                 class="btn btn--secondary btn--sm trip-card__cta"
               >
                 <?php esc_html_e( 'Find Out More', 'jaiye-journeys' ); ?>
@@ -382,9 +377,7 @@ get_header();
                 <time datetime="2027-01"><?php esc_html_e( 'January 2027', 'jaiye-journeys' ); ?></time>
               </p>
               <a
-                href="https://tally.so/r/aQa9D2"
-                target="_blank"
-                rel="noopener"
+                href="<?php echo esc_url( home_url( '/trips/jj-cape-town/' ) ); ?>"
                 class="btn btn--secondary btn--sm trip-card__cta"
               >
                 <?php esc_html_e( 'Find Out More', 'jaiye-journeys' ); ?>
@@ -417,9 +410,7 @@ get_header();
                 <time datetime="2027-04"><?php esc_html_e( 'April 2027', 'jaiye-journeys' ); ?></time>
               </p>
               <a
-                href="https://tally.so/r/Gxq2JL"
-                target="_blank"
-                rel="noopener"
+                href="<?php echo esc_url( home_url( '/trips/btl-chapter-1/' ) ); ?>"
                 class="btn btn--secondary btn--sm trip-card__cta"
               >
                 <?php esc_html_e( 'Find Out More', 'jaiye-journeys' ); ?>
@@ -452,9 +443,7 @@ get_header();
                 <time datetime="2027-05"><?php esc_html_e( 'May 2027', 'jaiye-journeys' ); ?></time>
               </p>
               <a
-                href="https://tally.so/r/RGVxVj"
-                target="_blank"
-                rel="noopener"
+                href="<?php echo esc_url( home_url( '/trips/jj-bali/' ) ); ?>"
                 class="btn btn--secondary btn--sm trip-card__cta"
               >
                 <?php esc_html_e( 'Find Out More', 'jaiye-journeys' ); ?>
