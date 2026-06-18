@@ -27,7 +27,7 @@
       <div class="site-logo">
         <a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home" class="site-logo__link" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?> — <?php esc_attr_e( 'Return to homepage', 'jaiye-journeys' ); ?>">
           <img
-            src="/wp-content/themes/jaiye-journeys-theme/assets/images/logo.png"
+            src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/logo.png' ); ?>"
             alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>"
             class="site-logo__img"
           >
