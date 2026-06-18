@@ -219,6 +219,9 @@ get_header();
             <?php esc_html_e( 'Travel That Feels Like You', 'jaiye-journeys' ); ?>
           </h2>
           <p class="fp-about__body">
+            <?php esc_html_e( 'I love my life', 'jaiye-journeys' ); ?>
+          </p>
+          <p class="fp-about__body">
             <?php esc_html_e( 'Jaiye Journeys was born out of a simple belief: travel should be a joy from the very first step of planning, not a source of overwhelm. Founded by Steph, a passionate traveller and detail-obsessed planner, we take care of every logistical layer so your only job is to show up and enjoy.', 'jaiye-journeys' ); ?>
           </p>
           <p class="fp-about__body">
