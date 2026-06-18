@@ -75,7 +75,7 @@ get_header();
                 <?php esc_html_e( 'Cape Town, South Africa', 'jaiye-journeys' ); ?>
               </p>
               <p class="trip-card__dates">
-                <time datetime="2027-01"><?php esc_html_e( 'January 2027', 'jaiye-journeys' ); ?></time>
+                <time datetime="2028-01"><?php esc_html_e( 'January 2028', 'jaiye-journeys' ); ?></time>
               </p>
               <p class="trip-card__desc">
                 <?php esc_html_e( 'Sun, culture, and the most dramatic coastline on earth. Cape Town is for the ones who want it all.', 'jaiye-journeys' ); ?>
@@ -113,7 +113,7 @@ get_header();
                 <?php esc_html_e( 'Bali, Gilis + Komodo, Indonesia', 'jaiye-journeys' ); ?>
               </p>
               <p class="trip-card__dates">
-                <time datetime="2027-05"><?php esc_html_e( 'May 2027', 'jaiye-journeys' ); ?></time>
+                <time datetime="2028-05"><?php esc_html_e( 'May 2028', 'jaiye-journeys' ); ?></time>
               </p>
               <p class="trip-card__desc">
                 <?php esc_html_e( "Rice terraces, turquoise water, and island-hopping through some of the world's most breathtaking archipelagos.", 'jaiye-journeys' ); ?>
@@ -151,7 +151,7 @@ get_header();
                 <?php esc_html_e( 'Bahia, Brazil', 'jaiye-journeys' ); ?>
               </p>
               <p class="trip-card__dates">
-                <time datetime="2027-07"><?php esc_html_e( 'July 2027', 'jaiye-journeys' ); ?></time>
+                <time datetime="2028-07"><?php esc_html_e( 'July 2028', 'jaiye-journeys' ); ?></time>
               </p>
               <p class="trip-card__desc">
                 <?php esc_html_e( 'Afro-Brazilian culture, colonial architecture, and coastline that never ends. Bahia is a full sensory experience.', 'jaiye-journeys' ); ?>
@@ -189,7 +189,7 @@ get_header();
                 <?php esc_html_e( 'Peru', 'jaiye-journeys' ); ?>
               </p>
               <p class="trip-card__dates">
-                <time datetime="2027-10"><?php esc_html_e( 'October 2027', 'jaiye-journeys' ); ?></time>
+                <time datetime="2028-10"><?php esc_html_e( 'October 2028', 'jaiye-journeys' ); ?></time>
               </p>
               <p class="trip-card__desc">
                 <?php esc_html_e( 'Ancient civilisations, dramatic landscapes, and the kind of trip that changes how you see the world.', 'jaiye-journeys' ); ?>
@@ -298,7 +298,7 @@ get_header();
                 <?php esc_html_e( 'Essaouira, Morocco', 'jaiye-journeys' ); ?>
               </p>
               <p class="trip-card__dates">
-                <time datetime="2027-04"><?php esc_html_e( 'April 2027', 'jaiye-journeys' ); ?></time>
+                <time datetime="2027-05"><?php esc_html_e( 'May 2027', 'jaiye-journeys' ); ?></time>
               </p>
               <p class="trip-card__desc">
                 <?php esc_html_e( 'Six days of reading, rest, and radical joy on the Moroccan Atlantic coast. Our first full literary residency.', 'jaiye-journeys' ); ?>
