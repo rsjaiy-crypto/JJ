@@ -356,7 +356,7 @@ get_header();
               <?php esc_html_e( 'Sintra, Portugal', 'jaiye-journeys' ); ?>
             </p>
             <p class="horizon-card__dates">
-              <time datetime="2027-09"><?php esc_html_e( 'September 2027', 'jaiye-journeys' ); ?></time>
+              <time datetime="2028-09"><?php esc_html_e( 'September 2028', 'jaiye-journeys' ); ?></time>
             </p>
             <a
               href="https://tally.so/r/Gxq2JL"
