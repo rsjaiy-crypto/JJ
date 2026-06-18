@@ -381,7 +381,7 @@ get_header();
               <?php esc_html_e( 'Oaxaca, Mexico', 'jaiye-journeys' ); ?>
             </p>
             <p class="horizon-card__dates">
-              <time datetime="2028-04"><?php esc_html_e( 'April 2028', 'jaiye-journeys' ); ?></time>
+              <time datetime="2029-04"><?php esc_html_e( 'April 2029', 'jaiye-journeys' ); ?></time>
             </p>
             <a
               href="https://tally.so/r/Gxq2JL"
@@ -406,7 +406,7 @@ get_header();
               <?php esc_html_e( 'Tuscany, Italy', 'jaiye-journeys' ); ?>
             </p>
             <p class="horizon-card__dates">
-              <time datetime="2028-09"><?php esc_html_e( 'September 2028', 'jaiye-journeys' ); ?></time>
+              <time datetime="2029-09"><?php esc_html_e( 'September 2029', 'jaiye-journeys' ); ?></time>
             </p>
             <a
               href="https://tally.so/r/Gxq2JL"
