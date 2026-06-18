@@ -204,7 +204,7 @@ get_header();
 
         <figure class="fp-about__photo">
           <img
-            src="/wp-content/themes/jaiye-journeys-theme/assets/images/steph.jpg?v=2"
+            src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/steph.jpg?v=2' ); ?>"
             alt="<?php esc_attr_e( 'Steph, founder of Jaiye Journeys', 'jaiye-journeys' ); ?>"
             class="fp-about__img"
             loading="lazy"
