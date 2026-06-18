@@ -10,53 +10,41 @@ get_header();
 
   <!-- ============================================================
        1. HERO
-       Deep-green bg. Two-column: text left, stacked film frames right.
-       Frames are purely decorative, hidden on mobile.
+       Forest green bg (matches Our Journeys hero). Clean, single column.
        ============================================================ -->
   <header
     class="pgc-hero"
     aria-label="<?php esc_attr_e( 'Private Groups & Celebrations', 'jaiye-journeys' ); ?>"
   >
     <div class="container">
-      <div class="pgc-hero__grid">
-
-        <div data-reveal>
-          <p class="overline pgc-kicker pgc-hero__kicker">
-            <?php esc_html_e( 'Private Groups &amp; Celebrations', 'jaiye-journeys' ); ?>
-          </p>
-          <h1 class="pgc-hero__heading">
-            <?php esc_html_e( 'You bring the people.', 'jaiye-journeys' ); ?>
-            <br><em><?php esc_html_e( 'We curate the vibe.', 'jaiye-journeys' ); ?></em>
-          </h1>
-          <p class="pgc-hero__sub">
-            <?php esc_html_e( 'Family reunions. Hen weekends. Milestone birthdays. Weddings far from home. Tell us who\'s coming and what you\'re celebrating, and we\'ll design the trip around it.', 'jaiye-journeys' ); ?>
-          </p>
-          <div class="pgc-hero__actions">
-            <a
-              class="btn btn--accent"
-              href="<?php echo esc_url( home_url( '/contact/' ) ); ?>"
-            >
-              <?php esc_html_e( 'Start Planning', 'jaiye-journeys' ); ?>
-            </a>
-            <a
-              class="btn btn--ghost"
-              href="#sheet"
-            >
-              <?php esc_html_e( 'See What We Plan', 'jaiye-journeys' ); ?>
-            </a>
-          </div>
-          <p class="pgc-hero__note">
-            <?php esc_html_e( 'No deposit required for a first conversation.', 'jaiye-journeys' ); ?>
-          </p>
+      <div class="pgc-hero__content">
+        <p class="overline pgc-hero__overline">
+          <?php esc_html_e( 'Private Groups &amp; Celebrations', 'jaiye-journeys' ); ?>
+        </p>
+        <h1 class="pgc-hero__heading">
+          <?php esc_html_e( 'You bring the people.', 'jaiye-journeys' ); ?><br>
+          <em><?php esc_html_e( 'We handle the rest.', 'jaiye-journeys' ); ?></em>
+        </h1>
+        <p class="pgc-hero__sub">
+          <?php esc_html_e( 'Family reunions, hen weekends, milestone birthdays, destination weddings. Tell us who is coming and what you are celebrating — we will design the trip around it.', 'jaiye-journeys' ); ?>
+        </p>
+        <div class="pgc-hero__actions">
+          <a
+            class="btn btn--ghost"
+            href="<?php echo esc_url( home_url( '/contact/' ) ); ?>"
+          >
+            <?php esc_html_e( 'Start Planning', 'jaiye-journeys' ); ?>
+          </a>
+          <a
+            class="pgc-hero__anchor"
+            href="#what-we-plan"
+          >
+            <?php esc_html_e( 'See what we plan', 'jaiye-journeys' ); ?>
+          </a>
         </div>
-
-        <!-- Decorative film stills — desktop only, aria-hidden -->
-        <div class="pgc-hero__frames" aria-hidden="true">
-          <div class="pgc-frame-still pgc-frame-still--a" data-label="reunion.jpg"></div>
-          <div class="pgc-frame-still pgc-frame-still--b" data-label="hen-do.jpg"></div>
-          <div class="pgc-frame-still pgc-frame-still--c" data-label="wedding.jpg"></div>
-        </div>
-
+        <p class="pgc-hero__note">
+          <?php esc_html_e( 'No commitment required for an initial conversation.', 'jaiye-journeys' ); ?>
+        </p>
       </div>
     </div>
   </header><!-- /.pgc-hero -->
@@ -64,7 +52,7 @@ get_header();
 
   <!-- ============================================================
        2. INTRO STRIP
-       Dark bg, border-top/bottom. Two-column: h2 left / body right.
+       Cream bg. Two-column: heading left, body right.
        ============================================================ -->
   <section
     class="pgc-intro"
@@ -74,7 +62,7 @@ get_header();
       <div class="pgc-intro__grid">
 
         <div data-reveal>
-          <p class="overline pgc-kicker">
+          <p class="overline">
             <?php esc_html_e( 'The Brief', 'jaiye-journeys' ); ?>
           </p>
           <h2 class="pgc-intro__heading">
@@ -84,7 +72,7 @@ get_header();
 
         <div data-reveal>
           <p class="pgc-intro__body">
-            <?php esc_html_e( 'The trips below are what people ask us for most, but they are not the only trips we plan. Send us your version of a celebration, however unusual, and we\'ll tell you straight away whether it\'s something we can build.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'The celebrations below are what people come to us for most — but they are not the only occasions we plan. Tell us your brief, however unusual, and we will let you know what is possible.', 'jaiye-journeys' ); ?>
           </p>
         </div>
 
@@ -94,131 +82,145 @@ get_header();
 
 
   <!-- ============================================================
-       3. CONTACT SHEET / CELEBRATION TYPES
-       Dark bg. 2×2 film-frame grid + 1 full-width salmon "open" frame.
-       Photo slots named for future photography swap-in.
+       3. CELEBRATION TYPES
+       Cream bg. White cards (trip-card pattern), 2×2 grid +
+       full-width forest green invitation card for open briefs.
+       Photo slots labelled for photography swap-in.
        ============================================================ -->
   <section
     class="pgc-sheet"
-    id="sheet"
+    id="what-we-plan"
     aria-label="<?php esc_attr_e( 'Celebration types we plan', 'jaiye-journeys' ); ?>"
   >
     <div class="container">
 
-      <div class="pgc-sheet__head" data-reveal>
-        <p class="overline pgc-kicker">
+      <header class="section-header section-header--center" data-reveal>
+        <p class="overline">
           <?php esc_html_e( 'What We Plan', 'jaiye-journeys' ); ?>
         </p>
-        <h2 class="pgc-sheet__title">
-          <?php esc_html_e( 'A contact sheet of the celebrations we\'ve built.', 'jaiye-journeys' ); ?>
+        <h2 class="section-header__title">
+          <?php esc_html_e( 'Built around every kind of occasion.', 'jaiye-journeys' ); ?>
         </h2>
-      </div>
+      </header>
 
-      <div class="pgc-frame-grid">
+      <div class="pgc-cel-grid">
 
-        <article class="pgc-frame" data-reveal tabindex="0">
-          <p class="pgc-frame__num">Frame 01</p>
+        <!-- Card 1: Family Reunions -->
+        <article class="trip-card pgc-cel-card" data-reveal>
           <div
-            class="pgc-frame__photo"
+            class="pgc-cel-card__media"
             data-img="family-reunion.jpg"
             role="img"
-            aria-label="<?php esc_attr_e( 'Image placeholder: family-reunion.jpg', 'jaiye-journeys' ); ?>"
+            aria-label="<?php esc_attr_e( 'Placeholder — family-reunion.jpg', 'jaiye-journeys' ); ?>"
           ></div>
-          <h3 class="pgc-frame__title">
-            <?php esc_html_e( 'Family Reunions', 'jaiye-journeys' ); ?>
-          </h3>
-          <p class="pgc-frame__lead">
-            <?php esc_html_e( 'Three generations, one villa, and a seating plan that keeps the peace.', 'jaiye-journeys' ); ?>
-          </p>
-          <p class="pgc-frame__detail">
-            <?php esc_html_e( 'We split the cost across each household, sort the dietary requirements nobody mentions until day two, and build in enough downtime that the trip still feels like a holiday rather than a reunion tour.', 'jaiye-journeys' ); ?>
-          </p>
+          <div class="trip-card__body">
+            <p class="trip-card__type">
+              <span class="overline"><?php esc_html_e( 'Family Reunions', 'jaiye-journeys' ); ?></span>
+            </p>
+            <h3 class="trip-card__title">
+              <?php esc_html_e( 'Three generations, one destination.', 'jaiye-journeys' ); ?>
+            </h3>
+            <p class="trip-card__desc">
+              <?php esc_html_e( 'We coordinate accommodation across households, split costs, and build in enough breathing room for everyone — including the ones who just want to sit by the pool.', 'jaiye-journeys' ); ?>
+            </p>
+          </div>
         </article>
 
-        <article class="pgc-frame" data-reveal tabindex="0">
-          <p class="pgc-frame__num">Frame 02</p>
+        <!-- Card 2: Hen Weekends -->
+        <article class="trip-card pgc-cel-card" data-reveal>
           <div
-            class="pgc-frame__photo"
+            class="pgc-cel-card__media"
             data-img="hen-weekend.jpg"
             role="img"
-            aria-label="<?php esc_attr_e( 'Image placeholder: hen-weekend.jpg', 'jaiye-journeys' ); ?>"
+            aria-label="<?php esc_attr_e( 'Placeholder — hen-weekend.jpg', 'jaiye-journeys' ); ?>"
           ></div>
-          <h3 class="pgc-frame__title">
-            <?php esc_html_e( 'Hen Weekends', 'jaiye-journeys' ); ?>
-          </h3>
-          <p class="pgc-frame__caption">
-            <?php esc_html_e( 'The UK\'s pre-wedding tradition, the equivalent of a bachelorette weekend.', 'jaiye-journeys' ); ?>
-          </p>
-          <p class="pgc-frame__lead">
-            <?php esc_html_e( 'The bride doesn\'t lift a finger. Everyone else handles the group chat, badly. We take it off their hands.', 'jaiye-journeys' ); ?>
-          </p>
-          <p class="pgc-frame__detail">
-            <?php esc_html_e( 'Activities, accommodation, and a kitty system so nobody\'s chasing payments, built around what the bride actually wants rather than what a Pinterest board says a hen weekend should look like.', 'jaiye-journeys' ); ?>
-          </p>
+          <div class="trip-card__body">
+            <p class="trip-card__type">
+              <span class="overline"><?php esc_html_e( 'Hen Weekends', 'jaiye-journeys' ); ?></span>
+            </p>
+            <h3 class="trip-card__title">
+              <?php esc_html_e( 'The bride arrives. We handled the rest.', 'jaiye-journeys' ); ?>
+            </h3>
+            <p class="pgc-cel__caption">
+              <?php esc_html_e( 'The UK\'s pre-wedding tradition — the equivalent of a bachelorette weekend.', 'jaiye-journeys' ); ?>
+            </p>
+            <p class="trip-card__desc">
+              <?php esc_html_e( 'Activities, accommodation, and a payment system so nobody is chasing transfers. Built around what the bride actually wants, not what a template suggests.', 'jaiye-journeys' ); ?>
+            </p>
+          </div>
         </article>
 
-        <article class="pgc-frame" data-reveal tabindex="0">
-          <p class="pgc-frame__num">Frame 03</p>
+        <!-- Card 3: Milestone Birthdays -->
+        <article class="trip-card pgc-cel-card" data-reveal>
           <div
-            class="pgc-frame__photo"
+            class="pgc-cel-card__media"
             data-img="milestone-birthday.jpg"
             role="img"
-            aria-label="<?php esc_attr_e( 'Image placeholder: milestone-birthday.jpg', 'jaiye-journeys' ); ?>"
+            aria-label="<?php esc_attr_e( 'Placeholder — milestone-birthday.jpg', 'jaiye-journeys' ); ?>"
           ></div>
-          <h3 class="pgc-frame__title">
-            <?php esc_html_e( 'Milestone Birthdays', 'jaiye-journeys' ); ?>
-          </h3>
-          <p class="pgc-frame__lead">
-            <?php esc_html_e( 'Turning 30, 40, or the one nobody likes to say out loud.', 'jaiye-journeys' ); ?>
-          </p>
-          <p class="pgc-frame__detail">
-            <?php esc_html_e( 'We design the trip around the milestone, not just the date. A weekend with the right people, somewhere that means something, built so the host gets to enjoy the day instead of running it.', 'jaiye-journeys' ); ?>
-          </p>
+          <div class="trip-card__body">
+            <p class="trip-card__type">
+              <span class="overline"><?php esc_html_e( 'Milestone Birthdays', 'jaiye-journeys' ); ?></span>
+            </p>
+            <h3 class="trip-card__title">
+              <?php esc_html_e( '30, 40, 50 — whichever one deserves a proper trip.', 'jaiye-journeys' ); ?>
+            </h3>
+            <p class="trip-card__desc">
+              <?php esc_html_e( 'The right people, somewhere that means something, and an itinerary that runs itself so the host can actually be present on the day.', 'jaiye-journeys' ); ?>
+            </p>
+          </div>
         </article>
 
-        <article class="pgc-frame" data-reveal tabindex="0">
-          <p class="pgc-frame__num">Frame 04</p>
+        <!-- Card 4: Destination Weddings -->
+        <article class="trip-card pgc-cel-card" data-reveal>
           <div
-            class="pgc-frame__photo"
+            class="pgc-cel-card__media"
             data-img="destination-wedding.jpg"
             role="img"
-            aria-label="<?php esc_attr_e( 'Image placeholder: destination-wedding.jpg', 'jaiye-journeys' ); ?>"
+            aria-label="<?php esc_attr_e( 'Placeholder — destination-wedding.jpg', 'jaiye-journeys' ); ?>"
           ></div>
-          <h3 class="pgc-frame__title">
-            <?php esc_html_e( 'Destination Weddings', 'jaiye-journeys' ); ?>
-          </h3>
-          <p class="pgc-frame__lead">
-            <?php esc_html_e( 'Your wedding, your guest list, somewhere none of you have been before.', 'jaiye-journeys' ); ?>
-          </p>
-          <p class="pgc-frame__detail">
-            <?php esc_html_e( 'Hotel blocks, group flights, and a guest portal so people can book their own rooms without calling you about it. You focus on the wedding. We handle everyone else\'s logistics.', 'jaiye-journeys' ); ?>
-          </p>
+          <div class="trip-card__body">
+            <p class="trip-card__type">
+              <span class="overline"><?php esc_html_e( 'Destination Weddings', 'jaiye-journeys' ); ?></span>
+            </p>
+            <h3 class="trip-card__title">
+              <?php esc_html_e( 'Your wedding, your guest list, somewhere worth travelling to.', 'jaiye-journeys' ); ?>
+            </h3>
+            <p class="trip-card__desc">
+              <?php esc_html_e( 'Room blocks, group transfers, and a guest portal so your guests can sort their own bookings without calling you about it. You focus on getting married. We handle the rest.', 'jaiye-journeys' ); ?>
+            </p>
+          </div>
         </article>
 
-        <!-- Frame 05 — salmon "open" slot, full-width, no photo placeholder -->
-        <article class="pgc-frame pgc-frame--open" data-reveal tabindex="0">
-          <p class="pgc-frame__num">
-            <?php esc_html_e( 'Frame 05 &mdash; Untitled', 'jaiye-journeys' ); ?>
-          </p>
-          <h3 class="pgc-frame__title">
-            <?php esc_html_e( 'Something Else Entirely', 'jaiye-journeys' ); ?>
-          </h3>
-          <p class="pgc-frame__lead">
-            <?php esc_html_e( 'A friendship group\'s first trip together in a decade. A retirement send-off. A baby shower somewhere warm.', 'jaiye-journeys' ); ?>
-          </p>
-          <p class="pgc-frame__detail">
-            <?php esc_html_e( 'If it involves a group of people and a reason to celebrate, tell us about it. We\'ll let you know what\'s possible.', 'jaiye-journeys' ); ?>
-          </p>
+        <!-- Card 5: Something Else Entirely — full-width forest green -->
+        <article class="pgc-invite-card" data-reveal>
+          <div class="pgc-invite-card__inner">
+            <p class="overline pgc-invite-card__overline">
+              <?php esc_html_e( 'Something Else Entirely', 'jaiye-journeys' ); ?>
+            </p>
+            <h3 class="pgc-invite-card__heading">
+              <?php esc_html_e( 'A long-overdue reunion. A retirement send-off. A baby shower somewhere warm.', 'jaiye-journeys' ); ?>
+            </h3>
+            <p class="pgc-invite-card__body">
+              <?php esc_html_e( 'If it is a group of people and a reason to celebrate, tell us about it. We will let you know what is possible.', 'jaiye-journeys' ); ?>
+            </p>
+            <a
+              class="btn btn--ghost"
+              href="<?php echo esc_url( home_url( '/contact/' ) ); ?>"
+            >
+              <?php esc_html_e( 'Tell Us About Your Celebration', 'jaiye-journeys' ); ?>
+            </a>
+          </div>
         </article>
 
-      </div><!-- /.pgc-frame-grid -->
+      </div><!-- /.pgc-cel-grid -->
     </div><!-- /.container -->
   </section><!-- /.pgc-sheet -->
 
 
   <!-- ============================================================
        4. BETWEEN THE LINES CALLOUT
-       Cream bg. Two-column: text + button left, pull quote right.
+       Sage bg. Two-column: text + button left, pull quote right.
        ============================================================ -->
   <section
     class="pgc-retreat"
@@ -228,26 +230,28 @@ get_header();
       <div class="pgc-retreat__grid">
 
         <div data-reveal>
-          <p class="overline pgc-retreat__kicker">
+          <p class="overline pgc-retreat__overline">
             <?php esc_html_e( 'Also Under This Roof', 'jaiye-journeys' ); ?>
           </p>
           <h2 class="pgc-retreat__heading">
-            <?php esc_html_e( 'Between the Lines: a retreat for readers.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Between the Lines — a retreat for readers.', 'jaiye-journeys' ); ?>
           </h2>
           <p class="pgc-retreat__body">
-            <?php esc_html_e( 'Not every celebration needs a guest list. Between the Lines is our literary residency, built for book clubs and reading communities who want a week of rest, good food, and better conversation than their group chat usually allows.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Not every celebration needs a guest list. Between the Lines is our literary residency for book clubs and reading communities who want a week of genuine rest, good food, and better conversation.', 'jaiye-journeys' ); ?>
           </p>
           <a
             class="btn btn--primary"
             href="<?php echo esc_url( home_url( '/between-the-lines/' ) ); ?>"
           >
-            <?php esc_html_e( 'Visit Between the Lines', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Explore Between the Lines', 'jaiye-journeys' ); ?>
           </a>
         </div>
 
         <div data-reveal>
           <blockquote class="pgc-retreat__quote">
-            <p><?php esc_html_e( '&ldquo;The best stories happen in the margins, and the best retreats happen away from your inbox.&rdquo;', 'jaiye-journeys' ); ?></p>
+            <p>
+              <?php esc_html_e( '&ldquo;The best stories happen in the margins. The best retreats happen away from the inbox.&rdquo;', 'jaiye-journeys' ); ?>
+            </p>
           </blockquote>
         </div>
 
@@ -257,8 +261,8 @@ get_header();
 
 
   <!-- ============================================================
-       5. HOW IT WORKS — PROCESS
-       Dark bg. Four-step horizontal layout with animated connector line.
+       5. HOW IT WORKS
+       Forest green bg. Four-step layout with animated connector line.
        ============================================================ -->
   <section
     class="pgc-process"
@@ -267,7 +271,7 @@ get_header();
     <div class="container">
 
       <div class="pgc-process__head" data-reveal>
-        <p class="overline pgc-kicker">
+        <p class="overline pgc-process__overline">
           <?php esc_html_e( 'How It Works', 'jaiye-journeys' ); ?>
         </p>
         <h2 class="pgc-process__heading">
@@ -276,7 +280,6 @@ get_header();
       </div>
 
       <div class="pgc-process__row">
-        <!-- Connector line — revealed by JS when row enters view -->
         <div class="pgc-process__line" aria-hidden="true"></div>
 
         <div class="pgc-process__step" data-reveal>
@@ -285,7 +288,7 @@ get_header();
             <?php esc_html_e( 'Inquire', 'jaiye-journeys' ); ?>
           </h3>
           <p class="pgc-process__step-body">
-            <?php esc_html_e( 'You tell us the occasion, the headcount, and the vibe you\'re after.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Tell us the occasion, the headcount, and the experience you have in mind.', 'jaiye-journeys' ); ?>
           </p>
         </div>
 
@@ -295,7 +298,7 @@ get_header();
             <?php esc_html_e( 'Design', 'jaiye-journeys' ); ?>
           </h3>
           <p class="pgc-process__step-body">
-            <?php esc_html_e( 'We build out the options. Accommodation, activities, and logistics, matched to your group and your budget.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'We build out the options — accommodation, activities, and logistics matched to your group.', 'jaiye-journeys' ); ?>
           </p>
         </div>
 
@@ -305,7 +308,7 @@ get_header();
             <?php esc_html_e( 'Confirm', 'jaiye-journeys' ); ?>
           </h3>
           <p class="pgc-process__step-body">
-            <?php esc_html_e( 'You lock it in with a deposit. Everyone else pays their share through their own link.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Lock it in with a deposit. Everyone else pays their share through their own link.', 'jaiye-journeys' ); ?>
           </p>
         </div>
 
@@ -315,7 +318,7 @@ get_header();
             <?php esc_html_e( 'Jaiye!', 'jaiye-journeys' ); ?>
           </h3>
           <p class="pgc-process__step-body">
-            <?php esc_html_e( 'You turn up and enjoy your own party. We\'re handling the rest, from the group chat to the final bill.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Show up. Everything else is handled.', 'jaiye-journeys' ); ?>
           </p>
         </div>
 
@@ -326,7 +329,7 @@ get_header();
 
   <!-- ============================================================
        6. WHAT'S INCLUDED
-       Forest bg. Two-column: heading left, list right.
+       Cream bg. Two-column: heading left, list right.
        ============================================================ -->
   <section
     class="pgc-included"
@@ -336,7 +339,7 @@ get_header();
       <div class="pgc-included__grid">
 
         <div data-reveal>
-          <p class="overline pgc-kicker">
+          <p class="overline">
             <?php esc_html_e( 'What We Handle', 'jaiye-journeys' ); ?>
           </p>
           <h2 class="pgc-included__heading">
@@ -346,16 +349,16 @@ get_header();
 
         <ul class="pgc-included__list" data-reveal>
           <li>
-            <?php esc_html_e( 'Individual payment links, so you\'re not chasing twelve people for money.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Individual payment links — so nobody is chasing transfers.', 'jaiye-journeys' ); ?>
           </li>
           <li>
-            <?php esc_html_e( 'A custom itinerary app each guest can check without messaging you for the address again.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'A custom itinerary each guest can access on their phone, without messaging you for the details.', 'jaiye-journeys' ); ?>
           </li>
           <li>
-            <?php esc_html_e( 'Hotel and venue sourcing through our FORA partnerships, with VIP perks you can\'t book direct.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Hotel and venue sourcing through our FORA partnerships, with VIP perks you cannot book directly.', 'jaiye-journeys' ); ?>
           </li>
           <li>
-            <?php esc_html_e( 'Dietary requirements, transfers, and the small details that turn a group trip into a smooth one.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Dietary requirements, transfers, and the small logistics that make a group trip feel seamless.', 'jaiye-journeys' ); ?>
           </li>
         </ul>
 
@@ -366,11 +369,11 @@ get_header();
 
   <!-- ============================================================
        7. THE INVESTMENT
-       Dark bg. Large guest-minimum number left, text right.
+       Cream bg. Large guest minimum number left, text right.
        ============================================================ -->
   <section
     class="pgc-invest"
-    aria-label="<?php esc_attr_e( 'Pricing and investment information', 'jaiye-journeys' ); ?>"
+    aria-label="<?php esc_attr_e( 'Pricing and group size information', 'jaiye-journeys' ); ?>"
   >
     <div class="container">
       <div class="pgc-invest__grid">
@@ -382,17 +385,17 @@ get_header();
         </div>
 
         <div data-reveal>
-          <p class="overline pgc-kicker">
+          <p class="overline">
             <?php esc_html_e( 'The Investment', 'jaiye-journeys' ); ?>
           </p>
           <h2 class="pgc-invest__heading">
             <?php esc_html_e( 'Every group is quoted individually.', 'jaiye-journeys' ); ?>
           </h2>
           <p class="pgc-invest__body">
-            <?php esc_html_e( 'Private group trips start from a minimum of 10 guests. Beyond that, the price depends on destination, headcount, and how hands-on you want us to be.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Private group trips start from ten guests. The price depends on the destination, the headcount, and how hands-on you would like us to be.', 'jaiye-journeys' ); ?>
           </p>
           <p class="pgc-invest__body">
-            <?php esc_html_e( 'Tell us the brief and we\'ll come back with real numbers, not a generic price list.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Send us the brief and we will come back with a real proposal — not a price list.', 'jaiye-journeys' ); ?>
           </p>
         </div>
 
@@ -403,31 +406,31 @@ get_header();
 
   <!-- ============================================================
        8. FINAL CTA
-       Salmon gradient bg. Centred text + button.
+       Forest green bg (matches oj-cta). Centred.
        ============================================================ -->
   <section
-    class="pgc-final"
+    class="pgc-cta"
     aria-label="<?php esc_attr_e( 'Start planning your group trip', 'jaiye-journeys' ); ?>"
   >
     <div class="container">
-      <div class="pgc-final__inner">
-        <h2 class="pgc-final__heading" data-reveal>
-          <?php esc_html_e( 'Your people are waiting for an invitation.', 'jaiye-journeys' ); ?>
+      <div class="pgc-cta__inner">
+        <h2 class="pgc-cta__heading" data-reveal>
+          <?php esc_html_e( 'Ready to bring your group together?', 'jaiye-journeys' ); ?>
         </h2>
-        <p class="pgc-final__sub" data-reveal>
-          <?php esc_html_e( 'Tell us who\'s coming, what you\'re celebrating, and where you\'ve always wanted to take them. We\'ll do the rest.', 'jaiye-journeys' ); ?>
+        <p class="pgc-cta__sub" data-reveal>
+          <?php esc_html_e( 'Tell us what you are celebrating, who is coming, and where in the world you would like to take them. We will handle the rest.', 'jaiye-journeys' ); ?>
         </p>
         <a
-          class="btn btn--primary"
+          class="btn btn--ghost"
           href="<?php echo esc_url( home_url( '/contact/' ) ); ?>"
           data-reveal
-          aria-label="<?php esc_attr_e( 'Start planning — contact Jaiye Journeys', 'jaiye-journeys' ); ?>"
+          aria-label="<?php esc_attr_e( 'Get in touch — contact Jaiye Journeys', 'jaiye-journeys' ); ?>"
         >
-          <?php esc_html_e( 'Start Planning', 'jaiye-journeys' ); ?>
+          <?php esc_html_e( 'Get in Touch', 'jaiye-journeys' ); ?>
         </a>
       </div>
     </div>
-  </section><!-- /.pgc-final -->
+  </section><!-- /.pgc-cta -->
 
 </main><!-- /#main-content -->
 
