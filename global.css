@@ -2595,3 +2595,797 @@ textarea::placeholder {
   color: var(--color-forest);
   opacity: 1;
 }
+
+
+/* ==========================================================================
+   17. Private Groups & Celebrations Page  (.pgc-)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Grain overlay — fixed ambient film-grain texture
+   Sits above page content (z-index 1) but below the sticky header (z-index 300).
+   Opacity 0.05 so it's a luxury texture hint, not a filter.
+   -------------------------------------------------------------------------- */
+
+.pgc-grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  z-index: 1;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+
+/* --------------------------------------------------------------------------
+   Scroll-reveal — scoped to .pgc-page so it never leaks to other templates
+   -------------------------------------------------------------------------- */
+
+.pgc-page [data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity var(--duration-slow) var(--ease-out),
+    transform var(--duration-slow) var(--ease-out);
+}
+
+.pgc-page [data-reveal].is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pgc-page [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   Kicker — overline variant with a coral dot prefix
+   Used on all dark sections. .pgc-retreat__kicker overrides for cream bg.
+   -------------------------------------------------------------------------- */
+
+.pgc-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55em;
+  color: var(--color-sage);
+}
+
+.pgc-kicker::before {
+  content: '';
+  width: 0.42em;
+  height: 0.42em;
+  border-radius: 50%;
+  background-color: var(--color-salmon);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+
+/* --------------------------------------------------------------------------
+   1. Hero — deep-green bg, two-column (text left / decorative frames right)
+   -------------------------------------------------------------------------- */
+
+.pgc-hero {
+  background-color: var(--color-deep-green);
+  color: var(--color-cream);
+  padding-block: clamp(3rem, 8vw, 6rem) clamp(4rem, 10vw, 7rem);
+  overflow: hidden;
+}
+
+.pgc-hero__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
+  align-items: center;
+}
+
+.pgc-hero__kicker {
+  margin-bottom: var(--space-6);
+}
+
+.pgc-hero__heading {
+  font-size: var(--text-4xl);
+  font-weight: var(--fw-regular);
+  color: var(--color-cream);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.pgc-hero__heading em {
+  font-style: italic;
+  color: var(--color-salmon);
+  font-weight: var(--fw-regular);
+}
+
+.pgc-hero__sub {
+  margin-top: var(--space-6);
+  max-width: 42ch;
+  font-size: var(--text-base);
+  font-weight: var(--fw-light);
+  color: color-mix(in srgb, var(--color-cream) 75%, transparent);
+  line-height: 1.7;
+}
+
+.pgc-hero__actions {
+  margin-top: var(--space-8);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.pgc-hero__note {
+  margin-top: var(--space-4);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-light);
+  letter-spacing: 0.06em;
+  color: color-mix(in srgb, var(--color-sage) 65%, transparent);
+  max-width: none;
+}
+
+/* Decorative stacked film stills — desktop only */
+
+.pgc-hero__frames {
+  position: relative;
+  height: 420px;
+  display: none;
+}
+
+.pgc-frame-still {
+  position: absolute;
+  width: 62%;
+  aspect-ratio: 4 / 5;
+  border: 1px solid color-mix(in srgb, var(--color-cream) 14%, transparent);
+  background: linear-gradient(155deg, #3a2e2a, #1e1b22 60%);
+  padding: var(--space-2);
+}
+
+.pgc-frame-still::after {
+  content: attr(data-label);
+  position: absolute;
+  left: var(--space-3);
+  bottom: var(--space-2);
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--color-cream) 50%, transparent);
+  text-transform: lowercase;
+}
+
+.pgc-frame-still--a { top: 0;   left: 6%;  transform: rotate(-6deg); z-index: 3; }
+.pgc-frame-still--b { top: 14%; left: 32%; transform: rotate(4deg);  z-index: 2; opacity: 0.85; }
+.pgc-frame-still--c { top: 34%; left: 10%; transform: rotate(2deg);  z-index: 1; opacity: 0.6; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pgc-frame-still { transform: none !important; }
+}
+
+@media (min-width: 880px) {
+  .pgc-hero__grid {
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: var(--space-12);
+  }
+
+  .pgc-hero__heading { font-size: var(--text-5xl); }
+  .pgc-hero__sub     { font-size: var(--text-md); }
+  .pgc-hero__frames  { display: block; }
+}
+
+
+/* --------------------------------------------------------------------------
+   2. Intro Strip — dark bg, thin borders, two-column
+   -------------------------------------------------------------------------- */
+
+.pgc-intro {
+  background-color: var(--color-deep-green);
+  color: var(--color-cream);
+  padding-block: clamp(2.5rem, 6vw, 4rem);
+  border-top: 1px solid color-mix(in srgb, var(--color-cream) 14%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-cream) 14%, transparent);
+}
+
+.pgc-intro__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+.pgc-intro__heading {
+  font-size: var(--text-2xl);
+  font-weight: var(--fw-regular);
+  color: var(--color-cream);
+  line-height: 1.15;
+  margin-top: var(--space-3);
+}
+
+.pgc-intro__body {
+  font-size: var(--text-base);
+  font-weight: var(--fw-light);
+  color: var(--color-sage);
+  line-height: 1.75;
+  max-width: 54ch;
+}
+
+@media (min-width: 880px) {
+  .pgc-intro__grid {
+    grid-template-columns: 0.9fr 1.6fr;
+    gap: var(--space-10);
+    align-items: center;
+  }
+
+  .pgc-intro__heading { font-size: var(--text-3xl); }
+  .pgc-intro__body    { font-size: var(--text-md); }
+}
+
+
+/* --------------------------------------------------------------------------
+   3. Contact Sheet — dark bg, film-frame grid
+   -------------------------------------------------------------------------- */
+
+.pgc-sheet {
+  background-color: var(--color-deep-green);
+  color: var(--color-cream);
+  padding-block: clamp(3.5rem, 8vw, 6rem);
+}
+
+.pgc-sheet__head {
+  margin-bottom: var(--space-10);
+  max-width: 60ch;
+}
+
+.pgc-sheet__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: var(--fw-regular);
+  color: var(--color-cream);
+  line-height: 1.2;
+  margin-top: var(--space-3);
+}
+
+/* Grid — 1 col mobile → 2 col tablet+ */
+
+.pgc-frame-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
+  background-color: color-mix(in srgb, var(--color-cream) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-cream) 14%, transparent);
+}
+
+@media (min-width: 760px) {
+  .pgc-frame-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Individual frame card */
+
+.pgc-frame {
+  background-color: var(--color-deep-green);
+  padding: var(--space-8) var(--space-6);
+  position: relative;
+  outline: none;
+  transition: background-color var(--duration-base) var(--ease-out);
+  cursor: default;
+}
+
+/* Sprocket-hole edge detail — film-contact-sheet aesthetic */
+.pgc-frame::before,
+.pgc-frame::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background-image: radial-gradient(
+    circle,
+    var(--color-deep-green) 3px,
+    transparent 3.5px
+  );
+  background-size: 22px 14px;
+  background-repeat: repeat-x;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pgc-frame::before { top: -7px; }
+.pgc-frame::after  { bottom: -7px; }
+
+.pgc-frame:hover,
+.pgc-frame:focus-within {
+  background-color: var(--color-forest);
+}
+
+.pgc-frame__num {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-regular);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-sage);
+  max-width: none;
+  margin: 0 0 var(--space-4);
+  opacity: 0.7;
+}
+
+/* Placeholder photo box — swap for <img> once photography is ready */
+
+.pgc-frame__photo {
+  height: 150px;
+  border: 1px solid color-mix(in srgb, var(--color-cream) 12%, transparent);
+  background: linear-gradient(135deg, #2c2620, #15131a 70%);
+  filter: grayscale(0.9) brightness(0.9);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: var(--space-5);
+  transition:
+    filter var(--duration-base) var(--ease-out),
+    transform var(--duration-base) var(--ease-out);
+}
+
+.pgc-frame__photo::after {
+  content: attr(data-img);
+  position: absolute;
+  left: var(--space-2);
+  bottom: var(--space-2);
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--color-cream) 40%, transparent);
+  text-transform: lowercase;
+}
+
+.pgc-frame:hover .pgc-frame__photo,
+.pgc-frame:focus-within .pgc-frame__photo {
+  filter: grayscale(0) brightness(1);
+  transform: scale(1.02);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pgc-frame__photo { transition: none; }
+  .pgc-frame:hover .pgc-frame__photo,
+  .pgc-frame:focus-within .pgc-frame__photo {
+    filter: grayscale(0) brightness(1);
+    transform: none;
+  }
+}
+
+.pgc-frame__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-regular);
+  color: var(--color-cream);
+  line-height: 1.2;
+  margin-bottom: var(--space-2);
+}
+
+.pgc-frame__caption {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: var(--text-sm);
+  font-weight: var(--fw-regular);
+  color: var(--color-sage);
+  margin-bottom: var(--space-3);
+  max-width: none;
+}
+
+.pgc-frame__lead {
+  font-size: var(--text-base);
+  font-weight: var(--fw-light);
+  color: var(--color-cream);
+  line-height: 1.6;
+  margin-bottom: var(--space-2);
+  max-width: none;
+}
+
+.pgc-frame__detail {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-light);
+  color: var(--color-sage);
+  line-height: 1.7;
+  max-width: 44ch;
+}
+
+/* Frame 5 — salmon "open" card, spans full grid width on tablet+ */
+
+.pgc-frame--open {
+  background-color: var(--color-salmon);
+}
+
+@media (min-width: 760px) {
+  .pgc-frame--open { grid-column: 1 / -1; }
+}
+
+.pgc-frame--open .pgc-frame__num {
+  color: color-mix(in srgb, var(--color-deep-green) 55%, transparent);
+  opacity: 1;
+}
+
+.pgc-frame--open .pgc-frame__title { color: var(--color-deep-green); }
+
+.pgc-frame--open .pgc-frame__lead {
+  color: var(--color-deep-green);
+}
+
+.pgc-frame--open .pgc-frame__detail {
+  color: color-mix(in srgb, var(--color-deep-green) 72%, transparent);
+}
+
+.pgc-frame--open::before,
+.pgc-frame--open::after {
+  background-image: radial-gradient(
+    circle,
+    var(--color-salmon) 3px,
+    transparent 3.5px
+  );
+}
+
+.pgc-frame--open:hover,
+.pgc-frame--open:focus-within {
+  background-color: color-mix(in srgb, var(--color-salmon) 82%, var(--color-deep-green));
+}
+
+
+/* --------------------------------------------------------------------------
+   4. Retreat Callout — cream bg, two-column
+   -------------------------------------------------------------------------- */
+
+.pgc-retreat {
+  background-color: var(--color-cream);
+  color: var(--color-deep-green);
+  padding-block: clamp(3.5rem, 8vw, 5.5rem);
+}
+
+.pgc-retreat__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-10);
+  align-items: center;
+}
+
+.pgc-retreat__kicker {
+  color: var(--color-forest);
+  margin-bottom: var(--space-3);
+}
+
+.pgc-retreat__kicker::before {
+  background-color: var(--color-salmon);
+}
+
+.pgc-retreat__heading {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: var(--fw-regular);
+  color: var(--color-deep-green);
+  line-height: 1.15;
+  margin-bottom: var(--space-4);
+}
+
+.pgc-retreat__body {
+  font-size: var(--text-base);
+  font-weight: var(--fw-light);
+  color: var(--color-forest);
+  line-height: 1.75;
+  max-width: 48ch;
+  margin-bottom: var(--space-6);
+}
+
+/* Pull quote — override global blockquote to keep cream-page styling */
+.pgc-retreat__quote {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-style: italic;
+  font-weight: var(--fw-regular);
+  line-height: 1.4;
+  color: var(--color-deep-green);
+  padding-left: var(--space-6);
+  border-left: 2px solid var(--color-salmon);
+}
+
+.pgc-retreat__quote p {
+  font-size: inherit;
+  font-style: inherit;
+  font-weight: inherit;
+  color: inherit;
+  line-height: inherit;
+  max-width: none;
+  margin: 0;
+}
+
+@media (min-width: 880px) {
+  .pgc-retreat__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-16);
+  }
+
+  .pgc-retreat__heading { font-size: var(--text-3xl); }
+
+  .pgc-retreat__quote {
+    font-size: clamp(var(--text-xl), 2.4vw, var(--text-2xl));
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   5. Process — dark bg, four-step horizontal layout with connector line
+   -------------------------------------------------------------------------- */
+
+.pgc-process {
+  background-color: var(--color-deep-green);
+  color: var(--color-cream);
+  padding-block: clamp(3.5rem, 8vw, 6rem);
+}
+
+.pgc-process__head {
+  max-width: 50ch;
+  margin-bottom: var(--space-12);
+}
+
+.pgc-process__heading {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: var(--fw-regular);
+  color: var(--color-cream);
+  line-height: 1.15;
+  margin-top: var(--space-3);
+}
+
+.pgc-process__row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
+  position: relative;
+}
+
+/* Connector line — hidden on mobile, animates on desktop when row enters view */
+
+.pgc-process__line {
+  display: none;
+  position: absolute;
+  top: 11px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: color-mix(in srgb, var(--color-cream) 14%, transparent);
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform var(--duration-slow) var(--ease-out);
+}
+
+.pgc-process__line.is-visible {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pgc-process__line {
+    transform: scaleX(1);
+    transition: none;
+  }
+}
+
+.pgc-process__step { position: relative; }
+
+.pgc-process__dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: var(--color-deep-green);
+  border: 1px solid var(--color-salmon);
+  margin-bottom: var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--color-salmon);
+}
+
+.pgc-process__step-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-regular);
+  color: var(--color-cream);
+  margin-bottom: var(--space-2);
+}
+
+.pgc-process__step-body {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-light);
+  color: var(--color-sage);
+  line-height: 1.7;
+  max-width: none;
+}
+
+@media (min-width: 880px) {
+  .pgc-process__row {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-8);
+  }
+
+  .pgc-process__line { display: block; }
+  .pgc-process__heading { font-size: var(--text-3xl); }
+}
+
+
+/* --------------------------------------------------------------------------
+   6. What's Included — forest bg, two-column
+   -------------------------------------------------------------------------- */
+
+.pgc-included {
+  background-color: var(--color-forest);
+  color: var(--color-cream);
+  padding-block: clamp(3.5rem, 8vw, 6rem);
+  border-top: 1px solid color-mix(in srgb, var(--color-cream) 14%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-cream) 14%, transparent);
+}
+
+.pgc-included__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+.pgc-included__heading {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: var(--fw-regular);
+  color: var(--color-cream);
+  line-height: 1.15;
+  margin-top: var(--space-3);
+}
+
+.pgc-included__list {
+  list-style: none;
+}
+
+.pgc-included__list li {
+  padding-block: var(--space-4);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-cream) 14%, transparent);
+  display: flex;
+  gap: var(--space-4);
+  font-size: var(--text-base);
+  font-weight: var(--fw-light);
+  line-height: 1.65;
+  color: var(--color-cream);
+  max-width: none;
+}
+
+.pgc-included__list li:first-child { padding-top: 0; }
+
+.pgc-included__list li::before {
+  content: '—';
+  color: var(--color-sage);
+  flex-shrink: 0;
+}
+
+@media (min-width: 880px) {
+  .pgc-included__grid {
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: var(--space-12);
+    align-items: start;
+  }
+
+  .pgc-included__heading { font-size: var(--text-3xl); }
+}
+
+
+/* --------------------------------------------------------------------------
+   7. Investment — dark bg, large guest-minimum number + copy
+   -------------------------------------------------------------------------- */
+
+.pgc-invest {
+  background-color: var(--color-deep-green);
+  color: var(--color-cream);
+  padding-block: clamp(3.5rem, 8vw, 6rem);
+}
+
+.pgc-invest__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.pgc-invest__num {
+  font-family: var(--font-heading);
+  font-size: clamp(4rem, 10vw, 7rem);
+  line-height: 1;
+  color: var(--color-sage);
+  max-width: none;
+  margin: 0;
+}
+
+.pgc-invest__num span {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-regular);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-sage);
+  opacity: 0.65;
+  margin-top: var(--space-2);
+}
+
+.pgc-invest__heading {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: var(--fw-regular);
+  color: var(--color-cream);
+  line-height: 1.15;
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.pgc-invest__body {
+  font-size: var(--text-base);
+  font-weight: var(--fw-light);
+  color: var(--color-sage);
+  line-height: 1.75;
+  max-width: 54ch;
+  margin-bottom: var(--space-3);
+}
+
+.pgc-invest__body:last-child { margin-bottom: 0; }
+
+@media (min-width: 880px) {
+  .pgc-invest__grid {
+    grid-template-columns: 0.7fr 1.3fr;
+    gap: var(--space-12);
+  }
+
+  .pgc-invest__heading { font-size: var(--text-3xl); }
+}
+
+
+/* --------------------------------------------------------------------------
+   8. Final CTA — salmon gradient bg, centred
+   -------------------------------------------------------------------------- */
+
+.pgc-final {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-salmon) 80%, var(--color-deep-green)),
+    var(--color-salmon)
+  );
+  color: var(--color-deep-green);
+  padding-block: clamp(4rem, 9vw, 7rem);
+  text-align: center;
+}
+
+.pgc-final__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.pgc-final__heading {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: var(--fw-regular);
+  color: var(--color-deep-green);
+  line-height: 1.1;
+  max-width: 22ch;
+}
+
+.pgc-final__sub {
+  font-size: var(--text-base);
+  font-weight: var(--fw-light);
+  color: color-mix(in srgb, var(--color-deep-green) 72%, transparent);
+  line-height: 1.7;
+  max-width: 42ch;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .pgc-final__heading { font-size: var(--text-4xl); }
+}
