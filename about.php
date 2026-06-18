@@ -93,7 +93,7 @@ $partners = [
 
     <div class="ab-intro__image-col" aria-hidden="true">
       <img
-        src="/wp-content/themes/jaiye-journeys-theme/assets/images/steph-intro.jpg?v=2"
+        src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/steph-intro.jpg?v=2' ); ?>"
         alt=""
         class="ab-intro__img"
         loading="lazy"

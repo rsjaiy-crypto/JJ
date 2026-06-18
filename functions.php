@@ -156,6 +156,6 @@ add_filter( 'body_class', 'jaiye_body_classes' );
 // ============================================================
 
 function jaiye_favicon() {
-    echo '<link rel="icon" type="image/png" href="/wp-content/themes/jaiye-journeys-theme/assets/images/favicon.png">' . "\n";
+    echo '<link rel="icon" type="image/png" href="' . esc_url( get_template_directory_uri() . '/assets/images/favicon.png' ) . '">' . "\n";
 }
 add_action( 'wp_head', 'jaiye_favicon' );
