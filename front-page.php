@@ -170,7 +170,7 @@ get_header();
 
         <li class="fp-service-tile fp-service-tile--no-badge">
           <h3 class="fp-service-tile__title">
-<a href="/contact/" target="_self" style="color: inherit; text-decoration: none;">Private Groups & Celebrations</a>          </h3>
+<a href="<?php echo esc_url( home_url( '/private-groups-celebrations/' ) ); ?>" target="_self" style="color: inherit; text-decoration: none;">Private Groups & Celebrations</a>          </h3>
           <p class="fp-service-tile__desc">
             <?php esc_html_e( 'Milestone moments curated for groups: birthdays, honeymoons, and corporate retreats.', 'jaiye-journeys' ); ?>
           </p>
