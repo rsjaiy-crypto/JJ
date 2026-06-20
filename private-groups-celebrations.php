@@ -16,17 +16,6 @@ get_header();
     class="pgc-hero"
     aria-label="<?php esc_attr_e( 'Private Groups & Celebrations', 'jaiye-journeys' ); ?>"
   >
-    <video
-      class="pgc-hero__video"
-      autoplay
-      muted
-      loop
-      playsinline
-      aria-hidden="true"
-    >
-      <source src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/hero-celebrations.mov' ); ?>" type="video/mp4">
-    </video>
-    <div class="pgc-hero__overlay" aria-hidden="true"></div>
     <div class="container">
       <div class="pgc-hero__content">
         <p class="overline pgc-hero__overline">

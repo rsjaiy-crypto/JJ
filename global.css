@@ -2635,32 +2635,9 @@ textarea::placeholder {
   min-height: 75vh;
   background-color: var(--color-forest);
   padding-block: var(--space-16) var(--space-12);
-  position: relative;
-  overflow: hidden;
-}
-
-.pgc-hero__video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: right center;
-  z-index: 0;
-  -webkit-mask-image: linear-gradient(to right, transparent 50%, black 72%);
-  mask-image:         linear-gradient(to right, transparent 50%, black 72%);
-}
-
-.pgc-hero__overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: #093923;
 }
 
 .pgc-hero__content {
-  position: relative;
-  z-index: 2;
   max-width: 680px;
 }
 
@@ -2736,14 +2713,6 @@ textarea::placeholder {
     font-size: var(--text-5xl);
   }
 
-  .pgc-hero__overlay {
-    background: linear-gradient(
-      to right,
-      rgba(9, 57, 35, 0.85) 0%,
-      rgba(9, 57, 35, 0.60) 40%,
-      rgba(9, 57, 35, 0.00) 65%
-    );
-  }
 }
 
 
