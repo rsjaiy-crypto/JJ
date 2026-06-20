@@ -24,7 +24,7 @@ get_header();
       playsinline
       aria-hidden="true"
     >
-      <source src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/milestone-birthday.mov' ); ?>" type="video/mp4">
+      <source src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/hero-celebrations.mov' ); ?>" type="video/mp4">
     </video>
     <div class="pgc-hero__overlay" aria-hidden="true"></div>
     <div class="container">
