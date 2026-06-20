@@ -898,7 +898,7 @@ get_header();
               <?php esc_html_e( 'The Sintra Edition', 'jaiye-journeys' ); ?>
             </h3>
             <p class="btl-pipeline-card__date">
-              <time datetime="2027"><?php esc_html_e( 'TBC 2027', 'jaiye-journeys' ); ?></time>
+              <time datetime="2027-09"><?php esc_html_e( 'September 2027', 'jaiye-journeys' ); ?></time>
             </p>
             <p class="btl-pipeline-card__desc">
               <?php esc_html_e( 'Fairy-tale palaces, forested hills, and a literary atmosphere that feels like it was made for readers.', 'jaiye-journeys' ); ?>
