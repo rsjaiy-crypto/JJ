@@ -100,10 +100,11 @@ add_filter( 'wp_resource_hints', 'jaiye_resource_hints', 10, 2 );
 
 function jaiye_fallback_nav_menu() {
     $items = [
-        'our-journeys'     => 'Our Journeys',
-        'between-the-lines' => 'Between the Lines',
-        'about'            => 'About',
-        'contact'          => 'Contact',
+        'our-journeys'              => 'Our Journeys',
+        'between-the-lines'         => 'Between the Lines',
+        'private-groups-celebrations' => 'Private Groups & Celebrations',
+        'about'                     => 'About',
+        'contact'                   => 'Contact',
     ];
 
     echo '<ul class="site-nav__list">';
