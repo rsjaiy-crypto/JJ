@@ -116,7 +116,7 @@
               <!-- LinkedIn -->
               <li>
                 <a
-                  href="https://linkedin.com/company/jaiyejourneys"
+                  href="https://www.linkedin.com/company/jaiye-journeys/"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="<?php esc_attr_e( 'Jaiye Journeys on LinkedIn', 'jaiye-journeys' ); ?>"
