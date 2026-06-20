@@ -16,6 +16,17 @@ get_header();
     class="pgc-hero"
     aria-label="<?php esc_attr_e( 'Private Groups & Celebrations', 'jaiye-journeys' ); ?>"
   >
+    <video
+      class="pgc-hero__video"
+      autoplay
+      muted
+      loop
+      playsinline
+      aria-hidden="true"
+    >
+      <source src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/milestone-birthday.mov' ); ?>" type="video/mp4">
+    </video>
+    <div class="pgc-hero__overlay" aria-hidden="true"></div>
     <div class="container">
       <div class="pgc-hero__content">
         <p class="overline pgc-hero__overline">
@@ -107,12 +118,14 @@ get_header();
 
         <!-- Card 1: Family Reunions -->
         <article class="trip-card pgc-cel-card" data-reveal>
-          <div
-            class="pgc-cel-card__media"
-            data-img="family-reunion.jpg"
-            role="img"
-            aria-label="<?php esc_attr_e( 'Placeholder — family-reunion.jpg', 'jaiye-journeys' ); ?>"
-          ></div>
+          <div class="pgc-cel-card__media">
+            <img
+              src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/family-reunions.jpg' ); ?>"
+              alt="<?php esc_attr_e( 'A multi-generational family gathered together on a group trip', 'jaiye-journeys' ); ?>"
+              class="trip-card__img"
+              loading="lazy"
+            >
+          </div>
           <div class="trip-card__body">
             <p class="trip-card__type">
               <span class="overline"><?php esc_html_e( 'Family Reunions', 'jaiye-journeys' ); ?></span>
@@ -128,12 +141,14 @@ get_header();
 
         <!-- Card 2: Hen Weekends -->
         <article class="trip-card pgc-cel-card" data-reveal>
-          <div
-            class="pgc-cel-card__media"
-            data-img="hen-weekend.jpg"
-            role="img"
-            aria-label="<?php esc_attr_e( 'Placeholder — hen-weekend.jpg', 'jaiye-journeys' ); ?>"
-          ></div>
+          <div class="pgc-cel-card__media">
+            <img
+              src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/hen-weekend.jpg' ); ?>"
+              alt="<?php esc_attr_e( 'A group of women celebrating a hen weekend abroad', 'jaiye-journeys' ); ?>"
+              class="trip-card__img"
+              loading="lazy"
+            >
+          </div>
           <div class="trip-card__body">
             <p class="trip-card__type">
               <span class="overline"><?php esc_html_e( 'Hen Weekends', 'jaiye-journeys' ); ?></span>
@@ -152,12 +167,14 @@ get_header();
 
         <!-- Card 3: Milestone Birthdays -->
         <article class="trip-card pgc-cel-card" data-reveal>
-          <div
-            class="pgc-cel-card__media"
-            data-img="milestone-birthday.jpg"
-            role="img"
-            aria-label="<?php esc_attr_e( 'Placeholder — milestone-birthday.jpg', 'jaiye-journeys' ); ?>"
-          ></div>
+          <div class="pgc-cel-card__media">
+            <img
+              src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/milestone-birthday.jpg' ); ?>"
+              alt="<?php esc_attr_e( 'Friends celebrating a milestone birthday on a group trip', 'jaiye-journeys' ); ?>"
+              class="trip-card__img"
+              loading="lazy"
+            >
+          </div>
           <div class="trip-card__body">
             <p class="trip-card__type">
               <span class="overline"><?php esc_html_e( 'Milestone Birthdays', 'jaiye-journeys' ); ?></span>
@@ -173,12 +190,14 @@ get_header();
 
         <!-- Card 4: Destination Weddings -->
         <article class="trip-card pgc-cel-card" data-reveal>
-          <div
-            class="pgc-cel-card__media"
-            data-img="destination-wedding.jpg"
-            role="img"
-            aria-label="<?php esc_attr_e( 'Placeholder — destination-wedding.jpg', 'jaiye-journeys' ); ?>"
-          ></div>
+          <div class="pgc-cel-card__media">
+            <img
+              src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/destination-wedding.jpg' ); ?>"
+              alt="<?php esc_attr_e( 'A couple celebrating their destination wedding abroad', 'jaiye-journeys' ); ?>"
+              class="trip-card__img"
+              loading="lazy"
+            >
+          </div>
           <div class="trip-card__body">
             <p class="trip-card__type">
               <span class="overline"><?php esc_html_e( 'Destination Weddings', 'jaiye-journeys' ); ?></span>
