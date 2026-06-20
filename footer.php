@@ -101,7 +101,7 @@
               <!-- TikTok -->
               <li>
                 <a
-                  href="https://tiktok.com/@jaiyejourneys1"
+                  href="https://tiktok.com/@JaiyeJourneys"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="<?php esc_attr_e( 'Jaiye Journeys on TikTok', 'jaiye-journeys' ); ?>"
