@@ -2737,12 +2737,12 @@ textarea::placeholder {
   .pgc-hero__overlay {
     background: linear-gradient(
       to right,
-      rgba(9, 57, 35, 0.82) 0%,
-      rgba(9, 57, 35, 0.72) 20%,
-      rgba(9, 57, 35, 0.55) 38%,
-      rgba(9, 57, 35, 0.32) 55%,
-      rgba(9, 57, 35, 0.12) 72%,
-      rgba(9, 57, 35, 0.00) 90%
+      rgba(9, 57, 35, 1.00) 0%,
+      rgba(9, 57, 35, 1.00) 45%,
+      rgba(9, 57, 35, 0.80) 58%,
+      rgba(9, 57, 35, 0.45) 68%,
+      rgba(9, 57, 35, 0.15) 78%,
+      rgba(9, 57, 35, 0.00) 88%
     );
   }
 }
