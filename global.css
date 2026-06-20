@@ -2632,7 +2632,7 @@ textarea::placeholder {
 .pgc-hero {
   display: flex;
   align-items: center;
-  min-height: 100vh;
+  min-height: 75vh;
   background-color: var(--color-forest);
   padding-block: var(--space-16) var(--space-12);
   position: relative;
@@ -2645,7 +2645,7 @@ textarea::placeholder {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center 30%;
   z-index: 0;
 }
 
