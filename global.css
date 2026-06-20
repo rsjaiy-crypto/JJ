@@ -2645,7 +2645,7 @@ textarea::placeholder {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 30%;
+  object-position: center 80%;
   z-index: 0;
 }
 
@@ -2737,11 +2737,12 @@ textarea::placeholder {
   .pgc-hero__overlay {
     background: linear-gradient(
       to right,
-      rgba(9, 57, 35, 0.75) 0%,
-      rgba(9, 57, 35, 0.75) 38%,
-      rgba(9, 57, 35, 0.63) 55%,
-      rgba(9, 57, 35, 0.05) 75%,
-      rgba(9, 57, 35, 0.00) 100%
+      rgba(9, 57, 35, 0.82) 0%,
+      rgba(9, 57, 35, 0.72) 20%,
+      rgba(9, 57, 35, 0.55) 38%,
+      rgba(9, 57, 35, 0.32) 55%,
+      rgba(9, 57, 35, 0.12) 72%,
+      rgba(9, 57, 35, 0.00) 90%
     );
   }
 }
