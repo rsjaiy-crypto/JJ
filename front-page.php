@@ -291,6 +291,24 @@ get_header();
           </blockquote>
         </article>
 
+        <article class="fp-testimonial" role="listitem">
+          <blockquote class="fp-testimonial__quote">
+            <p><?php esc_html_e( 'Steph helped me navigate almost everything a traveller considers a nightmare, including a stolen passport in a foreign country where we didn\'t speak the language. We needed an emergency visa and an emergency passport, sorted within 24 to 36 hours.', 'jaiye-journeys' ); ?></p>
+            <footer class="fp-testimonial__footer">
+              <cite class="fp-testimonial__cite">Ron Sparkman</cite>
+            </footer>
+          </blockquote>
+        </article>
+
+        <article class="fp-testimonial" role="listitem">
+          <blockquote class="fp-testimonial__quote">
+            <p><?php esc_html_e( 'You took the stress off me and saved me time. Your knowledge made the whole process feel effortless.', 'jaiye-journeys' ); ?></p>
+            <footer class="fp-testimonial__footer">
+              <cite class="fp-testimonial__cite">Vash</cite>
+            </footer>
+          </blockquote>
+        </article>
+
       </div><!-- /.fp-testimonials__track -->
     </div><!-- /.container -->
   </section><!-- /.fp-testimonials -->
