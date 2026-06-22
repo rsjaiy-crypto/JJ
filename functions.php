@@ -69,6 +69,15 @@ function jaiye_enqueue_assets() {
         [ 'jaiye-global' ],
         $version
     );
+
+    // Testimonials carousel
+    wp_enqueue_script(
+        'jaiye-carousel',
+        get_template_directory_uri() . '/js/carousel.js',
+        [],
+        filemtime( get_template_directory() . '/js/carousel.js' ),
+        true
+    );
 }
 add_action( 'wp_enqueue_scripts', 'jaiye_enqueue_assets' );
 
