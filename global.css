@@ -1244,6 +1244,14 @@ textarea::placeholder {
   color: var(--color-text-muted);
 }
 
+.fp-testimonial__stars {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  letter-spacing: 0.05em;
+  color: var(--color-salmon);
+  line-height: 1;
+}
+
 /* Desktop: auto-rotating single-card carousel (JS adds .has-carousel to section) */
 @media (min-width: 768px) {
   /* Fallback grid when JS hasn't run */

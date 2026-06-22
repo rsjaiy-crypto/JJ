@@ -269,6 +269,7 @@ get_header();
             <p><?php esc_html_e( 'Working with Jaiye Journeys took the stress away from planning all the logistics and allowed me to just be excited to travel.', 'jaiye-journeys' ); ?></p>
             <footer class="fp-testimonial__footer">
               <cite class="fp-testimonial__cite">Caroline S, Denver, Colorado</cite>
+              <p class="fp-testimonial__stars" role="img" aria-label="<?php esc_attr_e( '5 out of 5 stars', 'jaiye-journeys' ); ?>">&#9733;&#9733;&#9733;&#9733;&#9733;</p>
             </footer>
           </blockquote>
         </article>
@@ -278,6 +279,7 @@ get_header();
             <p><?php esc_html_e( 'Steph gave me the feeling that I could truly enjoy my holiday because everything was taken care of. Even when things go awry, Steph made sure the experience was seamless.', 'jaiye-journeys' ); ?></p>
             <footer class="fp-testimonial__footer">
               <cite class="fp-testimonial__cite">Anca B, Vancouver, Canada</cite>
+              <p class="fp-testimonial__stars" role="img" aria-label="<?php esc_attr_e( '5 out of 5 stars', 'jaiye-journeys' ); ?>">&#9733;&#9733;&#9733;&#9733;&#9733;</p>
             </footer>
           </blockquote>
         </article>
@@ -287,6 +289,7 @@ get_header();
             <p><?php esc_html_e( 'How streamlined the planning and booking process can actually be. I was contacted every step of the way.', 'jaiye-journeys' ); ?></p>
             <footer class="fp-testimonial__footer">
               <cite class="fp-testimonial__cite">Sam S, London, UK</cite>
+              <p class="fp-testimonial__stars" role="img" aria-label="<?php esc_attr_e( '5 out of 5 stars', 'jaiye-journeys' ); ?>">&#9733;&#9733;&#9733;&#9733;&#9733;</p>
             </footer>
           </blockquote>
         </article>
@@ -295,7 +298,8 @@ get_header();
           <blockquote class="fp-testimonial__quote">
             <p><?php esc_html_e( 'Steph helped me navigate almost everything a traveller considers a nightmare, including a stolen passport in a foreign country where we didn\'t speak the language. We needed an emergency visa and an emergency passport, sorted within 24 to 36 hours.', 'jaiye-journeys' ); ?></p>
             <footer class="fp-testimonial__footer">
-              <cite class="fp-testimonial__cite">Ron Sparkman</cite>
+              <cite class="fp-testimonial__cite">Ron S, Nitro, West Virginia</cite>
+              <p class="fp-testimonial__stars" role="img" aria-label="<?php esc_attr_e( '5 out of 5 stars', 'jaiye-journeys' ); ?>">&#9733;&#9733;&#9733;&#9733;&#9733;</p>
             </footer>
           </blockquote>
         </article>
@@ -304,7 +308,8 @@ get_header();
           <blockquote class="fp-testimonial__quote">
             <p><?php esc_html_e( 'You took the stress off me and saved me time. Your knowledge made the whole process feel effortless.', 'jaiye-journeys' ); ?></p>
             <footer class="fp-testimonial__footer">
-              <cite class="fp-testimonial__cite">Vash</cite>
+              <cite class="fp-testimonial__cite">Vash N., Scotland, UK</cite>
+              <p class="fp-testimonial__stars" role="img" aria-label="<?php esc_attr_e( '5 out of 5 stars', 'jaiye-journeys' ); ?>">&#9733;&#9733;&#9733;&#9733;&#9733;</p>
             </footer>
           </blockquote>
         </article>
