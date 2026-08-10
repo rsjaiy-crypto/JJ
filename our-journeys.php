@@ -260,7 +260,7 @@ get_header();
                 <?php esc_html_e( 'UK', 'jaiye-journeys' ); ?>
               </p>
               <p class="trip-card__dates">
-                <time datetime="2026-09"><?php esc_html_e( 'September / October 2026', 'jaiye-journeys' ); ?></time>
+                <time datetime="2026-11-06"><?php esc_html_e( '6th - 8th November 2026', 'jaiye-journeys' ); ?></time>
               </p>
               <p class="trip-card__desc">
                 <?php esc_html_e( 'Our first gathering. An intimate literary event to introduce the Between the Lines community before the full retreats begin.', 'jaiye-journeys' ); ?>
