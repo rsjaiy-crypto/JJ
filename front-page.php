@@ -367,8 +367,10 @@ get_header();
                 <time datetime="2026-11-06"><?php esc_html_e( '6th - 8th November 2026', 'jaiye-journeys' ); ?></time>
               </p>
               <a
-                href="<?php echo esc_url( home_url( '/trips/the-prologue/' ) ); ?>"
+                href="<?php echo esc_url( 'https://tally.so/r/Gxq2JL' ); ?>"
                 class="btn btn--secondary btn--sm trip-card__cta"
+                target="_blank"
+                rel="noopener"
               >
                 <?php esc_html_e( 'Find Out More', 'jaiye-journeys' ); ?>
               </a>
@@ -433,8 +435,10 @@ get_header();
                 <time datetime="2027-05"><?php esc_html_e( 'May 2027', 'jaiye-journeys' ); ?></time>
               </p>
               <a
-                href="<?php echo esc_url( home_url( '/trips/btl-chapter-1/' ) ); ?>"
+                href="<?php echo esc_url( 'https://tally.so/r/Gxq2JL' ); ?>"
                 class="btn btn--secondary btn--sm trip-card__cta"
+                target="_blank"
+                rel="noopener"
               >
                 <?php esc_html_e( 'Find Out More', 'jaiye-journeys' ); ?>
               </a>
