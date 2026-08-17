@@ -641,7 +641,7 @@ get_header();
 
 .bd-faq__item.is-open {
   border-color: var(--color-salmon);
-  background-color: color-mix(in srgb, var(--color-salmon) 10%, var(--color-cream));
+  background-color: var(--color-sage);
 }
 
 .bd-faq__heading { margin: 0; }
@@ -665,7 +665,8 @@ get_header();
 }
 
 .bd-faq__question {
-  font-family: var(--font-heading);
+  font-family: var(--font-body);
+  font-weight: var(--fw-semibold);
   font-size: var(--text-md);
   color: var(--color-deep-green);
 }

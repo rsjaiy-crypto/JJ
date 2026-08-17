@@ -49,7 +49,7 @@ function jaiye_enqueue_assets() {
     // Google Fonts
     wp_enqueue_style(
         'jaiye-fonts',
-        'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Jost:wght@300;400&display=swap',
+        'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Jost:wght@300;400;600&display=swap',
         [],
         null
     );
