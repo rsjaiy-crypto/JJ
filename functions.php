@@ -108,16 +108,59 @@ add_filter( 'wp_resource_hints', 'jaiye_resource_hints', 10, 2 );
 // ============================================================
 
 function jaiye_fallback_nav_menu() {
-    $items = [
-        'our-journeys'              => 'Our Journeys',
-        'between-the-lines'         => 'Between the Lines',
-        'private-groups-celebrations' => 'Private Groups & Celebrations',
-        'about'                     => 'About',
-        'contact'                   => 'Contact',
+    $leading_items = [
+        'our-journeys'      => 'Our Journeys',
+        'between-the-lines' => 'Between the Lines',
+    ];
+
+    $trailing_items = [
+        'about'   => 'About',
+        'contact' => 'Contact',
     ];
 
     echo '<ul class="site-nav__list">';
-    foreach ( $items as $slug => $label ) {
+
+    foreach ( $leading_items as $slug => $label ) {
+        $page = get_page_by_path( $slug );
+        $url  = $page ? get_permalink( $page->ID ) : home_url( '/' . $slug . '/' );
+        printf(
+            '<li class="menu-item"><a href="%s">%s</a></li>',
+            esc_url( $url ),
+            esc_html( $label )
+        );
+    }
+
+    // Services dropdown: Ticketing Desk (Tally), Business Desk, Private Groups & Celebrations.
+    $bd_page  = get_page_by_path( 'business-desk' );
+    $bd_url   = $bd_page ? get_permalink( $bd_page->ID ) : home_url( '/business-desk/' );
+    $pgc_page = get_page_by_path( 'private-groups-celebrations' );
+    $pgc_url  = $pgc_page ? get_permalink( $pgc_page->ID ) : home_url( '/private-groups-celebrations/' );
+    ?>
+    <li class="menu-item menu-item--has-dropdown">
+      <button type="button" class="site-nav__dropdown-trigger" aria-expanded="false" aria-controls="services-submenu">
+        <?php esc_html_e( 'Services', 'jaiye-journeys' ); ?>
+        <span class="site-nav__dropdown-caret" aria-hidden="true">&#9662;</span>
+      </button>
+      <ul class="site-nav__submenu" id="services-submenu">
+        <li>
+          <a href="<?php echo esc_url( 'https://tally.so/r/eq6rp0' ); ?>" target="_blank" rel="noopener">
+            <?php esc_html_e( 'The Ticketing Desk', 'jaiye-journeys' ); ?>
+          </a>
+        </li>
+        <li>
+          <a href="<?php echo esc_url( $bd_url ); ?>">
+            <?php esc_html_e( 'The Business Desk', 'jaiye-journeys' ); ?>
+          </a>
+        </li>
+        <li>
+          <a href="<?php echo esc_url( $pgc_url ); ?>">
+            <?php esc_html_e( 'Private Groups & Celebrations', 'jaiye-journeys' ); ?>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <?php
+    foreach ( $trailing_items as $slug => $label ) {
         $page = get_page_by_path( $slug );
         $url  = $page ? get_permalink( $page->ID ) : home_url( '/' . $slug . '/' );
         printf(

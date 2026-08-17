@@ -445,6 +445,41 @@
   mq.addEventListener('change', function (e) {
     if (e.matches) closeNav();
   });
+
+  // Services dropdown (nav) — click to open, click outside / Escape to close
+  function closeAllDropdowns() {
+    document.querySelectorAll('.menu-item--has-dropdown.is-open').forEach(function (item) {
+      item.classList.remove('is-open');
+      item.querySelector('.site-nav__dropdown-trigger').setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  document.querySelectorAll('.site-nav__dropdown-trigger').forEach(function (dropdownTrigger) {
+    var item = dropdownTrigger.closest('.menu-item--has-dropdown');
+
+    dropdownTrigger.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var wasOpen = item.classList.contains('is-open');
+      closeAllDropdowns();
+      if (!wasOpen) {
+        item.classList.add('is-open');
+        dropdownTrigger.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+
+  document.addEventListener('click', function (e) {
+    document.querySelectorAll('.menu-item--has-dropdown.is-open').forEach(function (item) {
+      if (!item.contains(e.target)) {
+        item.classList.remove('is-open');
+        item.querySelector('.site-nav__dropdown-trigger').setAttribute('aria-expanded', 'false');
+      }
+    });
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeAllDropdowns();
+  });
 })();
 </script>
 
