@@ -126,6 +126,11 @@ function jaiye_fallback_nav_menu() {
             esc_html( $label )
         );
     }
+    printf(
+        '<li class="menu-item"><a href="%s" target="_blank" rel="noopener">%s</a></li>',
+        esc_url( 'https://thejaiyeconcierge.com' ),
+        esc_html( 'The Jaiye Concierge' )
+    );
     echo '</ul>';
 }
 

@@ -178,12 +178,14 @@ get_header();
         </li>
 
         <li class="fp-service-tile fp-service-tile--no-badge">
-  <h3 class="fp-service-tile__title">
-    <a href="https://thejaiyeconcierge.com" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">The Jaiye Concierge</a>
-  </h3>
-  <p class="fp-service-tile__desc">Full-service lifestyle and travel management for clients who want everything handled.</p>
-  <span class="fp-service-tile__arrow" aria-hidden="true">→</span>
-</li>
+          <h3 class="fp-service-tile__title">
+            <a href="<?php echo esc_url( home_url( '/business-desk/' ) ); ?>" target="_self" style="color: inherit; text-decoration: none;">The Business Desk</a>
+          </h3>
+          <p class="fp-service-tile__desc">
+            <?php esc_html_e( 'Dedicated travel management for growing teams: one point of contact, VIP perks, and every logistics headache handled.', 'jaiye-journeys' ); ?>
+          </p>
+          <span class="fp-service-tile__arrow" aria-hidden="true">→</span>
+        </li>
 
       </ul><!-- /.fp-services__grid -->
     </div><!-- /.container -->
