@@ -758,11 +758,13 @@ get_header();
     align-items: stretch;
     gap: var(--space-3);
     height: 440px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .bd-faq__item {
-    flex: 0 0 90px;
-    width: 90px;
+    flex: 0 0 120px;
+    width: 120px;
     overflow: hidden;
     transition:
       flex-basis var(--duration-base) var(--ease-out),
@@ -772,8 +774,8 @@ get_header();
   }
 
   .bd-faq__item.is-open {
-    flex: 0 0 380px;
-    width: 380px;
+    flex: 0 0 360px;
+    width: 360px;
   }
 
   .bd-faq__heading {
@@ -799,14 +801,13 @@ get_header();
   }
 
   .bd-faq__question {
-    writing-mode: vertical-rl;
-    white-space: nowrap;
+    text-align: center;
     font-size: var(--text-sm);
+    line-height: 1.35;
   }
 
   .bd-faq__item.is-open .bd-faq__question {
-    writing-mode: horizontal-tb;
-    white-space: normal;
+    text-align: left;
     width: 100%;
     font-size: var(--text-md);
   }
