@@ -832,7 +832,7 @@ get_header();
     max-height: 100%;
   }
 
-  .bd-faq__answer { padding: var(--space-4) 0 0; }
+  .bd-faq__answer { padding: var(--space-4) var(--space-4) var(--space-6); }
 }
 
 @media (min-width: 1024px) {
