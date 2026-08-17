@@ -666,7 +666,7 @@ get_header();
 
 .bd-faq__question {
   font-family: var(--font-body);
-  font-weight: var(--fw-semibold);
+  font-weight: var(--fw-regular);
   font-size: var(--text-md);
   color: var(--color-deep-green);
 }
