@@ -324,9 +324,9 @@ $partners = [
         </li>
 
         <li class="ab-stat">
-          <span class="ab-stat__number">293</span>
+          <span class="ab-stat__number">234</span>
           <span class="ab-stat__label"><?php esc_html_e( 'Books Read in a Year', 'jaiye-journeys' ); ?></span>
-          <span class="ab-stat__desc"><?php esc_html_e( '147 in 2026 and it\'s only May', 'jaiye-journeys' ); ?></span>
+          <span class="ab-stat__desc"><?php esc_html_e( '234 in 2026 and it\'s only August', 'jaiye-journeys' ); ?></span>
         </li>
 
         <li class="ab-stat">
@@ -501,7 +501,7 @@ $partners = [
             <span class="ab-qa__icon" aria-hidden="true">+</span>
           </button>
           <div class="ab-qa__body">
-            <p class="ab-qa__answer"><?php esc_html_e( 'On foot first, always. Get completely lost, find a cafe, sit down, watch people. Then come back the next day and actually find the things I had been walking towards.', 'jaiye-journeys' ); ?></p>
+            <p class="ab-qa__answer"><?php esc_html_e( 'By bike, always. I love a city bike -- if I can get one or rent one temporarily, like I did in Osaka, I will cycle. It feels like one of the coolest ways to see a city in all its expanse. I do love to get completely lost, find a bar, sit down, and people-watch too, but walking is not it for me. Two wheels is how I actually explore.', 'jaiye-journeys' ); ?></p>
           </div>
         </div>
 
@@ -521,7 +521,7 @@ $partners = [
             <span class="ab-qa__icon" aria-hidden="true">+</span>
           </button>
           <div class="ab-qa__body">
-            <p class="ab-qa__answer"><?php esc_html_e( 'An actual book. Several, actually. People always have opinions about the weight until they see me reading by a pool while everyone else is on their phones.', 'jaiye-journeys' ); ?></p>
+            <p class="ab-qa__answer"><?php esc_html_e( 'Never an actual book -- I pack my Kindle. What I do always pack is a fan and a blanket, which people find funny given the contradiction. But I run too hot or too cold and never anything in between, so both come with me every time.', 'jaiye-journeys' ); ?></p>
           </div>
         </div>
 
@@ -531,7 +531,7 @@ $partners = [
             <span class="ab-qa__icon" aria-hidden="true">+</span>
           </button>
           <div class="ab-qa__body">
-            <p class="ab-qa__answer"><?php esc_html_e( 'A good breakfast. Not necessarily expensive -- just intentional. The best mornings abroad start slowly, with something local and unhurried.', 'jaiye-journeys' ); ?></p>
+            <p class="ab-qa__answer"><?php esc_html_e( 'Lounge access. The holiday starts the moment you hit the airport, and I am always fascinated by how few people actually use their lounge access -- they would rather be in the hustle and bustle of gen pop. Not me. I am in there, settled, before the trip has even begun.', 'jaiye-journeys' ); ?></p>
           </div>
         </div>
 
@@ -541,7 +541,7 @@ $partners = [
             <span class="ab-qa__icon" aria-hidden="true">+</span>
           </button>
           <div class="ab-qa__body">
-            <p class="ab-qa__answer"><?php esc_html_e( 'Two weeks. Start in Bali for five days of genuine stillness. Then Colombia for the energy -- Cartagena and then Medellín. End in Lisbon with absolutely nothing planned. A book, a pastel de nata, and nowhere to be.', 'jaiye-journeys' ); ?></p>
+            <p class="ab-qa__answer"><?php esc_html_e( 'It makes no sense whatsoever, but here it is. Land in Lima and settle in for a few days -- a food walking tour, fresh fruit, chocolate cake at Vaquita (still the most decadent thing I have ever eaten), ceviche or causa for lunch, dinner at Panchita, and a trip to the Choco Museo. Then fly out to Iquitos for a weekend in the Amazon -- the monkey jungle, the animal sanctuary, and hugging the sloths, which I have genuinely done. Back to Lima for a day, then on to Cusco for a few days before taking the train to Aguas Calientes via Ollantaytambo, the bus up to Machu Picchu, then back through Ollantaytambo to see the ruins and spend a night at a hotel overlooking the glaciers. The next day is the Sacred Valley -- the salt flats, horse riding or quad biking, lunch, and far too many photos of llamas. All things I have actually done. Fly back to Lima one more time, then finish with a weekend in Huacachina and Paracas -- a picnic and a private oasis in the desert before the actual sand dunes of Huacachina.', 'jaiye-journeys' ); ?></p>
           </div>
         </div>
 
