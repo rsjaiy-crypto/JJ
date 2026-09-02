@@ -858,7 +858,7 @@ get_header();
               <?php esc_html_e( 'Our Soft Launch', 'jaiye-journeys' ); ?>
             </h3>
             <p class="btl-pipeline-card__date">
-              <time datetime="2026-11-06"><?php esc_html_e( '6th - 8th November 2026', 'jaiye-journeys' ); ?></time>
+              <time datetime="2026-11-07"><?php esc_html_e( '7th November 2026', 'jaiye-journeys' ); ?></time>
             </p>
             <p class="btl-pipeline-card__desc">
               <?php esc_html_e( 'The first in-person BTL experience. Small, intimate, and closer to home.', 'jaiye-journeys' ); ?>
@@ -875,13 +875,13 @@ get_header();
               <?php esc_html_e( 'Chapter One', 'jaiye-journeys' ); ?>
             </p>
             <h3 class="btl-pipeline-card__title">
-              <?php esc_html_e( 'The Essaouira Edition', 'jaiye-journeys' ); ?>
+              <?php esc_html_e( 'The Marrakesh Edition', 'jaiye-journeys' ); ?>
             </h3>
             <p class="btl-pipeline-card__date">
-              <time datetime="2027-05"><?php esc_html_e( 'May 2027', 'jaiye-journeys' ); ?></time>
+              <time datetime="2027-03"><?php esc_html_e( 'March 2027', 'jaiye-journeys' ); ?></time>
             </p>
             <p class="btl-pipeline-card__desc">
-              <?php esc_html_e( 'The first full BTL residency. Moroccan coastal air, medina mornings, and long reading afternoons by the Atlantic.', 'jaiye-journeys' ); ?>
+              <?php esc_html_e( 'The first full BTL residency. Moroccan desert air, medina mornings, and long reading afternoons in a riad courtyard.', 'jaiye-journeys' ); ?>
             </p>
             <span class="btl-pipeline-card__pill btl-pipeline-card__pill--horizon">
               <?php esc_html_e( 'On the Horizon', 'jaiye-journeys' ); ?>

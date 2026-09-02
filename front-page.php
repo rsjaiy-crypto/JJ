@@ -366,7 +366,7 @@ get_header();
                 <?php esc_html_e( 'UK', 'jaiye-journeys' ); ?>
               </p>
               <p class="trip-card__dates">
-                <time datetime="2026-11-06"><?php esc_html_e( '6th - 8th November 2026', 'jaiye-journeys' ); ?></time>
+                <time datetime="2026-11-07"><?php esc_html_e( '7th November 2026', 'jaiye-journeys' ); ?></time>
               </p>
               <a
                 href="<?php echo esc_url( 'https://tally.so/r/Gxq2JL' ); ?>"
@@ -384,41 +384,8 @@ get_header();
           <article class="trip-card">
             <div class="trip-card__media">
               <img
-                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-cape-town.jpg' ); ?>"
-                alt="<?php esc_attr_e( 'Cape Town coastline with Table Mountain in the background', 'jaiye-journeys' ); ?>"
-                class="trip-card__img"
-                loading="lazy"
-              >
-            </div>
-            <div class="trip-card__body">
-              <p class="trip-card__type">
-                <span class="overline"><?php esc_html_e( 'Group Trip', 'jaiye-journeys' ); ?></span>
-              </p>
-              <h3 class="trip-card__title">
-                <?php esc_html_e( 'The Cape Town Edit', 'jaiye-journeys' ); ?>
-              </h3>
-              <p class="trip-card__destination">
-                <?php esc_html_e( 'South Africa', 'jaiye-journeys' ); ?>
-              </p>
-              <p class="trip-card__dates">
-                <time datetime="2028-01"><?php esc_html_e( 'January 2028', 'jaiye-journeys' ); ?></time>
-              </p>
-              <a
-                href="<?php echo esc_url( home_url( '/trips/jj-cape-town/' ) ); ?>"
-                class="btn btn--secondary btn--sm trip-card__cta"
-              >
-                <?php esc_html_e( 'Find Out More', 'jaiye-journeys' ); ?>
-              </a>
-            </div>
-          </article>
-        </li>
-
-        <li>
-          <article class="trip-card">
-            <div class="trip-card__media">
-              <img
                 src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-morocco.jpg' ); ?>"
-                alt="<?php esc_attr_e( 'Blue and white streets of Essaouira, Morocco', 'jaiye-journeys' ); ?>"
+                alt="<?php esc_attr_e( 'Streets of the Marrakesh medina, Morocco', 'jaiye-journeys' ); ?>"
                 class="trip-card__img"
                 loading="lazy"
               >
@@ -428,13 +395,13 @@ get_header();
                 <span class="overline"><?php esc_html_e( 'Between the Lines', 'jaiye-journeys' ); ?></span>
               </p>
               <h3 class="trip-card__title">
-                <?php esc_html_e( 'The Essaouira Edition', 'jaiye-journeys' ); ?>
+                <?php esc_html_e( 'The Marrakesh Edition', 'jaiye-journeys' ); ?>
               </h3>
               <p class="trip-card__destination">
-                <?php esc_html_e( 'Essaouira, Morocco', 'jaiye-journeys' ); ?>
+                <?php esc_html_e( 'Marrakesh, Morocco', 'jaiye-journeys' ); ?>
               </p>
               <p class="trip-card__dates">
-                <time datetime="2027-05"><?php esc_html_e( 'May 2027', 'jaiye-journeys' ); ?></time>
+                <time datetime="2027-03"><?php esc_html_e( 'March 2027', 'jaiye-journeys' ); ?></time>
               </p>
               <a
                 href="<?php echo esc_url( 'https://tally.so/r/Gxq2JL' ); ?>"
@@ -469,10 +436,43 @@ get_header();
                 <?php esc_html_e( 'Indonesia', 'jaiye-journeys' ); ?>
               </p>
               <p class="trip-card__dates">
-                <time datetime="2028-05"><?php esc_html_e( 'May 2028', 'jaiye-journeys' ); ?></time>
+                <time datetime="2027-05"><?php esc_html_e( 'May 2027', 'jaiye-journeys' ); ?></time>
               </p>
               <a
                 href="<?php echo esc_url( home_url( '/trips/jj-bali/' ) ); ?>"
+                class="btn btn--secondary btn--sm trip-card__cta"
+              >
+                <?php esc_html_e( 'Find Out More', 'jaiye-journeys' ); ?>
+              </a>
+            </div>
+          </article>
+        </li>
+
+        <li>
+          <article class="trip-card">
+            <div class="trip-card__media">
+              <img
+                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-cape-town.jpg' ); ?>"
+                alt="<?php esc_attr_e( 'Cape Town coastline with Table Mountain in the background', 'jaiye-journeys' ); ?>"
+                class="trip-card__img"
+                loading="lazy"
+              >
+            </div>
+            <div class="trip-card__body">
+              <p class="trip-card__type">
+                <span class="overline"><?php esc_html_e( 'Group Trip', 'jaiye-journeys' ); ?></span>
+              </p>
+              <h3 class="trip-card__title">
+                <?php esc_html_e( 'The Cape Town Edit', 'jaiye-journeys' ); ?>
+              </h3>
+              <p class="trip-card__destination">
+                <?php esc_html_e( 'South Africa', 'jaiye-journeys' ); ?>
+              </p>
+              <p class="trip-card__dates">
+                <time datetime="2028-01"><?php esc_html_e( 'January 2028', 'jaiye-journeys' ); ?></time>
+              </p>
+              <a
+                href="<?php echo esc_url( home_url( '/trips/jj-cape-town/' ) ); ?>"
                 class="btn btn--secondary btn--sm trip-card__cta"
               >
                 <?php esc_html_e( 'Find Out More', 'jaiye-journeys' ); ?>
