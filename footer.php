@@ -44,6 +44,7 @@
                     'between-the-lines' => 'Between the Lines',
                     'about'             => 'About',
                     'contact'           => 'Contact',
+                    'faq'               => 'FAQ',
                 ];
                 foreach ( $footer_links as $slug => $label ) :
                     $page = get_page_by_path( $slug );
