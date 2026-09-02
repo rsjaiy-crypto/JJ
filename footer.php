@@ -151,6 +151,7 @@
       <ul class="site-footer__legal">
         <li><a href="<?php echo esc_url( home_url( '/privacy-policy/' ) ); ?>"><?php esc_html_e( 'Privacy Policy', 'jaiye-journeys' ); ?></a></li>
         <li><a href="<?php echo esc_url( home_url( '/terms/' ) ); ?>"><?php esc_html_e( 'Terms', 'jaiye-journeys' ); ?></a></li>
+        <li><a href="<?php echo esc_url( home_url( '/health-safety/' ) ); ?>"><?php esc_html_e( 'Health & Safety', 'jaiye-journeys' ); ?></a></li>
       </ul>
     </div>
   </div><!-- /.site-footer__bottom -->
