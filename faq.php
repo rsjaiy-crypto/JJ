@@ -83,7 +83,7 @@ $faq_categories = [
     ],
   ],
   [
-    'heading' => __( 'Practical', 'jaiye-journeys' ),
+    'heading' => __( 'Other Things You Might Want to Know', 'jaiye-journeys' ),
     'items'   => [
       [
         'q' => __( 'Do you handle flights?', 'jaiye-journeys' ),
