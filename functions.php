@@ -132,6 +132,7 @@ function jaiye_fallback_nav_menu() {
     $trailing_items = [
         'about'   => 'About',
         'contact' => 'Contact',
+        'faq'     => 'FAQ',
     ];
 
     echo '<ul class="site-nav__list">';
