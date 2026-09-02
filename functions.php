@@ -1,6 +1,13 @@
 <?php
 
 // ============================================================
+// Google Analytics 4
+// ============================================================
+
+define( 'JAIYE_GA4_ID', 'G-13CW9QRTBE' );
+
+
+// ============================================================
 // Theme Setup
 // ============================================================
 
@@ -226,3 +233,31 @@ function jaiye_favicon() {
     echo '<link rel="icon" type="image/png" href="' . esc_url( get_template_directory_uri() . '/assets/images/favicon.png' ) . '">' . "\n";
 }
 add_action( 'wp_head', 'jaiye_favicon' );
+
+
+// ============================================================
+// GA4 Tracking
+// Gated by cookie consent — only fires once the visitor has
+// accepted via the cookie banner. Won't retroactively fire if
+// consent is given after this page has already loaded; the
+// consent script forces a reload on Accept to cover that case.
+// ============================================================
+
+function jaiye_ga4_tracking() {
+    if ( ! defined( 'JAIYE_GA4_ID' ) || empty( JAIYE_GA4_ID ) ) {
+        return;
+    }
+    if ( ! isset( $_COOKIE['jj_cookie_consent'] ) || $_COOKIE['jj_cookie_consent'] !== 'accepted' ) {
+        return;
+    }
+    ?>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=<?php echo esc_attr( JAIYE_GA4_ID ); ?>"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '<?php echo esc_js( JAIYE_GA4_ID ); ?>');
+    </script>
+    <?php
+}
+add_action( 'wp_head', 'jaiye_ga4_tracking' );
