@@ -15,6 +15,12 @@
 
 	function dismiss( value ) {
 		setCookie( COOKIE_NAME, value, COOKIE_DAYS );
+
+		if ( 'accepted' === value ) {
+			window.location.reload();
+			return;
+		}
+
 		banner.classList.remove( 'is-visible' );
 
 		banner.addEventListener( 'transitionend', function handler() {
