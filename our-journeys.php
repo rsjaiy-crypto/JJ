@@ -58,6 +58,82 @@ get_header();
           <article class="trip-card">
             <div class="trip-card__media">
               <img
+                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-bali.jpg' ); ?>"
+                alt="<?php esc_attr_e( 'Turquoise waters and tropical coastline of Bali, Indonesia', 'jaiye-journeys' ); ?>"
+                class="trip-card__img"
+                loading="lazy"
+              >
+            </div>
+            <div class="trip-card__body">
+              <p class="trip-card__type">
+                <span class="overline"><?php esc_html_e( 'Group Trip', 'jaiye-journeys' ); ?></span>
+              </p>
+              <h3 class="trip-card__title">
+                <?php esc_html_e( 'The Islands Cut', 'jaiye-journeys' ); ?>
+              </h3>
+              <p class="trip-card__destination">
+                <?php esc_html_e( 'Bali, Gilis + Komodo, Indonesia', 'jaiye-journeys' ); ?>
+              </p>
+              <p class="trip-card__dates">
+                <time datetime="2027-05"><?php esc_html_e( 'May 2027', 'jaiye-journeys' ); ?></time>
+              </p>
+              <p class="trip-card__desc">
+                <?php esc_html_e( "Rice terraces, turquoise water, and island-hopping through some of the world's most breathtaking archipelagos.", 'jaiye-journeys' ); ?>
+              </p>
+              <a
+                href="https://tally.so/r/RGVxVj"
+                class="btn btn--secondary btn--sm trip-card__cta"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <?php esc_html_e( 'Join Waitlist', 'jaiye-journeys' ); ?>
+              </a>
+            </div>
+          </article>
+        </li>
+
+        <li>
+          <article class="trip-card">
+            <div class="trip-card__media">
+              <img
+                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-peru.jpg' ); ?>"
+                alt="<?php esc_attr_e( 'Ancient ruins and dramatic landscapes of Peru', 'jaiye-journeys' ); ?>"
+                class="trip-card__img"
+                loading="lazy"
+              >
+            </div>
+            <div class="trip-card__body">
+              <p class="trip-card__type">
+                <span class="overline"><?php esc_html_e( 'Group Trip', 'jaiye-journeys' ); ?></span>
+              </p>
+              <h3 class="trip-card__title">
+                <?php esc_html_e( "The Director's Cut", 'jaiye-journeys' ); ?>
+              </h3>
+              <p class="trip-card__destination">
+                <?php esc_html_e( 'Peru', 'jaiye-journeys' ); ?>
+              </p>
+              <p class="trip-card__dates">
+                <time datetime="2027-10"><?php esc_html_e( 'October 2027', 'jaiye-journeys' ); ?></time>
+              </p>
+              <p class="trip-card__desc">
+                <?php esc_html_e( 'Ancient civilisations, dramatic landscapes, and the kind of trip that changes how you see the world.', 'jaiye-journeys' ); ?>
+              </p>
+              <a
+                href="https://tally.so/r/1ApXBp"
+                class="btn btn--secondary btn--sm trip-card__cta"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <?php esc_html_e( 'Join Waitlist', 'jaiye-journeys' ); ?>
+              </a>
+            </div>
+          </article>
+        </li>
+
+        <li>
+          <article class="trip-card">
+            <div class="trip-card__media">
+              <img
                 src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-cape-town.jpg' ); ?>"
                 alt="<?php esc_attr_e( 'Cape Town coastline with Table Mountain in the background', 'jaiye-journeys' ); ?>"
                 class="trip-card__img"
@@ -96,44 +172,6 @@ get_header();
           <article class="trip-card">
             <div class="trip-card__media">
               <img
-                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-bali.jpg' ); ?>"
-                alt="<?php esc_attr_e( 'Turquoise waters and tropical coastline of Bali, Indonesia', 'jaiye-journeys' ); ?>"
-                class="trip-card__img"
-                loading="lazy"
-              >
-            </div>
-            <div class="trip-card__body">
-              <p class="trip-card__type">
-                <span class="overline"><?php esc_html_e( 'Group Trip', 'jaiye-journeys' ); ?></span>
-              </p>
-              <h3 class="trip-card__title">
-                <?php esc_html_e( 'The Islands Cut', 'jaiye-journeys' ); ?>
-              </h3>
-              <p class="trip-card__destination">
-                <?php esc_html_e( 'Bali, Gilis + Komodo, Indonesia', 'jaiye-journeys' ); ?>
-              </p>
-              <p class="trip-card__dates">
-                <time datetime="2028-05"><?php esc_html_e( 'May 2028', 'jaiye-journeys' ); ?></time>
-              </p>
-              <p class="trip-card__desc">
-                <?php esc_html_e( "Rice terraces, turquoise water, and island-hopping through some of the world's most breathtaking archipelagos.", 'jaiye-journeys' ); ?>
-              </p>
-              <a
-                href="https://tally.so/r/RGVxVj"
-                class="btn btn--secondary btn--sm trip-card__cta"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <?php esc_html_e( 'Join Waitlist', 'jaiye-journeys' ); ?>
-              </a>
-            </div>
-          </article>
-        </li>
-
-        <li>
-          <article class="trip-card">
-            <div class="trip-card__media">
-              <img
                 src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-bahia.jpg' ); ?>"
                 alt="<?php esc_attr_e( 'Colonial architecture and coastline of Bahia, Brazil', 'jaiye-journeys' ); ?>"
                 class="trip-card__img"
@@ -158,44 +196,6 @@ get_header();
               </p>
               <a
                 href="https://tally.so/r/xXlrzr"
-                class="btn btn--secondary btn--sm trip-card__cta"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <?php esc_html_e( 'Join Waitlist', 'jaiye-journeys' ); ?>
-              </a>
-            </div>
-          </article>
-        </li>
-
-        <li>
-          <article class="trip-card">
-            <div class="trip-card__media">
-              <img
-                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-peru.jpg' ); ?>"
-                alt="<?php esc_attr_e( 'Ancient ruins and dramatic landscapes of Peru', 'jaiye-journeys' ); ?>"
-                class="trip-card__img"
-                loading="lazy"
-              >
-            </div>
-            <div class="trip-card__body">
-              <p class="trip-card__type">
-                <span class="overline"><?php esc_html_e( 'Group Trip', 'jaiye-journeys' ); ?></span>
-              </p>
-              <h3 class="trip-card__title">
-                <?php esc_html_e( "The Director's Cut", 'jaiye-journeys' ); ?>
-              </h3>
-              <p class="trip-card__destination">
-                <?php esc_html_e( 'Peru', 'jaiye-journeys' ); ?>
-              </p>
-              <p class="trip-card__dates">
-                <time datetime="2028-10"><?php esc_html_e( 'October 2028', 'jaiye-journeys' ); ?></time>
-              </p>
-              <p class="trip-card__desc">
-                <?php esc_html_e( 'Ancient civilisations, dramatic landscapes, and the kind of trip that changes how you see the world.', 'jaiye-journeys' ); ?>
-              </p>
-              <a
-                href="https://tally.so/r/1ApXBp"
                 class="btn btn--secondary btn--sm trip-card__cta"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -260,7 +260,7 @@ get_header();
                 <?php esc_html_e( 'UK', 'jaiye-journeys' ); ?>
               </p>
               <p class="trip-card__dates">
-                <time datetime="2026-11-06"><?php esc_html_e( '6th - 8th November 2026', 'jaiye-journeys' ); ?></time>
+                <time datetime="2026-11-07"><?php esc_html_e( '7th November 2026', 'jaiye-journeys' ); ?></time>
               </p>
               <p class="trip-card__desc">
                 <?php esc_html_e( 'Our first gathering. An intimate literary event to introduce the Between the Lines community before the full retreats begin.', 'jaiye-journeys' ); ?>
@@ -282,7 +282,7 @@ get_header();
             <div class="trip-card__media">
               <img
                 src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-morocco.jpg' ); ?>"
-                alt="<?php esc_attr_e( 'Blue and white streets of Essaouira, Morocco', 'jaiye-journeys' ); ?>"
+                alt="<?php esc_attr_e( 'Streets of the Marrakesh medina, Morocco', 'jaiye-journeys' ); ?>"
                 class="trip-card__img"
                 loading="lazy"
               >
@@ -292,16 +292,16 @@ get_header();
                 <span class="overline"><?php esc_html_e( 'Between the Lines', 'jaiye-journeys' ); ?></span>
               </p>
               <h3 class="trip-card__title">
-                <?php esc_html_e( 'The Essaouira Edition', 'jaiye-journeys' ); ?>
+                <?php esc_html_e( 'The Marrakesh Edition', 'jaiye-journeys' ); ?>
               </h3>
               <p class="trip-card__destination">
-                <?php esc_html_e( 'Essaouira, Morocco', 'jaiye-journeys' ); ?>
+                <?php esc_html_e( 'Marrakesh, Morocco', 'jaiye-journeys' ); ?>
               </p>
               <p class="trip-card__dates">
-                <time datetime="2027-05"><?php esc_html_e( 'May 2027', 'jaiye-journeys' ); ?></time>
+                <time datetime="2027-03"><?php esc_html_e( 'March 2027', 'jaiye-journeys' ); ?></time>
               </p>
               <p class="trip-card__desc">
-                <?php esc_html_e( 'Six days of reading, rest, and radical joy on the Moroccan Atlantic coast. Our first full literary residency.', 'jaiye-journeys' ); ?>
+                <?php esc_html_e( 'Six days of reading, rest, and radical joy in the heart of the Moroccan medina. Our first full literary residency.', 'jaiye-journeys' ); ?>
               </p>
               <a
                 href="https://tally.so/r/Gxq2JL"
