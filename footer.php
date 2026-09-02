@@ -483,6 +483,8 @@
 })();
 </script>
 
+<?php get_template_part( 'cookie-consent' ); ?>
+
 <?php wp_footer(); ?>
 </body>
 </html>

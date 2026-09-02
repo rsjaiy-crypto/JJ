@@ -78,6 +78,15 @@ function jaiye_enqueue_assets() {
         filemtime( get_template_directory() . '/js/carousel.js' ),
         true
     );
+
+    // Cookie consent banner
+    wp_enqueue_script(
+        'jaiye-cookie-consent',
+        get_template_directory_uri() . '/js/cookie-consent.js',
+        [],
+        filemtime( get_template_directory() . '/js/cookie-consent.js' ),
+        true
+    );
 }
 add_action( 'wp_enqueue_scripts', 'jaiye_enqueue_assets' );
 
