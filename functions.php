@@ -8,6 +8,18 @@ define( 'JAIYE_GA4_ID', 'G-13CW9QRTBE' );
 
 
 // ============================================================
+// Includes
+// Trip custom post type, its field schema, meta box UI and the
+// one-click seeder for sample trips.
+// ============================================================
+
+require_once get_template_directory() . '/inc/trip-fields.php';
+require_once get_template_directory() . '/inc/trip-cpt.php';
+require_once get_template_directory() . '/inc/trip-meta.php';
+require_once get_template_directory() . '/inc/trip-seed.php';
+
+
+// ============================================================
 // Theme Setup
 // ============================================================
 
@@ -94,6 +106,26 @@ function jaiye_enqueue_assets() {
         filemtime( get_template_directory() . '/js/cookie-consent.js' ),
         true
     );
+
+    // Trip singles only.
+    // The trip template is large; loading its CSS/JS sitewide would add weight
+    // to every other page for no benefit, so it is gated on the trip CPT.
+    if ( is_singular( 'trip' ) ) {
+        wp_enqueue_style(
+            'jaiye-trip',
+            get_template_directory_uri() . '/css/trip.css',
+            [ 'jaiye-global' ],
+            filemtime( get_template_directory() . '/css/trip.css' )
+        );
+
+        wp_enqueue_script(
+            'jaiye-trip',
+            get_template_directory_uri() . '/js/trip.js',
+            [],
+            filemtime( get_template_directory() . '/js/trip.js' ),
+            true
+        );
+    }
 }
 add_action( 'wp_enqueue_scripts', 'jaiye_enqueue_assets' );
 
