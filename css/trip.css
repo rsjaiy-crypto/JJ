@@ -391,9 +391,9 @@
 .trip-stats {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-8);
-  margin-bottom: var(--space-8);
-  padding-bottom: var(--space-8);
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-6);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -439,7 +439,7 @@
 /* ── Meters ── */
 
 .trip-meters {
-  margin-top: var(--space-10);
+  margin-top: var(--space-6);
 }
 
 .trip-meters__title {
@@ -457,7 +457,7 @@
   grid-template-columns: 110px 1fr;
   align-items: center;
   gap: var(--space-4);
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-2);
 }
 
 .trip-meter__label {
@@ -500,7 +500,7 @@
 
 .trip-booking__card {
   position: sticky;
-  top: calc(56px + var(--space-6));
+  top: var(--trip-sticky-offset, 110px);
   background-color: var(--color-cream);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -639,13 +639,13 @@
 
 .trip-carousel__slide {
   flex: 0 0 auto;
-  width: min(72vw, 520px);
+  width: min(56vw, 380px);
 }
 
 .trip-carousel__img {
   display: block;
   width: 100%;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
   border-radius: var(--radius-md);
 }
@@ -714,7 +714,7 @@
 
 .trip-inclusions__media {
   position: sticky;
-  top: calc(56px + var(--space-6));
+  top: var(--trip-sticky-offset, 110px);
 }
 
 .trip-inclusions__img {
@@ -1053,7 +1053,7 @@
 
 .trip-note-feature {
   position: sticky;
-  top: calc(56px + var(--space-6));
+  top: var(--trip-sticky-offset, 110px);
   display: flex;
   flex-direction: column;
   justify-content: center;
