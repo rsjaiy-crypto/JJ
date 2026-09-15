@@ -277,22 +277,13 @@
   margin: 0 0 var(--space-4);
 }
 
-.jcard__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+/*
+   Vibe tag pills themselves are defined once in global.css (.vibe-tags /
+   .vibe-tag), so every context they appear in matches. This only tightens
+   the spacing for the card's tighter layout.
+*/
+.jcard .vibe-tags {
   margin-bottom: var(--space-4);
-}
-
-.jcard__tag {
-  padding: 3px 10px;
-  border-radius: var(--radius-full);
-  background-color: color-mix(in srgb, var(--color-sage) 30%, transparent);
-  font-family: var(--font-body);
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  color: var(--color-forest);
-  white-space: nowrap;
 }
 
 .jcard__meta {

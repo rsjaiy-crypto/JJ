@@ -40,13 +40,21 @@ function jj_trip_seed_page() {
         wp_die( esc_html__( 'You do not have permission to do this.', 'jaiye-journeys' ) );
     }
 
-    $results = [];
+    $results     = [];
+    $tag_results = [];
 
     if (
         isset( $_POST['jj_seed_submit'], $_POST['jj_seed_nonce'] )
         && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['jj_seed_nonce'] ) ), 'jj_seed_trips' )
     ) {
         $results = jj_trip_run_seed();
+    }
+
+    if (
+        isset( $_POST['jj_apply_tags_submit'], $_POST['jj_apply_tags_nonce'] )
+        && wp_verify_nonce( sanitize_key( wp_unslash( $_POST['jj_apply_tags_nonce'] ) ), 'jj_apply_vibe_tags' )
+    ) {
+        $tag_results = jj_trip_apply_vibe_tags();
     }
     ?>
     <div class="wrap">
@@ -76,6 +84,37 @@ function jj_trip_seed_page() {
             <p>
                 <button type="submit" name="jj_seed_submit" value="1" class="button button-primary">
                     <?php esc_html_e( 'Seed trips now', 'jaiye-journeys' ); ?>
+                </button>
+            </p>
+        </form>
+
+        <hr>
+
+        <h2><?php esc_html_e( 'Apply Vibe Tags', 'jaiye-journeys' ); ?></h2>
+        <p>
+            <?php esc_html_e( 'Updates only the Vibe Tags field on Marrakech, Sintra, Tuscany, Peru and Bali to the current assignments below — everything else on those trips is left exactly as it is. Safe to run more than once.', 'jaiye-journeys' ); ?>
+        </p>
+        <ul style="margin:0 0 12px; list-style:disc; padding-left:20px;">
+            <?php foreach ( jj_trip_vibe_tag_assignments() as $slug => $keys ) : ?>
+                <li><code><?php echo esc_html( $slug ); ?></code> &mdash; <?php echo esc_html( implode( ', ', array_map( 'jj_vibe_tag_label', $keys ) ) ); ?></li>
+            <?php endforeach; ?>
+        </ul>
+
+        <?php if ( $tag_results ) : ?>
+            <div class="notice notice-success">
+                <ul style="margin:12px 0;">
+                    <?php foreach ( $tag_results as $line ) : ?>
+                        <li><?php echo esc_html( $line ); ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+        <?php endif; ?>
+
+        <form method="post">
+            <?php wp_nonce_field( 'jj_apply_vibe_tags', 'jj_apply_tags_nonce' ); ?>
+            <p>
+                <button type="submit" name="jj_apply_tags_submit" value="1" class="button button-primary">
+                    <?php esc_html_e( 'Apply vibe tags now', 'jaiye-journeys' ); ?>
                 </button>
             </p>
         </form>
@@ -232,6 +271,68 @@ function jj_trip_run_seed() {
 
 
 /**
+ * The canonical vibe tag assignment for each already-known trip.
+ *
+ * Kept separate from jj_trip_seed_definitions() because it needs to reach
+ * trips that already exist on live, which the main seeder deliberately never
+ * touches. See jj_trip_apply_vibe_tags().
+ *
+ * @return array<string, string[]> Trip slug => up to 3 tag keys.
+ */
+function jj_trip_vibe_tag_assignments() {
+    return [
+        'btl-marrakech' => [ 'sensory', 'main-character', 'slow' ],
+        'btl-sintra'    => [ 'storybook', 'bucket-list', 'slow' ],
+        'btl-tuscany'   => [ 'slow', 'community', 'storybook' ],
+        'jj-peru'       => [ 'contrast', 'bucket-list', 'foodie' ],
+        'jj-bali'       => [ 'contrast', 'wild', 'community' ],
+    ];
+}
+
+
+/**
+ * Apply the canonical vibe tags to trips that already exist.
+ *
+ * The full seeder in jj_trip_run_seed() skips any slug that already has a
+ * post, which is right for content but wrong for this: these 5 trips were
+ * already created (and may already be live) before the vibe tag system
+ * existed, so their Vibe Tags field needs updating in place rather than
+ * left at whatever it was seeded with originally. Only that one meta key is
+ * touched — nothing else on the post is read or changed.
+ *
+ * @return string[] Human-readable result lines.
+ */
+function jj_trip_apply_vibe_tags() {
+    $results = [];
+
+    foreach ( jj_trip_vibe_tag_assignments() as $slug => $keys ) {
+
+        $trip = get_page_by_path( $slug, OBJECT, 'trip' );
+
+        if ( ! $trip ) {
+            $results[] = sprintf(
+                /* translators: %s: trip slug */
+                __( 'Skipped "%s" — no trip with that slug exists yet. Run "Seed trips now" first, or create it in wp-admin.', 'jaiye-journeys' ),
+                $slug
+            );
+            continue;
+        }
+
+        update_post_meta( $trip->ID, JJ_TRIP_META_PREFIX . 'vibe_tags', implode( ',', $keys ) );
+
+        $results[] = sprintf(
+            /* translators: 1: trip title, 2: comma-separated tag labels */
+            __( 'Updated "%1$s" — %2$s', 'jaiye-journeys' ),
+            get_the_title( $trip->ID ),
+            implode( ', ', array_map( 'jj_vibe_tag_label', $keys ) )
+        );
+    }
+
+    return $results;
+}
+
+
+/**
  * The seed content itself.
  *
  * Peru is fully populated as the review sample. Bali and Cape Town are
@@ -251,7 +352,7 @@ function jj_trip_seed_definitions() {
             'meta'  => [
                 'destination'     => 'Peru',
                 'region'          => 'south-america',
-                'vibe_tags'       => 'Small group, High altitude, Bucket list',
+                'vibe_tags'       => 'contrast,bucket-list,foodie',
                 'intro_statement' => 'Nine days across the Sacred Valley and Machu Picchu, run the way we would actually do it — no queue, no filler, no group-trip drama.',
                 'collage_images'  => jj_trip_seed_gallery( [
                     'trip-peru.jpg',
@@ -513,7 +614,7 @@ function jj_trip_seed_definitions() {
                 'brand'           => 'btl',
                 'destination'     => 'Marrakech',
                 'region'          => 'africa',
-                'vibe_tags'       => 'Riad buyout, Literary, Slow',
+                'vibe_tags'       => 'sensory,main-character,slow',
                 'intro_statement' => 'Six days in a private riad near Bab Aylane, built around one loud city and a door that shuts it out completely.',
                 'collage_images'  => jj_trip_seed_gallery( [
                     'trip-morocco.jpg',
@@ -736,7 +837,7 @@ function jj_trip_seed_definitions() {
                 'status'          => 'coming-soon',
                 'destination'     => 'Sintra, Portugal',
                 'region'          => 'europe',
-                'vibe_tags'       => 'Palaces, Misty hills, Slow',
+                'vibe_tags'       => 'storybook,bucket-list,slow',
                 'intro_statement' => 'A chapter written in the fog: palaces, pine forest, and the kind of quiet that makes a long book feel short.',
                 'welcome_copy'    => "Placeholder premise copy — replace before this page goes out widely.\n\nSintra sits under cloud for much of the year, which is precisely the point. Gardens, palaces, and a cool grey light that makes staying in with a book feel like the correct decision rather than a wasted day.",
                 'duration'        => '4 Nights, 5 Days',
@@ -802,7 +903,7 @@ function jj_trip_seed_definitions() {
                 'status'          => 'coming-soon',
                 'destination'     => 'Tuscany, Italy',
                 'region'          => 'europe',
-                'vibe_tags'       => 'Villa, Long lunches, Slow',
+                'vibe_tags'       => 'slow,community,storybook',
                 'intro_statement' => 'A villa, a long table, and six days where the only fixed appointment is lunch.',
                 'welcome_copy'    => "Placeholder premise copy — replace before this page goes out widely.\n\nThe most indulgent chapter on the map: a private villa, a cook, a pool, and absolutely nowhere to be.",
                 'duration'        => '5 Nights, 6 Days',
@@ -834,7 +935,7 @@ function jj_trip_seed_definitions() {
             'meta'  => [
                 'destination'     => 'Bali, Gilis & Komodo, Indonesia',
                 'region'          => 'asia',
-                'vibe_tags'       => 'Islands, Small group, Slow travel',
+                'vibe_tags'       => 'contrast,wild,community',
                 'intro_statement' => 'Placeholder intro — replace this with the real Islands Edit copy before publishing.',
                 'duration'        => '',
                 'price_from'      => '',

@@ -432,6 +432,12 @@ get_header();
               <h3 class="trip-card__title">
                 <?php esc_html_e( 'The Islands Edit', 'jaiye-journeys' ); ?>
               </h3>
+              <?php
+              // Static mode: this promo isn't CPT-driven like the trip pages,
+              // so the tag keys are set right here — but the copy behind them
+              // still comes from the one shared definitions file.
+              jj_render_vibe_tags( [ 'contrast', 'wild', 'community' ], 'fp-islands', false );
+              ?>
               <p class="trip-card__destination">
                 <?php esc_html_e( 'Indonesia', 'jaiye-journeys' ); ?>
               </p>

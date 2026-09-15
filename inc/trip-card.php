@@ -28,8 +28,6 @@ function jj_trip_card( $post_id ) {
     $duration    = jj_trip_field( 'duration', $post_id );
     $destination = jj_trip_field( 'destination', $post_id );
     $year        = jj_trip_earliest_year( $post_id );
-
-    $vibe_tags = array_filter( array_map( 'trim', explode( ',', (string) jj_trip_field( 'vibe_tags', $post_id ) ) ) );
     ?>
     <article
       class="jcard<?php echo $coming_soon ? ' jcard--soon' : ''; ?>"
@@ -73,13 +71,7 @@ function jj_trip_card( $post_id ) {
             <p class="jcard__destination"><?php echo esc_html( $destination ); ?></p>
           <?php endif; ?>
 
-          <?php if ( $vibe_tags ) : ?>
-            <ul class="jcard__tags" role="list">
-              <?php foreach ( array_slice( $vibe_tags, 0, 3 ) as $tag ) : ?>
-                <li class="jcard__tag"><?php echo esc_html( $tag ); ?></li>
-              <?php endforeach; ?>
-            </ul>
-          <?php endif; ?>
+          <?php jj_render_trip_vibe_tags( $post_id, false ); // Static: the whole card is already a link, so no second layer of tap targets inside it. ?>
 
           <p class="jcard__meta">
             <span class="jcard__pace jcard__pace--<?php echo esc_attr( $pace_band ); ?>">
