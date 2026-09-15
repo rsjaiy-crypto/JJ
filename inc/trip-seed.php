@@ -504,6 +504,222 @@ function jj_trip_seed_definitions() {
             ],
         ],
 
+        /* ── Marrakech: the BTL chapter sample ────────────────────── */
+        'btl-marrakech' => [
+            'title' => 'Chapter One: Marrakech',
+            'hero'  => 'btl-hero.jpg',
+            'meta'  => [
+                'brand'           => 'btl',
+                'destination'     => 'Marrakech',
+                'vibe_tags'       => 'Riad buyout, Literary, Slow',
+                'intro_statement' => 'Six days in a private riad near Bab Aylane, built around one loud city and a door that shuts it out completely.',
+                'collage_images'  => jj_trip_seed_gallery( [
+                    'trip-morocco.jpg',
+                    'travel-riad-pool.jpg',
+                    'btl-reading-pool.jpg',
+                    'travel-tea.jpg',
+                    'btl-kindle-beach.jpg',
+                ] ),
+
+                'duration'     => '6 days',
+                'price_from'   => '2850',
+                'group_size'   => 'Twelve rooms, whole-riad buyout',
+                'welcome_copy' => "Marrakech holds two cities at once: the medina, dense and alive with the souks, and the quiet interior of a riad built to shut all of it out.\n\nPalazzo Montefiore sits within walking distance of Bab Aylane — twelve rooms around a courtyard, an in-house hammam, and a rooftop that catches the evening light over the old city. You will not hear the souks from inside. That is not an accident; it is the entire point of a riad.\n\nMost of the week stays close in, restful and unhurried. One day leaves the city behind entirely for the Agafay, a landscape that looks more like the moon than a desert.",
+
+                // Weighted toward rest: this chapter sits in the margins.
+                'meter_pace'       => '30',
+                'meter_culture'    => '75',
+                'meter_food'       => '70',
+                'meter_adventure'  => '45',
+                'meter_nightlife'  => '20',
+                'meter_relaxation' => '90',
+
+                'booking_url'   => 'https://tally.so/r/Gxq2JL',
+                'enquiry_url'   => '',
+                'payment_terms' => 'A holding deposit secures your spot, refundable until the cohort reaches its minimum. Balance due 60 days before departure. Payment plans and Klarna available at checkout.',
+
+                'departures' => [
+                    [
+                        'year'         => '2027',
+                        'dates'        => '18 – 23 March',
+                        'availability' => 'Waitlist open',
+                        'status'       => 'limited',
+                        'book_url'     => '',
+                    ],
+                ],
+
+                'carousel_images' => jj_trip_seed_gallery( [
+                    'travel-riad-pool.jpg',
+                    'trip-morocco.jpg',
+                    'travel-tea.jpg',
+                    'travel-terrace.jpg',
+                ] ),
+
+                'inclusions_image' => (string) jj_trip_seed_image( 'travel-riad-pool.jpg' ),
+
+                'included_groups' => [
+                    [
+                        'group_title' => 'The riad',
+                        'items'       => "Full private buyout of Palazzo Montefiore\n5 nights, twelve rooms around the courtyard\nAll breakfasts and dinners\nUse of the in-house hammam and sun terrace",
+                    ],
+                    [
+                        'group_title' => 'The chapter',
+                        'items'       => "The Agafay desert day in full\nGuided walk through the souks\nLe Jardin Secret, the Saadian-era garden\nAfternoon tea at the Royal Mansour\nRooftop book club",
+                    ],
+                    [
+                        'group_title' => 'Travel',
+                        'items'       => "All internal transfers\nAirport pickup and drop-off",
+                    ],
+                ],
+
+                'not_included' => "Flights\nTravel insurance (required)\nAdditional spa treatments\nShopping in the souks\nTips and personal spending",
+
+                'route_copy' => 'Everything runs from the riad near Bab Aylane, apart from one day out to the Agafay, less than an hour from the medina.',
+
+                'strip_images' => jj_trip_seed_gallery( [
+                    'trip-morocco.jpg',
+                    'travel-riad-pool.jpg',
+                    'travel-tea.jpg',
+                    'btl-reading-pool.jpg',
+                    'travel-terrace.jpg',
+                    'btl-kindle-beach.jpg',
+                ] ),
+
+                // BTL day naming: named chapters rather than Day 1..N.
+                'days' => [
+                    [
+                        'day_name' => 'The Prologue',
+                        'location' => 'Palazzo Montefiore',
+                        'headline' => 'Arrival, and the door closes',
+                        'body'     => 'Arrival at the riad. A welcome gala on the rooftop in "Dust & Gold" neutrals, as the city noise falls away behind you.',
+                        'image_1'  => (string) jj_trip_seed_image( 'travel-riad-pool.jpg' ),
+                        'image_2'  => (string) jj_trip_seed_image( 'travel-terrace.jpg' ),
+                    ],
+                    [
+                        'day_name' => 'Grounding',
+                        'location' => 'The courtyard',
+                        'headline' => 'An unstructured day',
+                        'body'     => 'No itinerary to follow. Just the riad, the courtyard, the hammam, and time to arrive properly.',
+                        'image_1'  => (string) jj_trip_seed_image( 'btl-reading-pool.jpg' ),
+                        'image_2'  => (string) jj_trip_seed_image( 'travel-tea.jpg' ),
+                    ],
+                    [
+                        'day_name' => 'Secrets of the Souks',
+                        'location' => 'The medina',
+                        'headline' => 'Out into the noise, briefly',
+                        'body'     => 'Le Jardin Secret, a hidden Saadian-era garden, followed by a guided walk through the souks and dinner in the medina.',
+                        'image_1'  => (string) jj_trip_seed_image( 'trip-morocco.jpg' ),
+                        'image_2'  => '',
+                    ],
+                    [
+                        'day_name' => 'The Agafay',
+                        'location' => 'Agafay desert',
+                        'headline' => "The chapter's signature day",
+                        'body'     => 'A private desert camp from mid-afternoon: camel or quad ride at sunset, hammam, fire dancing, and Gnawa music under the stars.',
+                        'image_1'  => (string) jj_trip_seed_image( 'hero-desert.jpg' ),
+                        'image_2'  => (string) jj_trip_seed_image( 'trip-morocco.jpg' ),
+                    ],
+                    [
+                        'day_name' => 'The Crescendo',
+                        'location' => 'Rooftop & Royal Mansour',
+                        'headline' => 'Book club, then tea',
+                        'body'     => 'Book club on the rooftop. Farewell afternoon tea at the Royal Mansour, closing the week on a quiet, looked-after note.',
+                        'image_1'  => (string) jj_trip_seed_image( 'travel-tea.jpg' ),
+                        'image_2'  => (string) jj_trip_seed_image( 'btl-kindle-beach.jpg' ),
+                    ],
+                    [
+                        'day_name' => 'The Epilogue',
+                        'location' => 'Palazzo Montefiore',
+                        'headline' => 'No-rush departure',
+                        'body'     => 'Stay by the pool until the last possible moment. Transfers whenever your flight is.',
+                        'image_1'  => (string) jj_trip_seed_image( 'travel-riad-pool.jpg' ),
+                        'image_2'  => '',
+                    ],
+                ],
+
+                'trip_notes' => [
+                    [
+                        'title'    => 'Arrivals & Departures',
+                        'body'     => "Fly into Marrakech Menara (RAK). Arrivals from 1pm on day one; departures any time on day six. The riad sits inside the medina near Bab Aylane, so the final approach is on foot — we meet you and handle the bags.",
+                        'icon'     => 'plane',
+                        'featured' => '1',
+                    ],
+                    [
+                        'title'    => 'Rooms',
+                        'body'     => 'Twelve rooms across the riad, a mix of doubles and suites. Solo occupancy and suite upgrades confirmed once the buyout is finalised.',
+                        'icon'     => 'bed',
+                        'featured' => '',
+                    ],
+                    [
+                        'title'    => 'Luggage',
+                        'body'     => 'One checked bag plus hand luggage. Medina lanes are narrow, so a hard shell with good wheels earns its keep.',
+                        'icon'     => 'luggage',
+                        'featured' => '',
+                    ],
+                    [
+                        'title'    => 'Visas & passports',
+                        'body'     => 'UK passport holders do not need a visa for stays under 90 days. Your passport must have six months validity.',
+                        'icon'     => 'passport',
+                        'featured' => '',
+                    ],
+                    [
+                        'title'    => 'Weather',
+                        'body'     => 'March in Marrakech runs 20–24°C by day and cools sharply after dark. The Agafay evening is genuinely cold — bring a proper layer.',
+                        'icon'     => 'sun',
+                        'featured' => '',
+                    ],
+                    [
+                        'title'    => 'Itinerary changes',
+                        'body'     => 'The Agafay day occasionally shifts by 24 hours for weather. Everything else runs from the riad, so the week holds its shape.',
+                        'icon'     => 'route',
+                        'featured' => '',
+                    ],
+                ],
+
+                'rating_value' => '',
+                'rating_count' => '',
+                'reviews'      => [],
+
+                'social_images' => jj_trip_seed_gallery( [
+                    'travel-riad-pool.jpg',
+                    'trip-morocco.jpg',
+                    'travel-tea.jpg',
+                    'btl-reading-pool.jpg',
+                ] ),
+                'social_handle' => 'jaiyejourneys',
+
+                'faqs' => [
+                    [
+                        'question' => 'Is there a waitlist?',
+                        'answer'   => 'Yes. Join to be notified the moment booking opens and to get first access before spaces are shared more widely.',
+                    ],
+                    [
+                        'question' => "What happens if the cohort doesn't reach its minimum?",
+                        'answer'   => 'Holding deposits are returned in full. Nothing becomes non-refundable until the retreat is officially green lit.',
+                    ],
+                    [
+                        'question' => 'Do I have to do the reading?',
+                        'answer'   => 'No. The book is an invitation, not homework. Plenty of people come for the riad and the quiet.',
+                    ],
+                    [
+                        'question' => 'Can I come solo?',
+                        'answer'   => 'Most guests do. Solo, or with the one friend who actually reads.',
+                    ],
+                    [
+                        'question' => 'Am I responsible for my own flights?',
+                        'answer'   => 'Yes. We recommend booking as soon as your place is confirmed, and the Ticketing Desk can find the right fare.',
+                    ],
+                    [
+                        'question' => 'Are dietary requirements catered for?',
+                        'answer'   => 'Yes. You will receive a preference sheet ahead of the retreat and the riad kitchen is briefed in advance.',
+                    ],
+                ],
+
+                'enquiry_image' => (string) jj_trip_seed_image( 'btl-reading-pool.jpg' ),
+                'enquiry_embed' => 'https://tally.so/r/Gxq2JL',
+            ],
+        ],
+
         /* ── Bali stub: fixes the homepage 404 ────────────────────── */
         'jj-bali' => [
             'title' => 'The Islands Edit',

@@ -701,6 +701,47 @@
   padding-block: var(--section-gap);
 }
 
+/*
+   Two columns on desktop. Previously this was a narrow centred column,
+   which left a lot of dead cream either side on wide screens.
+*/
+.trip-inclusions__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(var(--space-8), 5vw, var(--space-16));
+  align-items: start;
+}
+
+.trip-inclusions__media {
+  position: sticky;
+  top: calc(56px + var(--space-6));
+}
+
+.trip-inclusions__img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: var(--radius-lg);
+}
+
+@media (max-width: 900px) {
+  .trip-inclusions__grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Sticky is pointless once it's a single stacked column */
+  .trip-inclusions__media {
+    position: static;
+    order: -1;
+    margin-bottom: var(--space-6);
+  }
+
+  .trip-inclusions__img {
+    aspect-ratio: 3 / 2;
+  }
+}
+
 .trip-accordion {
   border-bottom: 1px solid var(--color-border);
 }
@@ -987,69 +1028,181 @@
 
 /* ------------------------------------------------------------------
    11. Trip notes
+   Featured card anchors the left column; the remaining notes are a
+   scroll-driven accordion so a long notes list stays scannable
+   instead of becoming a wall of small paragraphs.
    ------------------------------------------------------------------ */
 
 .trip-notes {
   padding-block: var(--section-gap);
 }
 
-.trip-notes__grid {
+.trip-notes__layout {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--space-4);
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(var(--space-6), 4vw, var(--space-12));
+  align-items: start;
 }
 
-.trip-note {
-  background-color: var(--color-cream);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
+.trip-notes__layout--no-feature {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 760px;
 }
 
-.trip-note--featured {
-  grid-column: span 2;
-  grid-row: span 2;
-  background-color: var(--color-forest);
-  color: var(--color-cream);
+/* ── Featured card ── */
+
+.trip-note-feature {
+  position: sticky;
+  top: calc(56px + var(--space-6));
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-height: 420px;
+  padding: clamp(var(--space-6), 3vw, var(--space-10));
+  border-radius: var(--radius-lg);
+  background-color: var(--color-forest);
+  color: var(--color-cream);
 }
 
-.trip-note__icon {
+.trip-note-feature__icon {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
-  margin-bottom: var(--space-4);
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--space-6);
   border-radius: 50%;
-  background-color: var(--color-surface);
-  color: var(--color-forest);
-}
-
-.trip-note--featured .trip-note__icon {
   background-color: var(--color-salmon);
   color: var(--color-surface);
 }
 
-.trip-note__icon svg {
+.trip-note-feature__icon svg {
   width: 22px;
   height: 22px;
 }
 
-.trip-note__title {
+.trip-note-feature__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: var(--fw-regular);
+  color: var(--color-cream);
+  margin-bottom: var(--space-4);
+}
+
+.trip-note-feature__body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--fw-light);
+  line-height: 1.7;
+  color: var(--color-cream);
+  opacity: 0.9;
+}
+
+.trip-note-feature__body p {
+  margin: 0 0 var(--space-3);
+}
+
+.trip-note-feature__body p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Scroll accordion stack ── */
+
+.trip-note-stack {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.trip-note-item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  overflow: hidden;
+  transition:
+    border-color var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out),
+    background-color var(--duration-base) var(--ease-out);
+}
+
+.trip-note-item.is-open {
+  border-color: color-mix(in srgb, var(--color-salmon) 55%, transparent);
+  box-shadow: 0 6px 24px rgba(8, 31, 28, 0.07);
+}
+
+.trip-note-item__heading {
+  margin: 0;
+}
+
+.trip-note-item__trigger {
+  appearance: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
   font-family: var(--font-heading);
   font-size: var(--text-lg);
   font-weight: var(--fw-regular);
   color: var(--color-deep-green);
-  margin-bottom: var(--space-2);
 }
 
-.trip-note--featured .trip-note__title {
-  font-size: var(--text-2xl);
-  color: var(--color-cream);
+.trip-note-item__icon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--color-cream);
+  color: var(--color-forest);
+  transition:
+    background-color var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out);
 }
 
-.trip-note__body {
+.trip-note-item__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.trip-note-item.is-open .trip-note-item__icon {
+  background-color: var(--color-salmon);
+  color: var(--color-surface);
+}
+
+.trip-note-item__title {
+  flex: 1;
+}
+
+.trip-note-item__chevron {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-right: 1.5px solid var(--color-salmon);
+  border-bottom: 1.5px solid var(--color-salmon);
+  transform: rotate(45deg);
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+.trip-note-item.is-open .trip-note-item__chevron {
+  transform: rotate(225deg);
+}
+
+/*
+   0fr → 1fr animates a panel of unknown height with no JS measuring.
+   Default is open: collapsing only happens once .is-interactive is set
+   by trip.js, so no-JS and reduced-motion readers get the full text.
+*/
+.trip-note-item__panel {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+
+.trip-note-item__panel-inner {
+  overflow: hidden;
   font-family: var(--font-body);
   font-size: var(--text-sm);
   font-weight: var(--fw-light);
@@ -1057,28 +1210,48 @@
   color: var(--color-text);
 }
 
-.trip-note__body p {
+.trip-note-item__panel-inner p {
   margin: 0 0 var(--space-3);
+  padding-inline: var(--space-5);
 }
 
-.trip-note__body p:last-child {
-  margin-bottom: 0;
+.trip-note-item__panel-inner p:first-child {
+  padding-top: 0;
 }
 
-.trip-note--featured .trip-note__body {
-  font-size: var(--text-base);
-  color: var(--color-cream);
-  opacity: 0.9;
+.trip-note-item__panel-inner p:last-child {
+  margin-bottom: var(--space-5);
 }
 
-@media (max-width: 767px) {
-  .trip-note--featured {
-    grid-column: span 1;
-    grid-row: span 1;
+.trip-note-stack.is-interactive .trip-note-item__panel {
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--duration-slow) var(--ease-out);
+}
+
+.trip-note-stack.is-interactive .trip-note-item.is-open .trip-note-item__panel {
+  grid-template-rows: 1fr;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trip-note-item,
+  .trip-note-item__icon,
+  .trip-note-item__chevron,
+  .trip-note-stack.is-interactive .trip-note-item__panel {
+    transition: none;
   }
 }
 
+@media (max-width: 900px) {
+  .trip-notes__layout {
+    grid-template-columns: 1fr;
+  }
 
+  /* Sticky would pin the card over the stack in a single column */
+  .trip-note-feature {
+    position: static;
+    min-height: 0;
+  }
+}
 /* ------------------------------------------------------------------
    12. Mid-page CTA
    ------------------------------------------------------------------ */
@@ -1360,4 +1533,41 @@
   .trip-mobile-bar {
     transition: none;
   }
+}
+
+
+/* ------------------------------------------------------------------
+   18. Brand variants
+   The trip CPT serves both JJ Edits and Between the Lines retreats.
+   Structure is identical; BTL gets the literary treatment.
+   ------------------------------------------------------------------ */
+
+.trip-hero__eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-regular);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-salmon);
+  margin: 0 0 var(--space-3);
+}
+
+/* BTL leans further into the serif and drops the tag pills' hard edges */
+.trip--btl .trip-hero__title {
+  font-style: italic;
+}
+
+.trip--btl .trip-intro__statement {
+  font-size: var(--text-3xl);
+}
+
+/*
+   Named days ("The Prologue") need more room than "Day 1", so the
+   tabs get a softer, wider treatment on BTL pages.
+*/
+.trip--btl .trip-days__tab {
+  font-family: var(--font-heading);
+  font-size: var(--text-md);
+  letter-spacing: 0.01em;
+  padding-inline: var(--space-6);
 }
