@@ -18,7 +18,6 @@ while ( have_posts() ) :
 
     $trip_id     = get_the_ID();
     $destination = jj_trip_field( 'destination', $trip_id );
-    $vibe_tags   = array_filter( array_map( 'trim', explode( ',', (string) jj_trip_field( 'vibe_tags', $trip_id ) ) ) );
     $booking_url = jj_trip_field( 'booking_url', $trip_id );
     $enquiry_url = jj_trip_field( 'enquiry_url', $trip_id );
 
@@ -74,13 +73,7 @@ while ( have_posts() ) :
       <?php endif; ?>
       <h1 class="trip-hero__title"><?php echo esc_html( jj_trip_volume_title( $trip_id ) ); ?></h1>
 
-      <?php if ( $vibe_tags ) : ?>
-        <ul class="trip-hero__tags" role="list">
-          <?php foreach ( array_slice( $vibe_tags, 0, 3 ) as $tag ) : ?>
-            <li class="trip-hero__tag"><?php echo esc_html( $tag ); ?></li>
-          <?php endforeach; ?>
-        </ul>
-      <?php endif; ?>
+      <?php jj_render_trip_vibe_tags( $trip_id ); ?>
     </div>
 
     <span class="trip-hero__sentinel" aria-hidden="true"></span>

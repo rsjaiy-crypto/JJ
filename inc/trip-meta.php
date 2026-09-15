@@ -134,6 +134,31 @@ function jj_trip_render_field( $name, $field, $value, $id = '' ) {
             echo '</select>';
             break;
 
+        case 'tags':
+            $selected_keys = array_filter( array_map( 'trim', explode( ',', (string) $value ) ) );
+            $max           = isset( $field['max'] ) ? (int) $field['max'] : 3;
+
+            echo '<div class="jj-trip-tags" data-max="' . esc_attr( $max ) . '">';
+            foreach ( $field['options'] as $tag_key => $definition ) {
+                $checkbox_id = $id . '-' . sanitize_html_class( $tag_key );
+                printf(
+                    '<label class="jj-trip-tags__item" title="%s"><input type="checkbox" id="%s" name="%s[]" value="%s" %s> %s</label>',
+                    esc_attr( $definition ),
+                    esc_attr( $checkbox_id ),
+                    esc_attr( $name ),
+                    esc_attr( $tag_key ),
+                    checked( in_array( $tag_key, $selected_keys, true ), true, false ),
+                    esc_html( jj_vibe_tag_label( $tag_key ) )
+                );
+            }
+            echo '</div>';
+            printf(
+                '<p class="jj-trip-tags__count description"><span class="jj-trip-tags__count-num">%d</span> / %d selected</p>',
+                count( $selected_keys ),
+                $max
+            );
+            break;
+
         case 'checkbox':
             printf(
                 '<label class="jj-trip-field__checkbox"><input type="checkbox" id="%s" name="%s" value="1" %s> %s</label>',
@@ -376,6 +401,26 @@ function jj_trip_save_meta( $post_id ) {
             // Unchecked checkboxes aren't submitted at all.
             if ( 'checkbox' === $field['type'] ) {
                 update_post_meta( $post_id, $meta_key, empty( $_POST[ $key ] ) ? '' : '1' );
+                continue;
+            }
+
+            // A checkbox-group of known tag keys, submitted as an array.
+            // Re-validated against the central definitions and re-capped at
+            // the field's max here — the admin's JS only disables further
+            // clicks, it doesn't stop a crafted request.
+            if ( 'tags' === $field['type'] ) {
+                $submitted = isset( $_POST[ $key ] ) && is_array( $_POST[ $key ] )
+                    ? array_map( 'sanitize_text_field', wp_unslash( $_POST[ $key ] ) )
+                    : [];
+
+                $known = array_keys( isset( $field['options'] ) ? $field['options'] : [] );
+                $valid = array_slice( array_values( array_intersect( $submitted, $known ) ), 0, isset( $field['max'] ) ? (int) $field['max'] : 3 );
+
+                if ( empty( $valid ) ) {
+                    delete_post_meta( $post_id, $meta_key );
+                } else {
+                    update_post_meta( $post_id, $meta_key, implode( ',', $valid ) );
+                }
                 continue;
             }
 

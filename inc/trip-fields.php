@@ -108,9 +108,11 @@ function jj_trip_schema() {
                     ],
                 ],
                 'vibe_tags'       => [
-                    'type'  => 'text',
-                    'label' => __( 'Vibe tags', 'jaiye-journeys' ),
-                    'desc'  => __( 'Three, comma separated. e.g. Small group, Adventure, Culture', 'jaiye-journeys' ),
+                    'type'    => 'tags',
+                    'label'   => __( 'Vibe tags', 'jaiye-journeys' ),
+                    'desc'    => __( 'Pick up to 3. Definitions live in inc/vibe-tags.php — edit the wording there, not per trip.', 'jaiye-journeys' ),
+                    'max'     => 3,
+                    'options' => jj_vibe_tag_definitions(), // key => definition; the checkbox label is derived from the key.
                 ],
                 'intro_statement' => [
                     'type'  => 'textarea',
@@ -495,6 +497,22 @@ function jj_trip_lines( $value ) {
     $lines = preg_split( '/\r\n|\r|\n/', (string) $value );
     $lines = array_map( 'trim', $lines );
     return array_values( array_filter( $lines, 'strlen' ) );
+}
+
+
+/**
+ * A trip's vibe tag keys, stored as a comma-separated string.
+ *
+ * @param int|null $post_id Post ID. Defaults to current post.
+ * @return string[]
+ */
+function jj_trip_vibe_tag_keys( $post_id = null ) {
+    $raw = jj_trip_field( 'vibe_tags', $post_id );
+    if ( ! $raw ) {
+        return [];
+    }
+
+    return array_values( array_filter( array_map( 'trim', explode( ',', $raw ) ) ) );
 }
 
 

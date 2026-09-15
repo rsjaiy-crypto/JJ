@@ -13,6 +13,7 @@ define( 'JAIYE_GA4_ID', 'G-13CW9QRTBE' );
 // one-click seeder for sample trips.
 // ============================================================
 
+require_once get_template_directory() . '/inc/vibe-tags.php';
 require_once get_template_directory() . '/inc/trip-fields.php';
 require_once get_template_directory() . '/inc/trip-cpt.php';
 require_once get_template_directory() . '/inc/trip-meta.php';

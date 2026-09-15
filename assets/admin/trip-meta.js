@@ -150,11 +150,44 @@
 		} );
 	}
 
+	/* ── Vibe tags: cap selection at data-max ────────────────────── */
+
+	function bindTagGroups( scope ) {
+		var groups = ( scope || document ).querySelectorAll( '.jj-trip-tags' );
+
+		Array.prototype.forEach.call( groups, function ( group ) {
+			var max        = parseInt( group.dataset.max, 10 ) || 3;
+			var checkboxes = group.querySelectorAll( 'input[type="checkbox"]' );
+			var countEl    = group.parentNode.querySelector( '.jj-trip-tags__count-num' );
+
+			function sync() {
+				var checked = Array.prototype.filter.call( checkboxes, function ( cb ) {
+					return cb.checked;
+				} );
+
+				// Once at the cap, further unchecked boxes are disabled rather
+				// than silently ignored on submit — the limit should be
+				// obvious while picking, not discovered after saving.
+				Array.prototype.forEach.call( checkboxes, function ( cb ) {
+					cb.disabled = ! cb.checked && checked.length >= max;
+				} );
+
+				if ( countEl ) {
+					countEl.textContent = checked.length;
+				}
+			}
+
+			group.addEventListener( 'change', sync );
+			sync();
+		} );
+	}
+
 	/* ── Init ────────────────────────────────────────────────────── */
 
 	document.addEventListener( 'DOMContentLoaded', function () {
 		bindMedia( document );
 		bindMeters( document );
+		bindTagGroups( document );
 
 		document.querySelectorAll( '.jj-trip-repeater' ).forEach( function ( repeater ) {
 			renumber( repeater );

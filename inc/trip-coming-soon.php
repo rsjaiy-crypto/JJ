@@ -21,7 +21,6 @@ $cs_copy        = jj_trip_field( 'welcome_copy', $trip_id );
 $cs_duration    = jj_trip_field( 'duration', $trip_id );
 $cs_collage     = jj_trip_gallery( 'collage_images', $trip_id );
 $cs_departures  = jj_trip_rows( 'departures', $trip_id );
-$cs_tags        = array_filter( array_map( 'trim', explode( ',', (string) jj_trip_field( 'vibe_tags', $trip_id ) ) ) );
 
 $cs_waitlist = jj_trip_field( 'booking_url', $trip_id );
 if ( ! $cs_waitlist ) {
@@ -71,13 +70,7 @@ if ( ! empty( $cs_departures[0] ) ) {
 
       <h1 class="trip-hero__title"><?php echo esc_html( jj_trip_volume_title( $trip_id ) ); ?></h1>
 
-      <?php if ( $cs_tags ) : ?>
-        <ul class="trip-hero__tags" role="list">
-          <?php foreach ( array_slice( $cs_tags, 0, 3 ) as $cs_tag ) : ?>
-            <li class="trip-hero__tag"><?php echo esc_html( $cs_tag ); ?></li>
-          <?php endforeach; ?>
-        </ul>
-      <?php endif; ?>
+      <?php jj_render_trip_vibe_tags( $trip_id ); ?>
     </div>
 
     <span class="trip-hero__sentinel" aria-hidden="true"></span>
