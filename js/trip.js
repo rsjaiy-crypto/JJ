@@ -30,6 +30,21 @@
 		return h;
 	}
 
+	/**
+	 * Publish the real header+subnav height as --trip-sticky-offset, so
+	 * every sticky element (booking card, inclusions image, featured note)
+	 * parks itself just below the fixed chrome instead of partly behind it.
+	 *
+	 * Previously this offset was hardcoded in CSS as "56px" — the sub-nav's
+	 * own height — which silently ignored the site header sitting above it.
+	 * That made a genuinely `position: sticky` element look broken, because
+	 * its top edge stuck out from underneath the header.
+	 */
+	function syncStickyOffset() {
+		var value = headerOffset() + 24; // + breathing room below the chrome
+		document.documentElement.style.setProperty( '--trip-sticky-offset', value + 'px' );
+	}
+
 	/* ── 1. Reveal on scroll ─────────────────────────────────────── */
 
 	function initReveals() {
@@ -489,6 +504,7 @@
 	/* ── Init ────────────────────────────────────────────────────── */
 
 	function init() {
+		syncStickyOffset();
 		initReveals();
 		initAnimatedElements();
 		initHeaderState();
@@ -501,6 +517,15 @@
 		initCarousels();
 		initNoteStack();
 		initMobileBar();
+
+		window.addEventListener( 'resize', syncStickyOffset, { passive: true } );
+
+		// The logo image can finish loading after the initial measurement
+		// and change the header's height — re-measure once it has.
+		var logo = document.querySelector( '.site-logo__img' );
+		if ( logo && ! logo.complete ) {
+			logo.addEventListener( 'load', syncStickyOffset, { once: true } );
+		}
 	}
 
 	if ( document.readyState === 'loading' ) {

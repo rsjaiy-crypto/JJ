@@ -115,7 +115,7 @@ foreach ( $trips as $trip ) {
 
           <div class="jfilter__row">
 
-            <?php if ( count( $regions_present ) > 1 ) : ?>
+            <?php if ( count( $regions_present ) >= 1 ) : ?>
               <label class="jfilter__field">
                 <span class="jfilter__label"><?php esc_html_e( 'Destination', 'jaiye-journeys' ); ?></span>
                 <select class="jfilter__select" data-filter="region">
@@ -127,7 +127,7 @@ foreach ( $trips as $trip ) {
               </label>
             <?php endif; ?>
 
-            <?php if ( count( $paces_present ) > 1 ) : ?>
+            <?php if ( count( $paces_present ) >= 1 ) : ?>
               <label class="jfilter__field">
                 <span class="jfilter__label"><?php esc_html_e( 'Pace', 'jaiye-journeys' ); ?></span>
                 <select class="jfilter__select" data-filter="pace">
