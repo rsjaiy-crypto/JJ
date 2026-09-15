@@ -38,6 +38,16 @@ function jj_trip_schema() {
         'hero' => [
             'title'  => __( 'Hero & Intro', 'jaiye-journeys' ),
             'fields' => [
+                'brand'           => [
+                    'type'    => 'select',
+                    'label'   => __( 'Brand', 'jaiye-journeys' ),
+                    'desc'    => __( 'BTL retreats use the literary treatment: named days rather than numbered, and the Between the Lines eyebrow.', 'jaiye-journeys' ),
+                    'default' => 'jj-edit',
+                    'options' => [
+                        'jj-edit' => __( 'Jaiye Journeys Edit', 'jaiye-journeys' ),
+                        'btl'     => __( 'Between the Lines retreat', 'jaiye-journeys' ),
+                    ],
+                ],
                 'destination'     => [
                     'type'  => 'text',
                     'label' => __( 'Destination', 'jaiye-journeys' ),
@@ -172,6 +182,11 @@ function jj_trip_schema() {
                         ],
                     ],
                 ],
+                'inclusions_image' => [
+                    'type'  => 'image',
+                    'label' => __( 'Inclusions side image', 'jaiye-journeys' ),
+                    'desc'  => __( 'Sits beside the accordions on desktop. Falls back to the first carousel image if empty.', 'jaiye-journeys' ),
+                ],
                 'not_included'    => [
                     'type'  => 'textarea',
                     'label' => __( "What's Not Included", 'jaiye-journeys' ),
@@ -205,6 +220,11 @@ function jj_trip_schema() {
                     'desc'      => __( 'One row per day. Days are numbered automatically in the tabs.', 'jaiye-journeys' ),
                     'row_label' => __( 'Day', 'jaiye-journeys' ),
                     'subfields' => [
+                        'day_name' => [
+                            'type'  => 'text',
+                            'label' => __( 'Day name (BTL only)', 'jaiye-journeys' ),
+                            'desc'  => __( 'Replaces "Day 1" on the tab — e.g. The Prologue. Leave blank on Edits to keep plain numbering.', 'jaiye-journeys' ),
+                        ],
                         'location' => [ 'type' => 'text', 'label' => __( 'Location', 'jaiye-journeys' ) ],
                         'headline' => [ 'type' => 'text', 'label' => __( 'Headline', 'jaiye-journeys' ) ],
                         'body'     => [ 'type' => 'textarea', 'label' => __( 'Body', 'jaiye-journeys' ), 'rows' => 5 ],

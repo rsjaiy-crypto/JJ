@@ -384,7 +384,87 @@
 		} );
 	}
 
-	/* ── 10. Mobile booking bar ──────────────────────────────────── */
+	/* ── 10. Trip notes: scroll-driven accordion ─────────────────── */
+
+	function initNoteStack() {
+		var stacks = document.querySelectorAll( '.js-note-stack' );
+
+		Array.prototype.forEach.call( stacks, function ( stack ) {
+			var items = Array.prototype.slice.call(
+				stack.querySelectorAll( '.trip-note-item' )
+			);
+			if ( items.length < 2 ) return;
+
+			function open( target ) {
+				items.forEach( function ( item ) {
+					var isTarget = item === target;
+					var trigger  = item.querySelector( '.trip-note-item__trigger' );
+
+					item.classList.toggle( 'is-open', isTarget );
+					if ( trigger ) {
+						trigger.setAttribute( 'aria-expanded', isTarget ? 'true' : 'false' );
+					}
+				} );
+			}
+
+			// Clicking always works, in every motion mode.
+			items.forEach( function ( item ) {
+				var trigger = item.querySelector( '.trip-note-item__trigger' );
+				if ( ! trigger ) return;
+
+				trigger.addEventListener( 'click', function () {
+					// Toggle if it's already the open one, so a note can be closed.
+					open( item.classList.contains( 'is-open' ) ? null : item );
+				} );
+			} );
+
+			// Under reduced motion the panels stay expanded: no .is-interactive,
+			// so the CSS never collapses them and scrolling changes nothing.
+			if ( prefersReduced() ) return;
+
+			stack.classList.add( 'is-interactive' );
+			open( items[ 0 ] );
+
+			var ticking = false;
+
+			function syncToScroll() {
+				var focusLine = window.innerHeight * 0.42;
+				var best      = null;
+				var bestDist  = Infinity;
+
+				items.forEach( function ( item ) {
+					var rect = item.getBoundingClientRect();
+					var dist = Math.abs( ( rect.top + rect.height / 2 ) - focusLine );
+
+					if ( dist < bestDist ) {
+						bestDist = dist;
+						best     = item;
+					}
+				} );
+
+				// Only act while the stack is actually on screen, otherwise
+				// scrolling elsewhere on the page keeps reshuffling it.
+				var stackRect = stack.getBoundingClientRect();
+				var onScreen  = stackRect.bottom > 0 && stackRect.top < window.innerHeight;
+
+				if ( best && onScreen ) {
+					open( best );
+				}
+
+				ticking = false;
+			}
+
+			window.addEventListener( 'scroll', function () {
+				if ( ticking ) return;
+				ticking = true;
+				window.requestAnimationFrame( syncToScroll );
+			}, { passive: true } );
+
+			syncToScroll();
+		} );
+	}
+
+	/* ── 11. Mobile booking bar ──────────────────────────────────── */
 
 	function initMobileBar() {
 		var bar = document.getElementById( 'trip-mobile-bar' );
@@ -419,6 +499,7 @@
 		initTabs( '.trip-booking__tab' );
 		initAccordions();
 		initCarousels();
+		initNoteStack();
 		initMobileBar();
 	}
 

@@ -34,9 +34,13 @@ while ( have_posts() ) :
     $included   = jj_trip_rows( 'included_groups', $trip_id );
 
     $price_from = jj_trip_field( 'price_from', $trip_id );
+
+    // Brand switch: 'btl' gets the literary treatment (named days, BTL eyebrow).
+    $brand    = jj_trip_field( 'brand', $trip_id, 'jj-edit' );
+    $is_btl   = ( 'btl' === $brand );
     ?>
 
-<main id="main-content" class="trip">
+<main id="main-content" class="trip trip--<?php echo esc_attr( $brand ); ?>">
 
   <!-- ============================================================
        1. HERO
@@ -58,6 +62,9 @@ while ( have_posts() ) :
     </div>
 
     <div class="container trip-hero__inner">
+      <?php if ( $is_btl ) : ?>
+        <p class="trip-hero__eyebrow"><?php esc_html_e( 'Between the Lines', 'jaiye-journeys' ); ?></p>
+      <?php endif; ?>
       <h1 class="trip-hero__title"><?php the_title(); ?></h1>
 
       <?php if ( $vibe_tags ) : ?>
@@ -327,8 +334,16 @@ while ( have_posts() ) :
   $route_copy   = jj_trip_field( 'route_copy', $trip_id );
   ?>
   <?php if ( $included || $not_included || $route_map || $route_copy ) : ?>
+    <?php
+    // Side image: explicit field first, else reuse the opening carousel shot.
+    $inclusions_image = absint( jj_trip_field( 'inclusions_image', $trip_id ) );
+    if ( ! $inclusions_image && ! empty( $carousel[0] ) ) {
+        $inclusions_image = absint( $carousel[0] );
+    }
+    ?>
     <section class="trip-inclusions" id="inclusions">
-      <div class="container container--narrow">
+      <div class="container trip-inclusions__grid">
+        <div class="trip-inclusions__main">
 
         <?php if ( $included ) : ?>
           <details class="trip-accordion js-accordion" open>
@@ -385,6 +400,19 @@ while ( have_posts() ) :
           </details>
         <?php endif; ?>
 
+        </div><!-- /.trip-inclusions__main -->
+
+        <?php if ( $inclusions_image ) : ?>
+          <div class="trip-inclusions__media js-reveal">
+            <?php
+            echo wp_get_attachment_image( $inclusions_image, 'large', false, [
+                'class'   => 'trip-inclusions__img',
+                'loading' => 'lazy',
+            ] );
+            ?>
+          </div>
+        <?php endif; ?>
+
       </div>
     </section>
   <?php endif; ?>
@@ -433,11 +461,17 @@ while ( have_posts() ) :
                     aria-selected="<?php echo 0 === $i ? 'true' : 'false'; ?>"
                     tabindex="<?php echo 0 === $i ? '0' : '-1'; ?>">
               <?php
-              printf(
-                  /* translators: %d: day number */
-                  esc_html__( 'Day %d', 'jaiye-journeys' ),
-                  (int) ( $i + 1 )
-              );
+              // BTL chapters use named days (The Prologue, The Crescendo…);
+              // Edits stay plainly numbered.
+              if ( ! empty( $day['day_name'] ) ) {
+                  echo esc_html( $day['day_name'] );
+              } else {
+                  printf(
+                      /* translators: %d: day number */
+                      esc_html__( 'Day %d', 'jaiye-journeys' ),
+                      (int) ( $i + 1 )
+                  );
+              }
               ?>
             </button>
           <?php endforeach; ?>
@@ -492,21 +526,69 @@ while ( have_posts() ) :
       <div class="container">
         <h2 class="trip-heading js-reveal"><?php esc_html_e( 'Trip Notes', 'jaiye-journeys' ); ?></h2>
 
-        <div class="trip-notes__grid">
-          <?php foreach ( $notes as $note ) : ?>
-            <?php $is_featured = ! empty( $note['featured'] ); ?>
-            <article class="trip-note<?php echo $is_featured ? ' trip-note--featured' : ''; ?> js-reveal">
-              <span class="trip-note__icon" aria-hidden="true">
-                <?php echo jj_trip_note_icon( isset( $note['icon'] ) ? $note['icon'] : 'route' ); // phpcs:ignore WordPress.Security.EscapeOutput -- returns a fixed inline SVG. ?>
+        <?php
+        // Split out the featured note so it can anchor the left column.
+        $featured_note = null;
+        $stack_notes   = [];
+
+        foreach ( $notes as $note ) {
+            if ( null === $featured_note && ! empty( $note['featured'] ) ) {
+                $featured_note = $note;
+            } else {
+                $stack_notes[] = $note;
+            }
+        }
+        ?>
+
+        <div class="trip-notes__layout<?php echo $featured_note ? '' : ' trip-notes__layout--no-feature'; ?>">
+
+          <?php if ( $featured_note ) : ?>
+            <article class="trip-note-feature js-reveal">
+              <span class="trip-note-feature__icon" aria-hidden="true">
+                <?php echo jj_trip_note_icon( isset( $featured_note['icon'] ) ? $featured_note['icon'] : 'plane' ); // phpcs:ignore WordPress.Security.EscapeOutput -- fixed inline SVG. ?>
               </span>
-              <?php if ( ! empty( $note['title'] ) ) : ?>
-                <h3 class="trip-note__title"><?php echo esc_html( $note['title'] ); ?></h3>
+              <?php if ( ! empty( $featured_note['title'] ) ) : ?>
+                <h3 class="trip-note-feature__title"><?php echo esc_html( $featured_note['title'] ); ?></h3>
               <?php endif; ?>
-              <?php if ( ! empty( $note['body'] ) ) : ?>
-                <div class="trip-note__body"><?php echo wp_kses_post( wpautop( $note['body'] ) ); ?></div>
+              <?php if ( ! empty( $featured_note['body'] ) ) : ?>
+                <div class="trip-note-feature__body"><?php echo wp_kses_post( wpautop( $featured_note['body'] ) ); ?></div>
               <?php endif; ?>
             </article>
-          <?php endforeach; ?>
+          <?php endif; ?>
+
+          <?php if ( $stack_notes ) : ?>
+            <!--
+              Scroll accordion. Defaults to every panel open; trip.js adds
+              .is-interactive to switch on collapsing, so this stays readable
+              with JS off or under prefers-reduced-motion.
+            -->
+            <div class="trip-note-stack js-note-stack">
+              <?php foreach ( $stack_notes as $index => $note ) : ?>
+                <article class="trip-note-item<?php echo 0 === $index ? ' is-open' : ''; ?>">
+                  <h3 class="trip-note-item__heading">
+                    <button type="button"
+                            class="trip-note-item__trigger"
+                            aria-expanded="<?php echo 0 === $index ? 'true' : 'false'; ?>"
+                            aria-controls="note-panel-<?php echo (int) $index; ?>">
+                      <span class="trip-note-item__icon" aria-hidden="true">
+                        <?php echo jj_trip_note_icon( isset( $note['icon'] ) ? $note['icon'] : 'route' ); // phpcs:ignore WordPress.Security.EscapeOutput -- fixed inline SVG. ?>
+                      </span>
+                      <span class="trip-note-item__title"><?php echo esc_html( isset( $note['title'] ) ? $note['title'] : '' ); ?></span>
+                      <span class="trip-note-item__chevron" aria-hidden="true"></span>
+                    </button>
+                  </h3>
+                  <div class="trip-note-item__panel" id="note-panel-<?php echo (int) $index; ?>">
+                    <div class="trip-note-item__panel-inner">
+                      <?php if ( ! empty( $note['body'] ) ) : ?>
+                        <?php echo wp_kses_post( wpautop( $note['body'] ) ); ?>
+                      <?php endif; ?>
+                    </div>
+                  </div>
+                </article>
+              <?php endforeach; ?>
+            </div>
+          <?php endif; ?>
+
         </div>
       </div>
     </section>
