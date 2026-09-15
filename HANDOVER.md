@@ -78,6 +78,32 @@ Config file: `.vscode/sftp.json` at the project root (one level above the theme,
 | `single.php` | Single blog post template. Used for any editorial posts (e.g. BTL editorial content). Minimal styling — not yet fully branded. |
 | `index.php` | WordPress required fallback. Not used on the live site — all real pages have specific templates. |
 | `HANDOVER.md` | This file. |
+| `single-trip.php` | **Single trip template.** 14-section trip page driven entirely by trip meta — hero, sticky sub-nav, collage, booking card, day-by-day tabs, trip notes, reviews, FAQ, enquiry. No hardcoded trip content. |
+| `archive-trip.php` | **Trip archive** at `/trips/`. Card grid of all published trips. |
+| `inc/trip-cpt.php` | Registers the `trip` post type behind `/trips/` plus the version-gated rewrite flush. |
+| `inc/trip-fields.php` | Field schema, getters and sanitisers — the single source of truth for a trip's data model. |
+| `inc/trip-meta.php` | Hand-rolled meta boxes, including repeatable rows. No ACF dependency. |
+| `inc/trip-seed.php` | Tools → Seed JJ Trips. Creates the Peru sample and the Bali/Cape Town stubs. Delete once real trips are written. |
+| `css/trip.css` | Trip template styles. Enqueued only on `is_singular('trip')`, not sitewide. |
+| `js/trip.js` | Trip template behaviour — reveals, sticky header, tabs, accordions, carousels, parallax. Respects `prefers-reduced-motion`. |
+| `assets/admin/trip-meta.{css,js}` | Admin-only UI for the repeatable meta boxes and media pickers. |
+
+### Trips: how they work
+
+Trips are a custom post type, **not** pages with templates — this is the one part of the
+site that is CMS-managed rather than hardcoded.
+
+- **URLs:** `/trips/<slug>/`. The homepage links to `/trips/jj-bali/` and
+  `/trips/jj-cape-town/`, so those two slugs must keep existing.
+- **Rewrite flush:** because the site deploys over SFTP rather than by activating the
+  theme, rewrite rules would never flush on their own and every trip URL would 404.
+  `JJ_TRIP_REWRITE_VERSION` in `inc/trip-cpt.php` handles this — **bump it whenever the
+  CPT slug or rewrite args change**, or the change won't take effect on live.
+- **Editing content:** Trips → edit a trip. Everything lives in meta boxes; the main
+  editor body is unused. The hero image is the post's Featured Image.
+- **No ACF:** repeaters are ACF PRO-only, and six of these field groups repeat, so the
+  meta boxes are hand-rolled instead. `inc/trip-fields.php` drives the UI, the
+  sanitising and the template together — add a field there and it appears everywhere.
 
 ---
 

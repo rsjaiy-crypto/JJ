@@ -1,0 +1,144 @@
+/* ------------------------------------------------------------------
+   Trip meta box admin UI
+   Deliberately plain — this is wp-admin, so it borrows core's styling
+   rather than importing the front-end design tokens.
+   ------------------------------------------------------------------ */
+
+.jj-trip-box__desc {
+  margin: 0 0 12px;
+  color: #50575e;
+  font-style: italic;
+}
+
+/* ── Fields ──────────────────────────────────────────────────────── */
+
+.jj-trip-field {
+  margin-bottom: 16px;
+}
+
+.jj-trip-field__label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.jj-trip-field__desc {
+  margin: 4px 0 0;
+}
+
+.jj-trip-field__checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+/* ── Meters ──────────────────────────────────────────────────────── */
+
+.jj-trip-meter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.jj-trip-meter__range {
+  flex: 1;
+  max-width: 420px;
+}
+
+.jj-trip-meter__out {
+  min-width: 3ch;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: #2271b1;
+}
+
+/* ── Media ───────────────────────────────────────────────────────── */
+
+.jj-trip-media__preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.jj-trip-media__preview img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #dcdcde;
+}
+
+.jj-trip-media__preview:empty {
+  margin-bottom: 0;
+}
+
+/* ── Repeaters ───────────────────────────────────────────────────── */
+
+.jj-trip-repeater {
+  margin-bottom: 24px;
+  padding-top: 8px;
+  border-top: 1px solid #dcdcde;
+}
+
+.jj-trip-repeater__title {
+  margin: 8px 0 4px;
+  font-size: 14px;
+}
+
+.jj-trip-repeater__rows {
+  margin-bottom: 12px;
+}
+
+.jj-trip-row {
+  margin-bottom: 12px;
+  border: 1px solid #dcdcde;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.jj-trip-row__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f6f7f7;
+  border-bottom: 1px solid #dcdcde;
+  border-radius: 4px 4px 0 0;
+}
+
+.jj-trip-row__handle {
+  color: #8c8f94;
+}
+
+.jj-trip-row__label {
+  flex: 1;
+}
+
+.jj-trip-row__remove {
+  color: #b32d2e;
+  cursor: pointer;
+}
+
+.jj-trip-row__remove:hover {
+  color: #8a2424;
+}
+
+.jj-trip-row__body {
+  padding: 12px;
+}
+
+/* Two-up layout for short fields inside a row, on wide screens */
+@media (min-width: 1200px) {
+  .jj-trip-row__body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 16px;
+  }
+
+  .jj-trip-row__body .jj-trip-field--textarea,
+  .jj-trip-row__body .jj-trip-field--gallery {
+    grid-column: 1 / -1;
+  }
+}
