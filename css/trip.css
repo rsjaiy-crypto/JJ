@@ -543,6 +543,20 @@
   font-weight: var(--fw-semibold);
 }
 
+/* Shown in place of a tab bar when a BTL trip has exactly one Chapter */
+.trip-booking__chapter-label {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  font-style: italic;
+  color: var(--color-salmon);
+}
+
+.trip-booking__chapter-cta {
+  width: 100%;
+  margin-top: var(--space-4);
+}
+
 .trip-departure {
   display: flex;
   align-items: center;

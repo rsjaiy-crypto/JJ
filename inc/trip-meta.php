@@ -109,6 +109,20 @@ function jj_trip_render_field( $name, $field, $value, $id = '' ) {
 
         case 'select':
             printf( '<select id="%s" name="%s" class="widefat">', esc_attr( $id ), esc_attr( $name ) );
+
+            // A value already stored that no longer matches any option — e.g.
+            // the schema's choices changed since this was saved — gets its own
+            // option so it stays visibly selected instead of silently falling
+            // back to whatever option happens to be first. Otherwise the next
+            // save (even an unrelated field) would quietly overwrite it.
+            if ( '' !== (string) $value && ! isset( $field['options'][ $value ] ) ) {
+                printf(
+                    '<option value="%s" selected>%s</option>',
+                    esc_attr( $value ),
+                    esc_html( sprintf( /* translators: %s: the stored value */ __( '%s (previously saved — pick a current option to update)', 'jaiye-journeys' ), $value ) )
+                );
+            }
+
             foreach ( $field['options'] as $opt_value => $opt_label ) {
                 printf(
                     '<option value="%s" %s>%s</option>',

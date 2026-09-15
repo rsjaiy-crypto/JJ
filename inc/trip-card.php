@@ -20,6 +20,7 @@ defined( 'ABSPATH' ) || exit;
 function jj_trip_card( $post_id ) {
 
     $brand       = jj_trip_field( 'brand', $post_id, 'jj-edit' );
+    $title       = jj_trip_volume_title( $post_id );
     $region      = jj_trip_field( 'region', $post_id );
     $pace_band   = jj_trip_pace_band( jj_trip_field( 'meter_pace', $post_id, 50 ) );
     $coming_soon = jj_trip_is_coming_soon( $post_id );
@@ -38,7 +39,7 @@ function jj_trip_card( $post_id ) {
       data-status="<?php echo esc_attr( $coming_soon ? 'coming-soon' : 'open' ); ?>"
       data-price="<?php echo esc_attr( $price ? (int) $price : 0 ); ?>"
       data-year="<?php echo esc_attr( $year ); ?>"
-      data-title="<?php echo esc_attr( get_the_title( $post_id ) ); ?>"
+      data-title="<?php echo esc_attr( $title ); ?>"
     >
       <a class="jcard__link" href="<?php echo esc_url( get_permalink( $post_id ) ); ?>">
 
@@ -66,7 +67,7 @@ function jj_trip_card( $post_id ) {
         </div>
 
         <div class="jcard__body">
-          <h3 class="jcard__title"><?php echo esc_html( get_the_title( $post_id ) ); ?></h3>
+          <h3 class="jcard__title"><?php echo esc_html( $title ); ?></h3>
 
           <?php if ( $destination ) : ?>
             <p class="jcard__destination"><?php echo esc_html( $destination ); ?></p>

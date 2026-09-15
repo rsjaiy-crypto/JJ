@@ -19,6 +19,33 @@ define( 'JJ_TRIP_META_PREFIX', '_jj_trip_' );
 
 
 /**
+ * Generate the Duration dropdown options: 2 Nights, 3 Days up to 29 Nights, 30 Days.
+ *
+ * Generated rather than hand-typed so the range can't drift out of step with
+ * itself (nights is always days − 1), and so the stored value is already the
+ * exact string the trip page displays — no separate formatting step.
+ *
+ * @return array
+ */
+function jj_trip_duration_options() {
+    $options = [ '' => __( '— Select a length —', 'jaiye-journeys' ) ];
+
+    for ( $days = 3; $days <= 30; $days++ ) {
+        $nights = $days - 1;
+        $label  = sprintf(
+            /* translators: 1: number of nights, 2: number of days */
+            __( '%1$d Nights, %2$d Days', 'jaiye-journeys' ),
+            $nights,
+            $days
+        );
+        $options[ $label ] = $label;
+    }
+
+    return $options;
+}
+
+
+/**
  * The full field schema, grouped into meta boxes.
  *
  * Field types: text, textarea, number, url, select, meter, image, gallery, repeater.
@@ -104,9 +131,11 @@ function jj_trip_schema() {
             'title'  => __( 'Overview & Stats', 'jaiye-journeys' ),
             'fields' => [
                 'duration'     => [
-                    'type'  => 'text',
-                    'label' => __( 'Duration', 'jaiye-journeys' ),
-                    'desc'  => __( 'e.g. 9 days', 'jaiye-journeys' ),
+                    'type'    => 'select',
+                    'label'   => __( 'Duration', 'jaiye-journeys' ),
+                    'desc'    => __( 'The exact stored value is what clients see — no separate formatting step.', 'jaiye-journeys' ),
+                    'default' => '',
+                    'options' => jj_trip_duration_options(),
                 ],
                 'price_from'   => [
                     'type'  => 'number',
@@ -466,6 +495,43 @@ function jj_trip_lines( $value ) {
     $lines = preg_split( '/\r\n|\r|\n/', (string) $value );
     $lines = array_map( 'trim', $lines );
     return array_values( array_filter( $lines, 'strlen' ) );
+}
+
+
+/**
+ * The client-facing trip title.
+ *
+ * BTL retreats read as "Volume: Destination" everywhere a client sees a trip
+ * name — the hero, the journeys grid card, the browser tab. Individual
+ * departures are labelled Chapter 1, 2, 3… (see the booking card in
+ * single-trip.php), so the destination itself is the Volume and no longer
+ * needs "Chapter One" hand-typed into the post title.
+ *
+ * The actual WordPress post title is untouched — this only governs display,
+ * so admin screens still show whatever internal title was typed.
+ *
+ * @param int|null $post_id Post ID. Defaults to current post.
+ * @return string
+ */
+function jj_trip_volume_title( $post_id = null ) {
+    $post_id = $post_id ? $post_id : get_the_ID();
+    $brand   = jj_trip_field( 'brand', $post_id, 'jj-edit' );
+
+    if ( 'btl' !== $brand ) {
+        return get_the_title( $post_id );
+    }
+
+    $destination = jj_trip_field( 'destination', $post_id );
+
+    if ( ! $destination ) {
+        return get_the_title( $post_id ); // Destination not filled in yet — fall back rather than show "Volume:" with nothing after it.
+    }
+
+    return sprintf(
+        /* translators: %s: destination name */
+        __( 'Volume: %s', 'jaiye-journeys' ),
+        $destination
+    );
 }
 
 

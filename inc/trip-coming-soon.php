@@ -69,7 +69,7 @@ if ( ! empty( $cs_departures[0] ) ) {
         ?>
       </p>
 
-      <h1 class="trip-hero__title"><?php the_title(); ?></h1>
+      <h1 class="trip-hero__title"><?php echo esc_html( jj_trip_volume_title( $trip_id ) ); ?></h1>
 
       <?php if ( $cs_tags ) : ?>
         <ul class="trip-hero__tags" role="list">
