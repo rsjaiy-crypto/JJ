@@ -138,6 +138,32 @@ add_action( 'template_redirect', 'jj_trip_archive_redirect' );
 
 
 /**
+ * Match the browser tab / search-result title to the on-page Volume title.
+ *
+ * Only the singular front-end string is touched — the underlying post_title
+ * used by admin screens is unaffected.
+ *
+ * @param array $parts Document title parts.
+ * @return array
+ */
+function jj_trip_document_title_parts( $parts ) {
+    if ( ! is_singular( 'trip' ) ) {
+        return $parts;
+    }
+
+    $post_id = get_queried_object_id();
+    if ( 'btl' !== jj_trip_field( 'brand', $post_id, 'jj-edit' ) ) {
+        return $parts;
+    }
+
+    $parts['title'] = jj_trip_volume_title( $post_id );
+
+    return $parts;
+}
+add_filter( 'document_title_parts', 'jj_trip_document_title_parts' );
+
+
+/**
  * Give trip singles a body class so the header can go transparent over the hero.
  */
 function jj_trip_body_class( $classes ) {

@@ -72,7 +72,7 @@ while ( have_posts() ) :
       <?php if ( $is_btl ) : ?>
         <p class="trip-hero__eyebrow"><?php esc_html_e( 'Between the Lines', 'jaiye-journeys' ); ?></p>
       <?php endif; ?>
-      <h1 class="trip-hero__title"><?php the_title(); ?></h1>
+      <h1 class="trip-hero__title"><?php echo esc_html( jj_trip_volume_title( $trip_id ) ); ?></h1>
 
       <?php if ( $vibe_tags ) : ?>
         <ul class="trip-hero__tags" role="list">
@@ -238,9 +238,75 @@ while ( have_posts() ) :
         <div class="trip-booking__card">
           <h3 class="trip-booking__title"><?php esc_html_e( 'Trip Dates', 'jaiye-journeys' ); ?></h3>
 
-          <?php if ( $departures ) : ?>
+          <?php if ( $departures && $is_btl ) : ?>
+            <!--
+              BTL: each departure is its own Chapter — Marrakech is the
+              Volume, every cohort that travels there is the next chapter of
+              it. Auto-numbered by row order, not grouped by year, so adding
+              a departure in wp-admin is all it takes for "Chapter 4" to exist.
+            -->
+            <?php if ( count( $departures ) > 1 ) : ?>
+              <div class="trip-booking__tabs" role="tablist" aria-label="<?php esc_attr_e( 'Chapter', 'jaiye-journeys' ); ?>">
+                <?php foreach ( $departures as $i => $departure ) : ?>
+                  <button type="button"
+                          class="trip-booking__tab<?php echo 0 === $i ? ' is-active' : ''; ?>"
+                          role="tab"
+                          id="chapter-tab-<?php echo (int) $i; ?>"
+                          aria-controls="chapter-panel-<?php echo (int) $i; ?>"
+                          aria-selected="<?php echo 0 === $i ? 'true' : 'false'; ?>">
+                    <?php
+                    printf(
+                        /* translators: %d: chapter number */
+                        esc_html__( 'Chapter %d', 'jaiye-journeys' ),
+                        (int) ( $i + 1 )
+                    );
+                    ?>
+                  </button>
+                <?php endforeach; ?>
+              </div>
+            <?php endif; ?>
+
+            <?php foreach ( $departures as $i => $departure ) : ?>
+              <div class="trip-booking__panel<?php echo 0 === $i ? ' is-active' : ''; ?>"
+                   id="chapter-panel-<?php echo (int) $i; ?>"
+                   role="tabpanel"
+                   aria-labelledby="chapter-tab-<?php echo (int) $i; ?>"
+                   <?php echo 0 === $i ? '' : 'hidden'; ?>>
+                <?php if ( 1 === count( $departures ) ) : ?>
+                  <p class="trip-booking__chapter-label"><?php esc_html_e( 'Chapter 1', 'jaiye-journeys' ); ?></p>
+                <?php endif; ?>
+                <ul class="trip-departures" role="list">
+                  <li class="trip-departure">
+                    <span class="trip-departure__dates">
+                      <?php
+                      $dep_text = trim( ( isset( $departure['dates'] ) ? $departure['dates'] : '' ) . ' ' . ( isset( $departure['year'] ) ? $departure['year'] : '' ) );
+                      echo esc_html( $dep_text );
+                      ?>
+                    </span>
+                    <?php if ( ! empty( $departure['availability'] ) ) : ?>
+                      <span class="trip-departure__status trip-departure__status--<?php echo esc_attr( ! empty( $departure['status'] ) ? $departure['status'] : 'available' ); ?>">
+                        <?php echo esc_html( $departure['availability'] ); ?>
+                      </span>
+                    <?php endif; ?>
+                  </li>
+                </ul>
+                <?php if ( ! empty( $departure['book_url'] ) ) : ?>
+                  <a href="<?php echo esc_url( $departure['book_url'] ); ?>" class="btn btn--accent trip-booking__chapter-cta" target="_blank" rel="noopener">
+                    <?php
+                    printf(
+                        /* translators: %d: chapter number */
+                        esc_html__( 'Book Chapter %d', 'jaiye-journeys' ),
+                        (int) ( $i + 1 )
+                    );
+                    ?>
+                  </a>
+                <?php endif; ?>
+              </div>
+            <?php endforeach; ?>
+
+          <?php elseif ( $departures ) : ?>
             <?php
-            // Group departures into year tabs, preserving entry order.
+            // JJ Edits keep the plain year-tab grouping.
             $by_year = [];
             foreach ( $departures as $departure ) {
                 $year = $departure['year'] ? $departure['year'] : __( 'Dates', 'jaiye-journeys' );
