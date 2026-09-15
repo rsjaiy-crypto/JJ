@@ -48,10 +48,37 @@ function jj_trip_schema() {
                         'btl'     => __( 'Between the Lines retreat', 'jaiye-journeys' ),
                     ],
                 ],
+                'status'          => [
+                    'type'    => 'select',
+                    'label'   => __( 'Status', 'jaiye-journeys' ),
+                    'desc'    => __( 'Coming soon renders a short waitlist page instead of the full itinerary, and shows "Notify Me" everywhere in place of "Book Now".', 'jaiye-journeys' ),
+                    'default' => 'open',
+                    'options' => [
+                        'open'        => __( 'Open — full trip page', 'jaiye-journeys' ),
+                        'coming-soon' => __( 'Coming soon — waitlist page', 'jaiye-journeys' ),
+                    ],
+                ],
                 'destination'     => [
                     'type'  => 'text',
                     'label' => __( 'Destination', 'jaiye-journeys' ),
                     'desc'  => __( 'Used in the "Welcome to …" heading. e.g. Peru', 'jaiye-journeys' ),
+                ],
+                'region'          => [
+                    'type'    => 'select',
+                    'label'   => __( 'Region', 'jaiye-journeys' ),
+                    'desc'    => __( 'Drives the destination filter on the Journeys page.', 'jaiye-journeys' ),
+                    'default' => '',
+                    'options' => [
+                        ''               => __( '— Select a region —', 'jaiye-journeys' ),
+                        'africa'         => __( 'Africa', 'jaiye-journeys' ),
+                        'asia'           => __( 'Asia', 'jaiye-journeys' ),
+                        'caribbean'      => __( 'Caribbean', 'jaiye-journeys' ),
+                        'europe'         => __( 'Europe', 'jaiye-journeys' ),
+                        'middle-east'    => __( 'Middle East', 'jaiye-journeys' ),
+                        'north-america'  => __( 'North America', 'jaiye-journeys' ),
+                        'oceania'        => __( 'Oceania', 'jaiye-journeys' ),
+                        'south-america'  => __( 'South America', 'jaiye-journeys' ),
+                    ],
                 ],
                 'vibe_tags'       => [
                     'type'  => 'text',
@@ -439,6 +466,102 @@ function jj_trip_lines( $value ) {
     $lines = preg_split( '/\r\n|\r|\n/', (string) $value );
     $lines = array_map( 'trim', $lines );
     return array_values( array_filter( $lines, 'strlen' ) );
+}
+
+
+/**
+ * Human label for a trip's brand.
+ *
+ * @param string $brand Brand key.
+ * @return string
+ */
+function jj_trip_brand_label( $brand ) {
+    return ( 'btl' === $brand )
+        ? __( 'Reading Retreat', 'jaiye-journeys' )
+        : __( 'Group Trip', 'jaiye-journeys' );
+}
+
+
+/**
+ * Human label for a region key.
+ *
+ * @param string $region Region key.
+ * @return string Empty string when unset or unknown.
+ */
+function jj_trip_region_label( $region ) {
+    $fields  = jj_trip_all_fields();
+    $options = isset( $fields['region']['options'] ) ? $fields['region']['options'] : [];
+
+    return ( $region && isset( $options[ $region ] ) ) ? $options[ $region ] : '';
+}
+
+
+/**
+ * Bucket a 0–100 pace meter into a filterable band.
+ *
+ * Derived from the existing pace meter rather than stored separately, so the
+ * filter can never disagree with what the trip page shows.
+ *
+ * @param int $pace Pace meter value.
+ * @return string One of 'slow', 'balanced', 'fast'.
+ */
+function jj_trip_pace_band( $pace ) {
+    $pace = (int) $pace;
+
+    if ( $pace <= 40 ) {
+        return 'slow';
+    }
+    if ( $pace >= 70 ) {
+        return 'fast';
+    }
+    return 'balanced';
+}
+
+
+/**
+ * Human label for a pace band.
+ *
+ * @param string $band Band key.
+ * @return string
+ */
+function jj_trip_pace_label( $band ) {
+    $labels = [
+        'slow'     => __( 'Slow', 'jaiye-journeys' ),
+        'balanced' => __( 'Balanced', 'jaiye-journeys' ),
+        'fast'     => __( 'Fast paced', 'jaiye-journeys' ),
+    ];
+
+    return isset( $labels[ $band ] ) ? $labels[ $band ] : $labels['balanced'];
+}
+
+
+/**
+ * Earliest departure year for a trip, used for sorting.
+ *
+ * @param int|null $post_id Post ID.
+ * @return int Year, or 0 when there are no dated departures.
+ */
+function jj_trip_earliest_year( $post_id = null ) {
+    $years = [];
+
+    foreach ( jj_trip_rows( 'departures', $post_id ) as $departure ) {
+        if ( ! empty( $departure['year'] ) && is_numeric( $departure['year'] ) ) {
+            $years[] = (int) $departure['year'];
+        }
+    }
+
+    return $years ? min( $years ) : 0;
+}
+
+
+/**
+ * Is this trip a not-yet-bookable "coming soon" entry?
+ *
+ * @param int|null $post_id Post ID.
+ * @return bool
+ */
+function jj_trip_is_coming_soon( $post_id = null ) {
+    return 'coming-soon' === jj_trip_field( 'status', $post_id, 'open' );
 }
 
 

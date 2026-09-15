@@ -250,6 +250,7 @@ function jj_trip_seed_definitions() {
             'hero'  => 'hero-peru.jpg',
             'meta'  => [
                 'destination'     => 'Peru',
+                'region'          => 'south-america',
                 'vibe_tags'       => 'Small group, High altitude, Bucket list',
                 'intro_statement' => 'Nine days across the Sacred Valley and Machu Picchu, run the way we would actually do it — no queue, no filler, no group-trip drama.',
                 'collage_images'  => jj_trip_seed_gallery( [
@@ -511,6 +512,7 @@ function jj_trip_seed_definitions() {
             'meta'  => [
                 'brand'           => 'btl',
                 'destination'     => 'Marrakech',
+                'region'          => 'africa',
                 'vibe_tags'       => 'Riad buyout, Literary, Slow',
                 'intro_statement' => 'Six days in a private riad near Bab Aylane, built around one loud city and a door that shuts it out completely.',
                 'collage_images'  => jj_trip_seed_gallery( [
@@ -720,12 +722,118 @@ function jj_trip_seed_definitions() {
             ],
         ],
 
+        /* ── Coming soon: future BTL chapters ─────────────────────────
+           Previously hardcoded in the "On the Horizon" strip on the Our
+           Journeys page. They're now real trips so each has its own
+           linkable, shareable waitlist page and its own demand signal
+           ahead of green-lighting the villa contract.
+           ------------------------------------------------------------ */
+        'btl-sintra' => [
+            'title' => 'Chapter Two: Sintra',
+            'hero'  => 'travel-tuscany.jpg',
+            'meta'  => [
+                'brand'           => 'btl',
+                'status'          => 'coming-soon',
+                'destination'     => 'Sintra, Portugal',
+                'region'          => 'europe',
+                'vibe_tags'       => 'Palaces, Misty hills, Slow',
+                'intro_statement' => 'A chapter written in the fog: palaces, pine forest, and the kind of quiet that makes a long book feel short.',
+                'welcome_copy'    => "Placeholder premise copy — replace before this page goes out widely.\n\nSintra sits under cloud for much of the year, which is precisely the point. Gardens, palaces, and a cool grey light that makes staying in with a book feel like the correct decision rather than a wasted day.",
+                'duration'        => '5 days',
+                'meter_pace'      => '25',
+                'meter_relaxation'=> '90',
+                'meter_culture'   => '80',
+                'booking_url'     => 'https://tally.so/r/Gxq2JL',
+                'collage_images'  => jj_trip_seed_gallery( [
+                    'travel-tuscany.jpg',
+                    'travel-terrace.jpg',
+                    'btl-reading-pool.jpg',
+                ] ),
+                'departures'      => [
+                    [
+                        'year'         => '2027',
+                        'dates'        => 'September',
+                        'availability' => 'Waitlist open',
+                        'status'       => 'limited',
+                        'book_url'     => '',
+                    ],
+                ],
+            ],
+        ],
+
+        'btl-oaxaca' => [
+            'title' => 'Chapter Three: Oaxaca',
+            'hero'  => 'travel-sea.jpg',
+            'meta'  => [
+                'brand'           => 'btl',
+                'status'          => 'coming-soon',
+                'destination'     => 'Oaxaca, Mexico',
+                'region'          => 'north-america',
+                'vibe_tags'       => 'Colour, Food, Craft',
+                'intro_statement' => 'Warmth, colour and a courtyard to read in, somewhere between the markets and the mezcal.',
+                'welcome_copy'    => "Placeholder premise copy — replace before this page goes out widely.\n\nOaxaca is the loudest, most colourful chapter planned so far, built around a courtyard house and a city that takes its food and its craft as seriously as anywhere on earth.",
+                'duration'        => '6 days',
+                'meter_pace'      => '40',
+                'meter_food'      => '95',
+                'meter_culture'   => '90',
+                'booking_url'     => 'https://tally.so/r/Gxq2JL',
+                'collage_images'  => jj_trip_seed_gallery( [
+                    'travel-sea.jpg',
+                    'travel-tea.jpg',
+                    'travel-lobby.jpg',
+                ] ),
+                'departures'      => [
+                    [
+                        'year'         => '2028',
+                        'dates'        => 'April',
+                        'availability' => 'Waitlist open',
+                        'status'       => 'limited',
+                        'book_url'     => '',
+                    ],
+                ],
+            ],
+        ],
+
+        'btl-tuscany' => [
+            'title' => 'Chapter Four: Tuscany',
+            'hero'  => 'travel-tuscany.jpg',
+            'meta'  => [
+                'brand'           => 'btl',
+                'status'          => 'coming-soon',
+                'destination'     => 'Tuscany, Italy',
+                'region'          => 'europe',
+                'vibe_tags'       => 'Villa, Long lunches, Slow',
+                'intro_statement' => 'A villa, a long table, and six days where the only fixed appointment is lunch.',
+                'welcome_copy'    => "Placeholder premise copy — replace before this page goes out widely.\n\nThe most indulgent chapter on the map: a private villa, a cook, a pool, and absolutely nowhere to be.",
+                'duration'        => '6 days',
+                'meter_pace'      => '20',
+                'meter_relaxation'=> '95',
+                'meter_food'      => '90',
+                'booking_url'     => 'https://tally.so/r/Gxq2JL',
+                'collage_images'  => jj_trip_seed_gallery( [
+                    'travel-tuscany.jpg',
+                    'travel-terrace.jpg',
+                    'travel-riad-pool.jpg',
+                ] ),
+                'departures'      => [
+                    [
+                        'year'         => '2028',
+                        'dates'        => 'September',
+                        'availability' => 'Waitlist open',
+                        'status'       => 'limited',
+                        'book_url'     => '',
+                    ],
+                ],
+            ],
+        ],
+
         /* ── Bali stub: fixes the homepage 404 ────────────────────── */
         'jj-bali' => [
             'title' => 'The Islands Edit',
             'hero'  => 'trip-bali.jpg',
             'meta'  => [
                 'destination'     => 'Bali, Gilis & Komodo, Indonesia',
+                'region'          => 'asia',
                 'vibe_tags'       => 'Islands, Small group, Slow travel',
                 'intro_statement' => 'Placeholder intro — replace this with the real Islands Edit copy before publishing.',
                 'duration'        => 'TBC',
@@ -743,6 +851,7 @@ function jj_trip_seed_definitions() {
             'hero'  => 'trip-cape-town.jpg',
             'meta'  => [
                 'destination'     => 'Cape Town, South Africa',
+                'region'          => 'africa',
                 'vibe_tags'       => 'City, Coast, Food',
                 'intro_statement' => 'Placeholder intro — replace this with the real Cape Town Edit copy before publishing.',
                 'duration'        => 'TBC',
