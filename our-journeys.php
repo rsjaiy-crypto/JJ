@@ -1,441 +1,188 @@
 <?php
 /*
  * Template Name: Our Journeys
+ *
+ * The single journeys hub. Previously this page hardcoded every trip card by
+ * hand in two separate sections (group trips, then BTL retreats); it now pulls
+ * live from the `trip` post type and filters client-side, so adding a trip in
+ * wp-admin is all that's needed for it to appear here.
+ *
+ * /trips/ redirects here — see jj_trip_archive_redirect() in inc/trip-cpt.php.
+ *
+ * @package jaiye-journeys
  */
 
+defined( 'ABSPATH' ) || exit;
+
 get_header();
+
+require_once get_template_directory() . '/inc/trip-card.php';
+
+$trips = get_posts( [
+    'post_type'      => 'trip',
+    'post_status'    => 'publish',
+    'posts_per_page' => -1,
+    'orderby'        => 'menu_order title',
+    'order'          => 'ASC',
+] );
+
+// Only offer a filter option for a region that actually has trips behind it.
+$regions_present = [];
+foreach ( $trips as $trip ) {
+    $region = jj_trip_field( 'region', $trip->ID );
+    if ( $region && ! isset( $regions_present[ $region ] ) ) {
+        $regions_present[ $region ] = jj_trip_region_label( $region );
+    }
+}
+asort( $regions_present );
+
+// Same for pace: don't offer a band that would return an empty grid.
+$paces_present = [];
+foreach ( $trips as $trip ) {
+    $band = jj_trip_pace_band( jj_trip_field( 'meter_pace', $trip->ID, 50 ) );
+    $paces_present[ $band ] = jj_trip_pace_label( $band );
+}
+$pace_order    = [ 'slow' => 0, 'balanced' => 1, 'fast' => 2 ];
+uksort( $paces_present, function ( $a, $b ) use ( $pace_order ) {
+    return $pace_order[ $a ] <=> $pace_order[ $b ];
+} );
+
+$counts = [
+    'all'     => count( $trips ),
+    'jj-edit' => 0,
+    'btl'     => 0,
+];
+foreach ( $trips as $trip ) {
+    $brand = jj_trip_field( 'brand', $trip->ID, 'jj-edit' );
+    if ( isset( $counts[ $brand ] ) ) {
+        $counts[ $brand ]++;
+    }
+}
 ?>
 
 <main id="main-content" class="site-main">
 
   <!-- ============================================================
        1. HERO
-       50vh, forest green background, cream text.
        ============================================================ -->
-  <section
-    class="oj-hero"
-    aria-label="<?php esc_attr_e( 'Our Journeys', 'jaiye-journeys' ); ?>"
-  >
+  <section class="oj-hero" aria-label="<?php esc_attr_e( 'Our Journeys', 'jaiye-journeys' ); ?>">
     <div class="container">
       <div class="oj-hero__content">
-        <h1 class="oj-hero__heading">
-          <?php esc_html_e( 'Our Journeys', 'jaiye-journeys' ); ?>
-        </h1>
+        <h1 class="oj-hero__heading"><?php esc_html_e( 'Our Journeys', 'jaiye-journeys' ); ?></h1>
         <p class="oj-hero__sub">
-          <?php esc_html_e( 'Curated group experiences and luxury literary retreats. Your next chapter starts here.', 'jaiye-journeys' ); ?>
+          <?php esc_html_e( 'Curated group trips and literary reading retreats. Filter by where you want to go, what kind of journey it is, and how fast you want it to move.', 'jaiye-journeys' ); ?>
         </p>
       </div>
     </div>
-  </section><!-- /.oj-hero -->
+  </section>
 
 
   <!-- ============================================================
-       2. GROUP TRIPS
-       Cream bg. Card grid: 1 col → 2 col → 3 col.
+       2. FILTERABLE JOURNEYS GRID
        ============================================================ -->
-  <section
-    class="oj-section oj-section--group"
-    id="group-trips"
-    aria-label="<?php esc_attr_e( 'Group trips', 'jaiye-journeys' ); ?>"
-  >
+  <section class="jfilter" id="journeys" aria-label="<?php esc_attr_e( 'All journeys', 'jaiye-journeys' ); ?>">
     <div class="container">
 
-      <header class="section-header section-header--center">
-        <p class="overline">
-          <?php esc_html_e( 'Group Trips', 'jaiye-journeys' ); ?>
+      <?php if ( ! $trips ) : ?>
+
+        <p class="jfilter__empty-state">
+          <?php esc_html_e( 'No journeys are published yet.', 'jaiye-journeys' ); ?>
         </p>
-        <h2 class="section-header__title">
-          <?php esc_html_e( 'Group Trips', 'jaiye-journeys' ); ?>
-        </h2>
-        <p class="section-header__sub">
-          <?php esc_html_e( 'Open-access curated trips for the Jaiye Journeys community.', 'jaiye-journeys' ); ?>
+
+      <?php else : ?>
+
+        <!--
+          Filtering is progressive enhancement: with JS off every trip stays
+          visible and the controls simply do nothing, so the page is never
+          empty or unusable.
+        -->
+        <div class="jfilter__controls js-jfilter">
+
+          <div class="jfilter__chips" role="group" aria-label="<?php esc_attr_e( 'Filter by journey type', 'jaiye-journeys' ); ?>">
+            <button type="button" class="jchip is-active" data-filter="brand" data-value="all" aria-pressed="true">
+              <?php esc_html_e( 'All Journeys', 'jaiye-journeys' ); ?>
+              <span class="jchip__count"><?php echo esc_html( $counts['all'] ); ?></span>
+            </button>
+            <button type="button" class="jchip" data-filter="brand" data-value="jj-edit" aria-pressed="false">
+              <?php esc_html_e( 'Group Trips', 'jaiye-journeys' ); ?>
+              <span class="jchip__count"><?php echo esc_html( $counts['jj-edit'] ); ?></span>
+            </button>
+            <button type="button" class="jchip" data-filter="brand" data-value="btl" aria-pressed="false">
+              <?php esc_html_e( 'Reading Retreats', 'jaiye-journeys' ); ?>
+              <span class="jchip__count"><?php echo esc_html( $counts['btl'] ); ?></span>
+            </button>
+          </div>
+
+          <div class="jfilter__row">
+
+            <?php if ( count( $regions_present ) > 1 ) : ?>
+              <label class="jfilter__field">
+                <span class="jfilter__label"><?php esc_html_e( 'Destination', 'jaiye-journeys' ); ?></span>
+                <select class="jfilter__select" data-filter="region">
+                  <option value="all"><?php esc_html_e( 'Anywhere', 'jaiye-journeys' ); ?></option>
+                  <?php foreach ( $regions_present as $key => $label ) : ?>
+                    <option value="<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></option>
+                  <?php endforeach; ?>
+                </select>
+              </label>
+            <?php endif; ?>
+
+            <?php if ( count( $paces_present ) > 1 ) : ?>
+              <label class="jfilter__field">
+                <span class="jfilter__label"><?php esc_html_e( 'Pace', 'jaiye-journeys' ); ?></span>
+                <select class="jfilter__select" data-filter="pace">
+                  <option value="all"><?php esc_html_e( 'Any pace', 'jaiye-journeys' ); ?></option>
+                  <?php foreach ( $paces_present as $band => $label ) : ?>
+                    <option value="<?php echo esc_attr( $band ); ?>"><?php echo esc_html( $label ); ?></option>
+                  <?php endforeach; ?>
+                </select>
+              </label>
+            <?php endif; ?>
+
+            <label class="jfilter__field">
+              <span class="jfilter__label"><?php esc_html_e( 'Sort', 'jaiye-journeys' ); ?></span>
+              <select class="jfilter__select" data-sort>
+                <option value="soonest"><?php esc_html_e( 'Soonest first', 'jaiye-journeys' ); ?></option>
+                <option value="price-asc"><?php esc_html_e( 'Price: low to high', 'jaiye-journeys' ); ?></option>
+                <option value="price-desc"><?php esc_html_e( 'Price: high to low', 'jaiye-journeys' ); ?></option>
+                <option value="az"><?php esc_html_e( 'A–Z', 'jaiye-journeys' ); ?></option>
+              </select>
+            </label>
+
+            <button type="button" class="jfilter__reset js-jfilter-reset" hidden>
+              <?php esc_html_e( 'Clear filters', 'jaiye-journeys' ); ?>
+            </button>
+
+          </div>
+
+          <p class="jfilter__status" role="status" aria-live="polite"></p>
+
+        </div><!-- /.jfilter__controls -->
+
+        <div class="jfilter__grid js-jfilter-grid">
+          <?php foreach ( $trips as $trip ) : ?>
+            <?php jj_trip_card( $trip->ID ); ?>
+          <?php endforeach; ?>
+        </div>
+
+        <p class="jfilter__empty js-jfilter-empty" hidden>
+          <?php esc_html_e( 'No journeys match those filters yet. Try widening your search, or get in touch and we will build something for you.', 'jaiye-journeys' ); ?>
         </p>
-      </header>
 
-      <ul class="oj-grid" role="list">
+      <?php endif; ?>
 
-        <li>
-          <article class="trip-card">
-            <div class="trip-card__media">
-              <img
-                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-bali.jpg' ); ?>"
-                alt="<?php esc_attr_e( 'Turquoise waters and tropical coastline of Bali, Indonesia', 'jaiye-journeys' ); ?>"
-                class="trip-card__img"
-                loading="lazy"
-              >
-            </div>
-            <div class="trip-card__body">
-              <p class="trip-card__type">
-                <span class="overline"><?php esc_html_e( 'Group Trip', 'jaiye-journeys' ); ?></span>
-              </p>
-              <h3 class="trip-card__title">
-                <?php esc_html_e( 'The Islands Cut', 'jaiye-journeys' ); ?>
-              </h3>
-              <p class="trip-card__destination">
-                <?php esc_html_e( 'Bali, Gilis + Komodo, Indonesia', 'jaiye-journeys' ); ?>
-              </p>
-              <p class="trip-card__dates">
-                <time datetime="2027-05"><?php esc_html_e( 'May 2027', 'jaiye-journeys' ); ?></time>
-              </p>
-              <p class="trip-card__desc">
-                <?php esc_html_e( "Rice terraces, turquoise water, and island-hopping through some of the world's most breathtaking archipelagos.", 'jaiye-journeys' ); ?>
-              </p>
-              <a
-                href="https://tally.so/r/RGVxVj"
-                class="btn btn--secondary btn--sm trip-card__cta"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <?php esc_html_e( 'Join Waitlist', 'jaiye-journeys' ); ?>
-              </a>
-            </div>
-          </article>
-        </li>
-
-        <li>
-          <article class="trip-card">
-            <div class="trip-card__media">
-              <img
-                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-peru.jpg' ); ?>"
-                alt="<?php esc_attr_e( 'Ancient ruins and dramatic landscapes of Peru', 'jaiye-journeys' ); ?>"
-                class="trip-card__img"
-                loading="lazy"
-              >
-            </div>
-            <div class="trip-card__body">
-              <p class="trip-card__type">
-                <span class="overline"><?php esc_html_e( 'Group Trip', 'jaiye-journeys' ); ?></span>
-              </p>
-              <h3 class="trip-card__title">
-                <?php esc_html_e( "The Director's Cut", 'jaiye-journeys' ); ?>
-              </h3>
-              <p class="trip-card__destination">
-                <?php esc_html_e( 'Peru', 'jaiye-journeys' ); ?>
-              </p>
-              <p class="trip-card__dates">
-                <time datetime="2027-10"><?php esc_html_e( 'October 2027', 'jaiye-journeys' ); ?></time>
-              </p>
-              <p class="trip-card__desc">
-                <?php esc_html_e( 'Ancient civilisations, dramatic landscapes, and the kind of trip that changes how you see the world.', 'jaiye-journeys' ); ?>
-              </p>
-              <a
-                href="https://tally.so/r/1ApXBp"
-                class="btn btn--secondary btn--sm trip-card__cta"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <?php esc_html_e( 'Join Waitlist', 'jaiye-journeys' ); ?>
-              </a>
-            </div>
-          </article>
-        </li>
-
-        <li>
-          <article class="trip-card">
-            <div class="trip-card__media">
-              <img
-                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-cape-town.jpg' ); ?>"
-                alt="<?php esc_attr_e( 'Cape Town coastline with Table Mountain in the background', 'jaiye-journeys' ); ?>"
-                class="trip-card__img"
-                loading="lazy"
-              >
-            </div>
-            <div class="trip-card__body">
-              <p class="trip-card__type">
-                <span class="overline"><?php esc_html_e( 'Group Trip', 'jaiye-journeys' ); ?></span>
-              </p>
-              <h3 class="trip-card__title">
-                <?php esc_html_e( 'The Cape Town Edit', 'jaiye-journeys' ); ?>
-              </h3>
-              <p class="trip-card__destination">
-                <?php esc_html_e( 'Cape Town, South Africa', 'jaiye-journeys' ); ?>
-              </p>
-              <p class="trip-card__dates">
-                <time datetime="2028-01"><?php esc_html_e( 'January 2028', 'jaiye-journeys' ); ?></time>
-              </p>
-              <p class="trip-card__desc">
-                <?php esc_html_e( 'Sun, culture, and the most dramatic coastline on earth. Cape Town is for the ones who want it all.', 'jaiye-journeys' ); ?>
-              </p>
-              <a
-                href="https://tally.so/r/aQa9D2"
-                class="btn btn--secondary btn--sm trip-card__cta"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <?php esc_html_e( 'Join Waitlist', 'jaiye-journeys' ); ?>
-              </a>
-            </div>
-          </article>
-        </li>
-
-        <li>
-          <article class="trip-card">
-            <div class="trip-card__media">
-              <img
-                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-bahia.jpg' ); ?>"
-                alt="<?php esc_attr_e( 'Colonial architecture and coastline of Bahia, Brazil', 'jaiye-journeys' ); ?>"
-                class="trip-card__img"
-                loading="lazy"
-              >
-            </div>
-            <div class="trip-card__body">
-              <p class="trip-card__type">
-                <span class="overline"><?php esc_html_e( 'Group Trip', 'jaiye-journeys' ); ?></span>
-              </p>
-              <h3 class="trip-card__title">
-                <?php esc_html_e( 'The Bahia Edit', 'jaiye-journeys' ); ?>
-              </h3>
-              <p class="trip-card__destination">
-                <?php esc_html_e( 'Bahia, Brazil', 'jaiye-journeys' ); ?>
-              </p>
-              <p class="trip-card__dates">
-                <time datetime="2028-07"><?php esc_html_e( 'July 2028', 'jaiye-journeys' ); ?></time>
-              </p>
-              <p class="trip-card__desc">
-                <?php esc_html_e( 'Afro-Brazilian culture, colonial architecture, and coastline that never ends. Bahia is a full sensory experience.', 'jaiye-journeys' ); ?>
-              </p>
-              <a
-                href="https://tally.so/r/xXlrzr"
-                class="btn btn--secondary btn--sm trip-card__cta"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <?php esc_html_e( 'Join Waitlist', 'jaiye-journeys' ); ?>
-              </a>
-            </div>
-          </article>
-        </li>
-
-      </ul><!-- /.oj-grid -->
-    </div><!-- /.container -->
-  </section><!-- /.oj-section--group -->
+    </div>
+  </section>
 
 
   <!-- ============================================================
-       3. BETWEEN THE LINES
-       Sage (#b1bb9e) background. Two-card grid.
+       3. CTA STRIP
        ============================================================ -->
-  <section
-    class="oj-section oj-section--btl"
-    aria-label="<?php esc_attr_e( 'Between the Lines literary retreats', 'jaiye-journeys' ); ?>"
-  >
-    <div class="container">
-
-      <header class="section-header section-header--center">
-        <p class="overline">
-          <?php esc_html_e( 'Between the Lines', 'jaiye-journeys' ); ?>
-        </p>
-        <h2 class="section-header__title">
-          <?php esc_html_e( 'Between the Lines', 'jaiye-journeys' ); ?>
-        </h2>
-        <p class="section-header__sub">
-          <?php esc_html_e( 'Luxury literary retreats for serious readers who want to live inside the feeling of their favourite books.', 'jaiye-journeys' ); ?>
-        </p>
-      </header>
-
-      <p class="oj-btl__intro">
-        <?php esc_html_e( 'Between the Lines is our literary retreat series — exclusively co-branded experiences produced in partnership with book community leaders. Each retreat is intimate, intentional, and unlike anything else in the travel space.', 'jaiye-journeys' ); ?>
-      </p>
-
-      <ul class="oj-grid oj-grid--2col" role="list">
-
-        <li>
-          <article class="trip-card">
-            <div class="trip-card__media">
-              <img
-                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-btl-prologue.jpg' ); ?>"
-                alt="<?php esc_attr_e( 'The Prologue — a literary gathering in the UK', 'jaiye-journeys' ); ?>"
-                class="trip-card__img"
-                loading="lazy"
-              >
-            </div>
-            <div class="trip-card__body">
-              <p class="trip-card__type">
-                <span class="overline"><?php esc_html_e( 'Between the Lines', 'jaiye-journeys' ); ?></span>
-              </p>
-              <h3 class="trip-card__title">
-                <?php esc_html_e( 'The Prologue', 'jaiye-journeys' ); ?>
-              </h3>
-              <p class="trip-card__destination">
-                <?php esc_html_e( 'UK', 'jaiye-journeys' ); ?>
-              </p>
-              <p class="trip-card__dates">
-                <time datetime="2026-11-07"><?php esc_html_e( '7th November 2026', 'jaiye-journeys' ); ?></time>
-              </p>
-              <p class="trip-card__desc">
-                <?php esc_html_e( 'Our first gathering. An intimate literary event to introduce the Between the Lines community before the full retreats begin.', 'jaiye-journeys' ); ?>
-              </p>
-              <a
-                href="https://tally.so/r/Gxq2JL"
-                class="btn btn--secondary btn--sm trip-card__cta"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <?php esc_html_e( 'Join Waitlist', 'jaiye-journeys' ); ?>
-              </a>
-            </div>
-          </article>
-        </li>
-
-        <li>
-          <article class="trip-card">
-            <div class="trip-card__media">
-              <img
-                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-morocco.jpg' ); ?>"
-                alt="<?php esc_attr_e( 'Streets of the Marrakesh medina, Morocco', 'jaiye-journeys' ); ?>"
-                class="trip-card__img"
-                loading="lazy"
-              >
-            </div>
-            <div class="trip-card__body">
-              <p class="trip-card__type">
-                <span class="overline"><?php esc_html_e( 'Between the Lines', 'jaiye-journeys' ); ?></span>
-              </p>
-              <h3 class="trip-card__title">
-                <?php esc_html_e( 'The Marrakesh Edition', 'jaiye-journeys' ); ?>
-              </h3>
-              <p class="trip-card__destination">
-                <?php esc_html_e( 'Marrakesh, Morocco', 'jaiye-journeys' ); ?>
-              </p>
-              <p class="trip-card__dates">
-                <time datetime="2027-03"><?php esc_html_e( 'March 2027', 'jaiye-journeys' ); ?></time>
-              </p>
-              <p class="trip-card__desc">
-                <?php esc_html_e( 'Six days of reading, rest, and radical joy in the heart of the Moroccan medina. Our first full literary residency.', 'jaiye-journeys' ); ?>
-              </p>
-              <a
-                href="https://tally.so/r/Gxq2JL"
-                class="btn btn--secondary btn--sm trip-card__cta"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <?php esc_html_e( 'Join Waitlist', 'jaiye-journeys' ); ?>
-              </a>
-            </div>
-          </article>
-        </li>
-
-      </ul><!-- /.oj-grid -->
-    </div><!-- /.container -->
-  </section><!-- /.oj-section--btl -->
-
-
-  <!-- ============================================================
-       4. ON THE HORIZON
-       Cream background. Minimal text-only cards.
-       ============================================================ -->
-  <section
-    class="oj-section oj-section--horizon"
-    aria-label="<?php esc_attr_e( 'Trips on the horizon', 'jaiye-journeys' ); ?>"
-  >
-    <div class="container">
-
-      <header class="section-header section-header--center">
-        <p class="overline">
-          <?php esc_html_e( 'Coming Soon', 'jaiye-journeys' ); ?>
-        </p>
-        <h2 class="section-header__title">
-          <?php esc_html_e( 'On the Horizon', 'jaiye-journeys' ); ?>
-        </h2>
-        <p class="section-header__sub">
-          <?php esc_html_e( 'We plan ahead. Here is what is coming.', 'jaiye-journeys' ); ?>
-        </p>
-      </header>
-
-      <ul class="oj-grid oj-grid--3col" role="list">
-
-        <li>
-          <article class="horizon-card">
-            <p class="horizon-card__type">
-              <span class="overline"><?php esc_html_e( 'Between the Lines', 'jaiye-journeys' ); ?></span>
-            </p>
-            <h3 class="horizon-card__title">
-              <?php esc_html_e( 'BTL Chapter 2', 'jaiye-journeys' ); ?>
-            </h3>
-            <p class="horizon-card__destination">
-              <?php esc_html_e( 'Sintra, Portugal', 'jaiye-journeys' ); ?>
-            </p>
-            <p class="horizon-card__dates">
-              <time datetime="2027-09"><?php esc_html_e( 'September 2027', 'jaiye-journeys' ); ?></time>
-            </p>
-            <a
-              href="https://tally.so/r/Gxq2JL"
-              class="btn btn--secondary btn--sm horizon-card__cta"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <?php esc_html_e( 'Notify Me', 'jaiye-journeys' ); ?>
-            </a>
-          </article>
-        </li>
-
-        <li>
-          <article class="horizon-card">
-            <p class="horizon-card__type">
-              <span class="overline"><?php esc_html_e( 'Between the Lines', 'jaiye-journeys' ); ?></span>
-            </p>
-            <h3 class="horizon-card__title">
-              <?php esc_html_e( 'BTL Chapter 3', 'jaiye-journeys' ); ?>
-            </h3>
-            <p class="horizon-card__destination">
-              <?php esc_html_e( 'Oaxaca, Mexico', 'jaiye-journeys' ); ?>
-            </p>
-            <p class="horizon-card__dates">
-              <time datetime="2028-04"><?php esc_html_e( 'April 2028', 'jaiye-journeys' ); ?></time>
-            </p>
-            <a
-              href="https://tally.so/r/Gxq2JL"
-              class="btn btn--secondary btn--sm horizon-card__cta"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <?php esc_html_e( 'Notify Me', 'jaiye-journeys' ); ?>
-            </a>
-          </article>
-        </li>
-
-        <li>
-          <article class="horizon-card">
-            <p class="horizon-card__type">
-              <span class="overline"><?php esc_html_e( 'Between the Lines', 'jaiye-journeys' ); ?></span>
-            </p>
-            <h3 class="horizon-card__title">
-              <?php esc_html_e( 'BTL Chapter 4', 'jaiye-journeys' ); ?>
-            </h3>
-            <p class="horizon-card__destination">
-              <?php esc_html_e( 'Tuscany, Italy', 'jaiye-journeys' ); ?>
-            </p>
-            <p class="horizon-card__dates">
-              <time datetime="2028-09"><?php esc_html_e( 'September 2028', 'jaiye-journeys' ); ?></time>
-            </p>
-            <a
-              href="https://tally.so/r/Gxq2JL"
-              class="btn btn--secondary btn--sm horizon-card__cta"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <?php esc_html_e( 'Notify Me', 'jaiye-journeys' ); ?>
-            </a>
-          </article>
-        </li>
-
-      </ul><!-- /.oj-grid -->
-    </div><!-- /.container -->
-  </section><!-- /.oj-section--horizon -->
-
-
-  <!-- ============================================================
-       5. CTA STRIP
-       Forest green background, cream text.
-       ============================================================ -->
-  <section
-    class="oj-cta"
-    aria-label="<?php esc_attr_e( 'Get in touch', 'jaiye-journeys' ); ?>"
-  >
+  <section class="oj-cta" aria-label="<?php esc_attr_e( 'Get in touch', 'jaiye-journeys' ); ?>">
     <div class="container">
       <div class="oj-cta__inner">
         <h2 class="oj-cta__heading">
-          <?php esc_html_e( 'Not sure which trip is for you?', 'jaiye-journeys' ); ?>
+          <?php esc_html_e( 'Not sure which journey is for you?', 'jaiye-journeys' ); ?>
         </h2>
         <p class="oj-cta__sub">
           <?php esc_html_e( 'Get in touch and we will help you find your perfect journey.', 'jaiye-journeys' ); ?>
@@ -449,7 +196,7 @@ get_header();
         </a>
       </div>
     </div>
-  </section><!-- /.oj-cta -->
+  </section>
 
 </main><!-- /#main-content -->
 

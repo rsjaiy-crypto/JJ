@@ -112,6 +112,32 @@ add_filter( 'template_include', 'jj_trip_template_hierarchy' );
 
 
 /**
+ * Send the /trips/ archive to the Our Journeys hub.
+ *
+ * Our Journeys is the canonical listing — it's the URL already in the primary
+ * nav. Redirecting rather than rendering a second grid keeps one page for
+ * search engines to index instead of two with identical content.
+ *
+ * Individual trips keep their /trips/<slug>/ URLs, so existing links (the
+ * homepage cards included) are unaffected.
+ */
+function jj_trip_archive_redirect() {
+    if ( ! is_post_type_archive( 'trip' ) ) {
+        return;
+    }
+
+    $page = get_page_by_path( 'our-journeys' );
+    if ( ! $page ) {
+        return; // No hub page to send them to — render the archive as a fallback.
+    }
+
+    wp_safe_redirect( get_permalink( $page->ID ), 301 );
+    exit;
+}
+add_action( 'template_redirect', 'jj_trip_archive_redirect' );
+
+
+/**
  * Give trip singles a body class so the header can go transparent over the hero.
  */
 function jj_trip_body_class( $classes ) {

@@ -107,6 +107,24 @@ function jaiye_enqueue_assets() {
         true
     );
 
+    // Journeys hub: filter/sort UI.
+    if ( is_page_template( 'our-journeys.php' ) ) {
+        wp_enqueue_style(
+            'jaiye-journeys-hub',
+            get_template_directory_uri() . '/css/journeys.css',
+            [ 'jaiye-global' ],
+            filemtime( get_template_directory() . '/css/journeys.css' )
+        );
+
+        wp_enqueue_script(
+            'jaiye-journeys-hub',
+            get_template_directory_uri() . '/js/journeys.js',
+            [],
+            filemtime( get_template_directory() . '/js/journeys.js' ),
+            true
+        );
+    }
+
     // Trip singles only.
     // The trip template is large; loading its CSS/JS sitewide would add weight
     // to every other page for no benefit, so it is gated on the trip CPT.

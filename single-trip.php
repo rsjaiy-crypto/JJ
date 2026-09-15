@@ -38,6 +38,13 @@ while ( have_posts() ) :
     // Brand switch: 'btl' gets the literary treatment (named days, BTL eyebrow).
     $brand    = jj_trip_field( 'brand', $trip_id, 'jj-edit' );
     $is_btl   = ( 'btl' === $brand );
+
+    // Not-yet-bookable trips get a short waitlist page instead of the full
+    // itinerary — a template full of empty sections reads as unfinished.
+    if ( jj_trip_is_coming_soon( $trip_id ) ) {
+        require get_template_directory() . '/inc/trip-coming-soon.php';
+        continue;
+    }
     ?>
 
 <main id="main-content" class="trip trip--<?php echo esc_attr( $brand ); ?>">

@@ -1,0 +1,392 @@
+/* ==================================================================
+   Our Journeys hub — filter controls and trip cards
+   Loaded only on the our-journeys.php template.
+   Uses global.css design tokens; no new colour values.
+   ================================================================== */
+
+.jfilter {
+  padding-block: var(--section-gap);
+}
+
+/* ------------------------------------------------------------------
+   Filter controls
+   ------------------------------------------------------------------ */
+
+.jfilter__controls {
+  margin-bottom: var(--space-10);
+}
+
+/* ── Brand chips ── */
+
+.jfilter__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.jchip {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background-color: transparent;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out);
+}
+
+.jchip:hover {
+  border-color: var(--color-forest);
+  color: var(--color-forest);
+}
+
+.jchip.is-active {
+  background-color: var(--color-forest);
+  border-color: var(--color-forest);
+  color: var(--color-cream);
+}
+
+.jchip__count {
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  opacity: 0.65;
+}
+
+/* ── Selects row ── */
+
+.jfilter__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-5);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.jfilter__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 170px;
+}
+
+.jfilter__label {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-regular);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  opacity: 0.8;
+}
+
+.jfilter__select {
+  appearance: none;
+  width: 100%;
+  padding: var(--space-3) var(--space-8) var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  cursor: pointer;
+
+  /* Chevron drawn inline so no image request is needed */
+  background-image: linear-gradient(45deg, transparent 50%, var(--color-forest) 50%),
+                    linear-gradient(135deg, var(--color-forest) 50%, transparent 50%);
+  background-position: calc(100% - 20px) 55%, calc(100% - 14px) 55%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+
+.jfilter__select:focus-visible {
+  outline: 2px solid var(--color-salmon);
+  outline-offset: 2px;
+}
+
+.jfilter__reset {
+  appearance: none;
+  margin-left: auto;
+  padding: var(--space-3) var(--space-4);
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.jfilter__reset:hover {
+  color: var(--color-salmon);
+}
+
+.jfilter__status {
+  margin: var(--space-4) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.jfilter__empty,
+.jfilter__empty-state {
+  margin: var(--space-12) auto;
+  max-width: 44ch;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--fw-light);
+  line-height: 1.7;
+  color: var(--color-text-muted);
+}
+
+/* ------------------------------------------------------------------
+   Grid
+   ------------------------------------------------------------------ */
+
+.jfilter__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: clamp(var(--space-5), 3vw, var(--space-8));
+}
+
+/* Set by JS when a card is filtered out */
+.jcard[hidden] {
+  display: none;
+}
+
+/* ------------------------------------------------------------------
+   Card
+   ------------------------------------------------------------------ */
+
+.jcard {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition:
+    transform var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out);
+}
+
+.jcard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 38px rgba(8, 31, 28, 0.10);
+}
+
+.jcard__link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.jcard__media {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background-color: var(--color-sage);
+}
+
+.jcard__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--duration-slow) var(--ease-out);
+}
+
+.jcard:hover .jcard__img {
+  transform: scale(1.04);
+}
+
+.jcard__img--placeholder {
+  display: block;
+  background-color: var(--color-sage);
+}
+
+/* ── Badges ── */
+
+.jcard__badge {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* Group trips read forest; reading retreats read salmon, so the two
+   product lines are distinguishable at a glance in a mixed grid. */
+.jcard__badge--jj-edit {
+  background-color: var(--color-forest);
+  color: var(--color-cream);
+}
+
+.jcard__badge--btl {
+  background-color: var(--color-salmon);
+  color: var(--color-surface);
+}
+
+.jcard__badge--soon {
+  top: auto;
+  bottom: var(--space-4);
+  left: var(--space-4);
+  background-color: var(--color-cream);
+  color: var(--color-forest);
+}
+
+/* ── Body ── */
+
+.jcard__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: var(--space-5);
+}
+
+.jcard__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-regular);
+  line-height: 1.2;
+  color: var(--color-deep-green);
+  margin-bottom: var(--space-2);
+}
+
+.jcard__destination {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-light);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-4);
+}
+
+.jcard__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.jcard__tag {
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  background-color: color-mix(in srgb, var(--color-sage) 30%, transparent);
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--color-forest);
+  white-space: nowrap;
+}
+
+.jcard__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-5);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.jcard__pace {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Small dot cueing pace without needing a legend */
+.jcard__pace::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--color-sage);
+}
+
+.jcard__pace--slow::before    { background-color: var(--color-sage); }
+.jcard__pace--balanced::before { background-color: var(--color-forest); }
+.jcard__pace--fast::before     { background-color: var(--color-salmon); }
+
+.jcard__duration::before {
+  content: '·';
+  margin-right: var(--space-3);
+}
+
+.jcard__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin: auto 0 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.jcard__price {
+  font-family: var(--font-heading);
+  font-size: var(--text-md);
+  color: var(--color-deep-green);
+}
+
+.jcard__cta {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-salmon);
+}
+
+.jcard--soon .jcard__foot {
+  justify-content: flex-start;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jcard,
+  .jcard__img {
+    transition: none;
+  }
+
+  .jcard:hover {
+    transform: none;
+  }
+
+  .jcard:hover .jcard__img {
+    transform: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .jfilter__row {
+    gap: var(--space-4);
+  }
+
+  .jfilter__field {
+    flex: 1 1 140px;
+    min-width: 0;
+  }
+
+  .jfilter__reset {
+    margin-left: 0;
+  }
+}
