@@ -28,7 +28,7 @@
   --color-border:      color-mix(in srgb, var(--color-sage) 40%, transparent);
 
   /* Typography — families */
-  --font-heading: 'Cormorant Garamond', Georgia, serif;
+  --font-heading: 'Bodoni Moda', Georgia, serif;
   --font-body:    'Jost', system-ui, sans-serif;
 
   /* Typography — weights */
