@@ -70,7 +70,7 @@ function jaiye_enqueue_assets() {
     // Google Fonts
     wp_enqueue_style(
         'jaiye-fonts',
-        'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Jost:wght@300;400;600&display=swap',
+        'https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,600;1,400;1,600&family=Jost:wght@300;400;600&display=swap',
         [],
         null
     );
@@ -330,13 +330,9 @@ function jaiye_klaviyo_tracking() {
     if ( ! defined( 'JAIYE_KLAVIYO_COMPANY_ID' ) || empty( JAIYE_KLAVIYO_COMPANY_ID ) ) {
         return;
     }
-    // TEMPORARILY DISABLED — Klaviyo's "Confirm onsite tracking" check does an
-    // unauthenticated server-side fetch with no cookies, so it can never see
-    // anything gated behind consent. Re-enable this block immediately after
-    // Klaviyo's Confirm step succeeds.
-    // if ( ! isset( $_COOKIE['jj_cookie_consent'] ) || $_COOKIE['jj_cookie_consent'] !== 'accepted' ) {
-    //     return;
-    // }
+    if ( ! isset( $_COOKIE['jj_cookie_consent'] ) || $_COOKIE['jj_cookie_consent'] !== 'accepted' ) {
+        return;
+    }
     ?>
     <script async type="text/javascript" src="https://static.klaviyo.com/onsite/js/<?php echo esc_attr( JAIYE_KLAVIYO_COMPANY_ID ); ?>/klaviyo.js?company_id=<?php echo esc_attr( JAIYE_KLAVIYO_COMPANY_ID ); ?>"></script>
     <script type="text/javascript">
