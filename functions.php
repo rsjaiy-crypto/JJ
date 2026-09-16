@@ -5,6 +5,7 @@
 // ============================================================
 
 define( 'JAIYE_GA4_ID', 'G-13CW9QRTBE' );
+define( 'JAIYE_KLAVIYO_COMPANY_ID', 'RujwSB' );
 
 
 // ============================================================
@@ -312,3 +313,32 @@ function jaiye_ga4_tracking() {
     <?php
 }
 add_action( 'wp_head', 'jaiye_ga4_tracking' );
+
+
+// ============================================================
+// Klaviyo Onsite Tracking
+// Company ID: RujwSB
+// Gated by cookie consent — same rule as GA4 above. Klaviyo's
+// onsite script sets tracking cookies and profiles browsing
+// behaviour, so it only fires once a visitor has accepted via
+// the cookie banner. Loaded in the footer (Klaviyo's own install
+// instructions say "before </body>") rather than the head, so it
+// never blocks the page render.
+// ============================================================
+
+function jaiye_klaviyo_tracking() {
+    if ( ! defined( 'JAIYE_KLAVIYO_COMPANY_ID' ) || empty( JAIYE_KLAVIYO_COMPANY_ID ) ) {
+        return;
+    }
+    if ( ! isset( $_COOKIE['jj_cookie_consent'] ) || $_COOKIE['jj_cookie_consent'] !== 'accepted' ) {
+        return;
+    }
+    ?>
+    <script async type="text/javascript" src="https://static.klaviyo.com/onsite/js/<?php echo esc_attr( JAIYE_KLAVIYO_COMPANY_ID ); ?>/klaviyo.js?company_id=<?php echo esc_attr( JAIYE_KLAVIYO_COMPANY_ID ); ?>"></script>
+    <script type="text/javascript">
+    //Initialize Klaviyo object on page load
+    !function(){if(!window.klaviyo){window._klOnsite=window._klOnsite||[];try{window.klaviyo=new Proxy({},{get:function(n,i){return"push"===i?function(){var n;(n=window._klOnsite).push.apply(n,arguments)}:function(){for(var n=arguments.length,o=new Array(n),w=0;w<n;w++)o[w]=arguments[w];var t="function"==typeof o[o.length-1]?o.pop():void 0,e=new Promise((function(n){window._klOnsite.push([i].concat(o,[function(i){t&&t(i),n(i)}]))}));return e}}})}catch(n){window.klaviyo=window.klaviyo||[],window.klaviyo.push=function(){var n;(n=window._klOnsite).push.apply(n,arguments)}}}}();
+    </script>
+    <?php
+}
+add_action( 'wp_footer', 'jaiye_klaviyo_tracking' );
