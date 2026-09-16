@@ -479,7 +479,47 @@
 		} );
 	}
 
-	/* ── 11. Mobile booking bar ──────────────────────────────────── */
+	/* ── 11. Vibe tag tooltips: tap to reveal on touch ───────────── */
+
+	/**
+	 * Desktop already gets the definition on hover/focus for free via CSS
+	 * (:hover, :focus-within — see .vibe-tag__tip in global.css). Touch
+	 * devices have no equivalent persistent hover, so tapping a tag toggles
+	 * an .is-open class instead; tapping the same tag or anywhere else closes
+	 * it. aria-expanded tracks the same state for assistive tech.
+	 */
+	function initVibeTags() {
+		var tags = document.querySelectorAll( '.js-vibe-tag' );
+		if ( ! tags.length ) return;
+
+		function closeAll( except ) {
+			document.querySelectorAll( '.vibe-tag.is-open' ).forEach( function ( openTag ) {
+				if ( openTag === except ) return;
+				openTag.classList.remove( 'is-open' );
+				var btn = openTag.querySelector( '.js-vibe-tag' );
+				if ( btn ) btn.setAttribute( 'aria-expanded', 'false' );
+			} );
+		}
+
+		Array.prototype.forEach.call( tags, function ( btn ) {
+			btn.addEventListener( 'click', function ( e ) {
+				var tag       = btn.closest( '.vibe-tag' );
+				var wasOpen   = tag.classList.contains( 'is-open' );
+
+				e.stopPropagation(); // Don't let the outside-click handler below immediately re-close it.
+				closeAll( tag );
+
+				tag.classList.toggle( 'is-open', ! wasOpen );
+				btn.setAttribute( 'aria-expanded', wasOpen ? 'false' : 'true' );
+			} );
+		} );
+
+		document.addEventListener( 'click', function () {
+			closeAll();
+		} );
+	}
+
+	/* ── 12. Mobile booking bar ──────────────────────────────────── */
 
 	function initMobileBar() {
 		var bar = document.getElementById( 'trip-mobile-bar' );
@@ -515,6 +555,7 @@
 		initTabs( '.trip-booking__tab' );
 		initAccordions();
 		initCarousels();
+		initVibeTags();
 		initNoteStack();
 		initMobileBar();
 

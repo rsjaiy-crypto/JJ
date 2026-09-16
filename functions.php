@@ -14,6 +14,7 @@ define( 'JAIYE_KLAVIYO_COMPANY_ID', 'RujwSB' );
 // one-click seeder for sample trips.
 // ============================================================
 
+require_once get_template_directory() . '/inc/fx-rate.php';
 require_once get_template_directory() . '/inc/vibe-tags.php';
 require_once get_template_directory() . '/inc/trip-fields.php';
 require_once get_template_directory() . '/inc/trip-cpt.php';

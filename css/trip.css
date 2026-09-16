@@ -441,6 +441,29 @@
   color: var(--color-deep-green);
 }
 
+/*
+   The "From £X" stat only: a third row for a muted, secondary approximate
+   USD note. Deliberately not applied to the other stats, and deliberately
+   small/quiet next to the real price — this is a footnote, not a second
+   price tag competing for attention.
+*/
+.trip-stat--price {
+  grid-template-rows: auto auto auto;
+}
+
+.trip-stat--price .trip-stat__icon {
+  grid-row: 1 / span 3;
+}
+
+.trip-stat__fx {
+  grid-column: 2;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-style: italic;
+  color: var(--color-text-muted);
+  opacity: 0.65;
+}
+
 /* ── Meters ── */
 
 .trip-meters {

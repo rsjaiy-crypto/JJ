@@ -173,12 +173,24 @@ while ( have_posts() ) :
           <?php endif; ?>
 
           <?php if ( $price_from ) : ?>
-            <li class="trip-stat">
+            <?php $price_usd = jj_fx_format_usd_estimate( $price_from ); ?>
+            <li class="trip-stat<?php echo $price_usd ? ' trip-stat--price' : ''; ?>">
               <span class="trip-stat__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M15 6.5a4 4 0 0 0-6.5 3v3.5a3 3 0 0 1-1.5 2.6h9"/><path d="M7 11h6"/></svg>
               </span>
               <span class="trip-stat__label"><?php esc_html_e( 'From', 'jaiye-journeys' ); ?></span>
               <span class="trip-stat__value">&pound;<?php echo esc_html( number_format_i18n( (int) $price_from ) ); ?></span>
+              <?php if ( $price_usd ) : ?>
+                <span class="trip-stat__fx">
+                  <?php
+                  printf(
+                      /* translators: %s: approximate USD amount, e.g. $4,100 */
+                      esc_html__( 'approx. %s USD', 'jaiye-journeys' ),
+                      esc_html( $price_usd )
+                  );
+                  ?>
+                </span>
+              <?php endif; ?>
             </li>
           <?php endif; ?>
 
