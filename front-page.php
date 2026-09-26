@@ -39,7 +39,7 @@ get_header();
           <?php esc_html_e( 'to Enjoy Life.', 'jaiye-journeys' ); ?>
         </h1>
         <p class="fp-hero__sub">
-          <?php esc_html_e( 'We handle the admin so you can focus on the enjoyment.', 'jaiye-journeys' ); ?>
+          <?php esc_html_e( 'The trip everyone remembers. The planning nobody sees.', 'jaiye-journeys' ); ?>
         </p>
         <a
           href="<?php echo esc_url( home_url( '/contact/' ) ); ?>"
@@ -255,9 +255,12 @@ get_header();
         <p class="overline">
           <?php esc_html_e( 'Testimonials', 'jaiye-journeys' ); ?>
         </p>
-        <h2 class="section-header__title">
-          <?php esc_html_e( 'Stories from the Road', 'jaiye-journeys' ); ?>
+        <h2 class="fp-testimonials__headline">
+          <?php esc_html_e( '“You were born to do this!”', 'jaiye-journeys' ); ?>
         </h2>
+        <p class="fp-testimonials__headline-name">
+          <?php esc_html_e( 'Anca B.', 'jaiye-journeys' ); ?>
+        </p>
       </header>
 
       <div
