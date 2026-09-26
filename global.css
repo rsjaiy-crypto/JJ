@@ -1291,6 +1291,9 @@ textarea::placeholder {
 
 .fp-testimonials__headline-name {
   margin-top: var(--space-3);
+  margin-inline: auto;
+  max-width: 18ch;
+  text-align: right;
   font-size: var(--text-base);
   color: var(--color-forest);
   opacity: 0.75;
