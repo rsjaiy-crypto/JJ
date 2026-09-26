@@ -259,7 +259,7 @@ get_header();
           <?php esc_html_e( '“You were born to do this!”', 'jaiye-journeys' ); ?>
         </h2>
         <p class="fp-testimonials__headline-name">
-          <?php esc_html_e( 'Anca B.', 'jaiye-journeys' ); ?>
+          <?php esc_html_e( '-Anca B.', 'jaiye-journeys' ); ?>
         </p>
       </header>
 
