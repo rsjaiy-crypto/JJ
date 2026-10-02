@@ -457,27 +457,27 @@ get_header();
           <article class="trip-card">
             <div class="trip-card__media">
               <img
-                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-cape-town.jpg' ); ?>"
-                alt="<?php esc_attr_e( 'Cape Town coastline with Table Mountain in the background', 'jaiye-journeys' ); ?>"
+                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-sintra.jpg' ); ?>"
+                alt="<?php esc_attr_e( 'Gothic palace above terraced gardens in Sintra, Portugal', 'jaiye-journeys' ); ?>"
                 class="trip-card__img"
                 loading="lazy"
               >
             </div>
             <div class="trip-card__body">
               <p class="trip-card__type">
-                <span class="overline"><?php esc_html_e( 'Group Trip', 'jaiye-journeys' ); ?></span>
+                <span class="overline"><?php esc_html_e( 'Between the Lines', 'jaiye-journeys' ); ?></span>
               </p>
               <h3 class="trip-card__title">
-                <?php esc_html_e( 'The Cape Town Edit', 'jaiye-journeys' ); ?>
+                <?php esc_html_e( 'Volume: Sintra', 'jaiye-journeys' ); ?>
               </h3>
               <p class="trip-card__destination">
-                <?php esc_html_e( 'South Africa', 'jaiye-journeys' ); ?>
+                <?php esc_html_e( 'Sintra, Portugal', 'jaiye-journeys' ); ?>
               </p>
               <p class="trip-card__dates">
-                <time datetime="2028-01"><?php esc_html_e( 'January 2028', 'jaiye-journeys' ); ?></time>
+                <time datetime="2027-10"><?php esc_html_e( 'October 2027', 'jaiye-journeys' ); ?></time>
               </p>
               <a
-                href="<?php echo esc_url( home_url( '/trips/jj-cape-town/' ) ); ?>"
+                href="<?php echo esc_url( home_url( '/trips/sintra-mist-manuscripts/' ) ); ?>"
                 class="btn btn--secondary btn--sm trip-card__cta"
               >
                 <?php esc_html_e( 'Find Out More', 'jaiye-journeys' ); ?>

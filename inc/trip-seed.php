@@ -853,7 +853,7 @@ function jj_trip_seed_definitions() {
                 'departures'      => [
                     [
                         'year'         => '2027',
-                        'dates'        => 'September',
+                        'dates'        => 'October',
                         'availability' => 'The List is open',
                         'status'       => 'limited',
                         'book_url'     => '',
