@@ -81,7 +81,7 @@ get_header();
 
         <div class="jje-glance__cta">
           <a href="<?php echo esc_url( 'https://tally.so/r/1ApXBp' ); ?>" target="_blank" rel="noopener" class="btn btn--accent">
-            <?php esc_html_e( 'Join the Waitlist', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
           </a>
         </div>
 
@@ -299,7 +299,7 @@ get_header();
       <section id="faq" class="jje-section">
         <h2><?php esc_html_e( 'Questions', 'jaiye-journeys' ); ?></h2>
         <details class="jje-accordion-item">
-          <summary><?php esc_html_e( 'Is there a waitlist?', 'jaiye-journeys' ); ?></summary>
+          <summary><?php esc_html_e( 'Can I get on The List?', 'jaiye-journeys' ); ?></summary>
           <p><?php esc_html_e( 'Yes. Join to be notified the moment booking opens and to get first access before spaces are shared more widely.', 'jaiye-journeys' ); ?></p>
         </details>
         <details class="jje-accordion-item">
@@ -348,7 +348,7 @@ get_header();
         <h2><?php esc_html_e( 'This One Is Ready for You', 'jaiye-journeys' ); ?></h2>
         <p><?php esc_html_e( "All that's left is your call. Reply with your dates and I'll get everything locked in. Steph x", 'jaiye-journeys' ); ?></p>
         <a href="<?php echo esc_url( 'https://tally.so/r/1ApXBp' ); ?>" target="_blank" rel="noopener" class="btn btn--accent">
-          <?php esc_html_e( 'Join the Waitlist', 'jaiye-journeys' ); ?>
+          <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
         </a>
       </section>
 
@@ -367,7 +367,7 @@ get_header();
     <p><?php esc_html_e( 'TBC pp', 'jaiye-journeys' ); ?></p>
   </div>
   <a href="<?php echo esc_url( 'https://tally.so/r/1ApXBp' ); ?>" target="_blank" rel="noopener" class="btn btn--accent btn--sm">
-    <?php esc_html_e( 'Join Waitlist', 'jaiye-journeys' ); ?>
+    <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
   </a>
 </div>
 
