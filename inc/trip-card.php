@@ -84,7 +84,7 @@ function jj_trip_card( $post_id ) {
 
           <p class="jcard__foot">
             <?php if ( $coming_soon ) : ?>
-              <span class="jcard__cta"><?php esc_html_e( 'Join the waitlist', 'jaiye-journeys' ); ?></span>
+              <span class="jcard__cta"><?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?></span>
             <?php else : ?>
               <?php if ( $price ) : ?>
                 <span class="jcard__price">

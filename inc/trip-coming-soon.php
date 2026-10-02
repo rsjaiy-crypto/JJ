@@ -110,17 +110,17 @@ if ( ! empty( $cs_departures[0] ) ) {
 
         <div class="trip-soon__fact">
           <dt><?php esc_html_e( 'Price', 'jaiye-journeys' ); ?></dt>
-          <dd><?php esc_html_e( 'Announced to the waitlist first', 'jaiye-journeys' ); ?></dd>
+          <dd><?php esc_html_e( 'Prices go to The List first', 'jaiye-journeys' ); ?></dd>
         </div>
       </dl>
 
       <div class="trip-soon__cta js-reveal">
         <h2 class="trip-soon__cta-title"><?php esc_html_e( 'Be first to know', 'jaiye-journeys' ); ?></h2>
         <p class="trip-soon__cta-copy">
-          <?php esc_html_e( 'Join the waitlist and you will get the dates, the full itinerary and first access to places before this chapter is shared more widely. No deposit, no commitment.', 'jaiye-journeys' ); ?>
+          <?php esc_html_e( 'Get on The List and you will get the price, the full itinerary and first access to places before this chapter is shared more widely. No deposit, no commitment.', 'jaiye-journeys' ); ?>
         </p>
         <a href="<?php echo esc_url( $cs_waitlist ); ?>" class="btn btn--accent" target="_blank" rel="noopener">
-          <?php esc_html_e( 'Join the Waitlist', 'jaiye-journeys' ); ?>
+          <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
         </a>
       </div>
 
@@ -144,7 +144,7 @@ if ( ! empty( $cs_departures[0] ) ) {
     <div class="container container--narrow">
       <p class="trip-soon__back">
         <a href="<?php echo esc_url( home_url( '/our-journeys/' ) ); ?>">
-          <?php esc_html_e( 'See journeys you can book now', 'jaiye-journeys' ); ?>
+          <?php esc_html_e( 'See our other journeys', 'jaiye-journeys' ); ?>
         </a>
       </p>
     </div>

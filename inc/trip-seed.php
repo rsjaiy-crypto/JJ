@@ -645,7 +645,7 @@ function jj_trip_seed_definitions() {
                     [
                         'year'         => '2027',
                         'dates'        => '18 – 23 March',
-                        'availability' => 'Waitlist open',
+                        'availability' => 'The List is open',
                         'status'       => 'limited',
                         'book_url'     => '',
                     ],
@@ -793,7 +793,7 @@ function jj_trip_seed_definitions() {
 
                 'faqs' => [
                     [
-                        'question' => 'Is there a waitlist?',
+                        'question' => 'Can I get on The List?',
                         'answer'   => 'Yes. Join to be notified the moment booking opens and to get first access before spaces are shared more widely.',
                     ],
                     [
@@ -854,7 +854,7 @@ function jj_trip_seed_definitions() {
                     [
                         'year'         => '2027',
                         'dates'        => 'September',
-                        'availability' => 'Waitlist open',
+                        'availability' => 'The List is open',
                         'status'       => 'limited',
                         'book_url'     => '',
                     ],
@@ -887,7 +887,7 @@ function jj_trip_seed_definitions() {
                     [
                         'year'         => '2028',
                         'dates'        => 'April',
-                        'availability' => 'Waitlist open',
+                        'availability' => 'The List is open',
                         'status'       => 'limited',
                         'book_url'     => '',
                     ],
@@ -920,7 +920,7 @@ function jj_trip_seed_definitions() {
                     [
                         'year'         => '2028',
                         'dates'        => 'September',
-                        'availability' => 'Waitlist open',
+                        'availability' => 'The List is open',
                         'status'       => 'limited',
                         'book_url'     => '',
                     ],

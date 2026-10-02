@@ -67,6 +67,10 @@ $faq_categories = [
         'q' => __( "How do you handle payments when it's a group?", 'jaiye-journeys' ),
         'a' => __( "We always try to get everyone their own payment link. There's more than one way we can take payment depending on the trip, but either way: you get to be a guest at your own trip, not the one chasing your friends for money.", 'jaiye-journeys' ),
       ],
+      [
+        'q' => __( 'Can my partner come?', 'jaiye-journeys' ),
+        'a' => __( 'Yes, of course. Our trips are designed with women in mind, but partners, husbands and friends of every kind are welcome.', 'jaiye-journeys' ),
+      ],
     ],
   ],
   [

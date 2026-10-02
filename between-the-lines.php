@@ -600,7 +600,7 @@ get_header();
         target="_blank"
         rel="noopener noreferrer"
       >
-        <?php esc_html_e( 'Join the Waitlist', 'jaiye-journeys' ); ?>
+        <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
       </a>
     </div>
   </section><!-- /.btl-hero -->
@@ -832,7 +832,7 @@ get_header();
 
   <!-- ============================================================
        6. THE PIPELINE
-       Cream bg. Three retreat cards.
+       Cream bg. Two retreat cards.
        ============================================================ -->
   <section
     class="btl-pipeline"
@@ -852,30 +852,10 @@ get_header();
         <li>
           <article class="btl-pipeline-card">
             <p class="btl-pipeline-card__label">
-              <?php esc_html_e( 'The Prologue', 'jaiye-journeys' ); ?>
+              <?php esc_html_e( 'Volume: Marrakesh', 'jaiye-journeys' ); ?>
             </p>
             <h3 class="btl-pipeline-card__title">
-              <?php esc_html_e( 'Our Soft Launch', 'jaiye-journeys' ); ?>
-            </h3>
-            <p class="btl-pipeline-card__date">
-              <time datetime="2026-11-07"><?php esc_html_e( '7th November 2026', 'jaiye-journeys' ); ?></time>
-            </p>
-            <p class="btl-pipeline-card__desc">
-              <?php esc_html_e( 'The first in-person BTL experience. Small, intimate, and closer to home.', 'jaiye-journeys' ); ?>
-            </p>
-            <span class="btl-pipeline-card__pill btl-pipeline-card__pill--open">
-              <?php esc_html_e( 'Open Soon', 'jaiye-journeys' ); ?>
-            </span>
-          </article>
-        </li>
-
-        <li>
-          <article class="btl-pipeline-card">
-            <p class="btl-pipeline-card__label">
-              <?php esc_html_e( 'Chapter One', 'jaiye-journeys' ); ?>
-            </p>
-            <h3 class="btl-pipeline-card__title">
-              <?php esc_html_e( 'The Marrakesh Edition', 'jaiye-journeys' ); ?>
+              <?php esc_html_e( 'Scents and Sounds', 'jaiye-journeys' ); ?>
             </h3>
             <p class="btl-pipeline-card__date">
               <time datetime="2027-03"><?php esc_html_e( 'March 2027', 'jaiye-journeys' ); ?></time>
@@ -920,7 +900,7 @@ get_header();
        ============================================================ -->
   <section
     class="btl-waitlist"
-    aria-label="<?php esc_attr_e( 'Join the Between the Lines waitlist', 'jaiye-journeys' ); ?>"
+    aria-label="<?php esc_attr_e( 'Get on The List for Between the Lines', 'jaiye-journeys' ); ?>"
   >
     <img
       src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/btl-logo-green-dark.png' ); ?>"
@@ -933,7 +913,7 @@ get_header();
       <?php esc_html_e( 'The best stories begin with a single page.', 'jaiye-journeys' ); ?>
     </h2>
     <p class="btl-waitlist__body">
-      <?php esc_html_e( 'Join the waitlist to be first to know when retreats open, receive early access pricing, and become part of the BTL community before the doors open.', 'jaiye-journeys' ); ?>
+      <?php esc_html_e( 'Get on The List to be first to know when retreats open, receive early access pricing, and become part of the BTL community before the doors open.', 'jaiye-journeys' ); ?>
     </p>
     <a
       href="https://tally.so/r/Gxq2JL"
@@ -941,7 +921,7 @@ get_header();
       target="_blank"
       rel="noopener noreferrer"
     >
-      <?php esc_html_e( 'Join the Waitlist', 'jaiye-journeys' ); ?>
+      <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
     </a>
   </section><!-- /.btl-waitlist -->
 
