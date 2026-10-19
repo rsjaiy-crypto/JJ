@@ -251,6 +251,11 @@
   color: var(--color-forest);
 }
 
+.jcard__badge--sold-out {
+  background-color: var(--color-forest);
+  color: var(--color-cream);
+}
+
 /* ── Body ── */
 
 .jcard__body {

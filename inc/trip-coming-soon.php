@@ -22,7 +22,12 @@ $cs_duration    = jj_trip_field( 'duration', $trip_id );
 $cs_collage     = jj_trip_gallery( 'collage_images', $trip_id );
 $cs_departures  = jj_trip_rows( 'departures', $trip_id );
 
-$cs_waitlist = jj_trip_field( 'booking_url', $trip_id );
+// Booking URL stays in the chain for trips set up before the Waitlist link
+// field existed; new trips should keep the checkout link there instead.
+$cs_waitlist = jj_trip_field( 'waitlist_url', $trip_id );
+if ( ! $cs_waitlist ) {
+    $cs_waitlist = jj_trip_field( 'booking_url', $trip_id );
+}
 if ( ! $cs_waitlist ) {
     $cs_waitlist = jj_trip_field( 'enquiry_embed', $trip_id );
 }

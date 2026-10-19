@@ -48,7 +48,7 @@ function jj_trip_duration_options() {
 /**
  * The full field schema, grouped into meta boxes.
  *
- * Field types: text, textarea, number, url, select, meter, image, gallery, repeater.
+ * Field types: text, textarea, number, url, select, datetime, meter, image, gallery, repeater.
  *
  * @return array
  */
@@ -60,6 +60,42 @@ function jj_trip_schema() {
     }
 
     $schema = [
+
+        /* ── Sales status ─────────────────────────────────────────── */
+        // Sits in the sidebar beside Publish: "Published" only says the page
+        // is live, this box says what visitors can actually do on it.
+        'sales' => [
+            'title'   => __( 'Sales Status', 'jaiye-journeys' ),
+            'context' => 'side',
+            'fields'  => [
+                'status'         => [
+                    'type'    => 'select',
+                    'label'   => __( 'Status', 'jaiye-journeys' ),
+                    'desc'    => __( 'Waitlist shows a short "Get on The List" page instead of the full itinerary. Sold out keeps the full page but removes every Book button.', 'jaiye-journeys' ),
+                    'default' => 'open',
+                    'options' => [
+                        'coming-soon' => __( 'Waitlist', 'jaiye-journeys' ),
+                        'open'        => __( 'On sale', 'jaiye-journeys' ),
+                        'sold-out'    => __( 'Sold out', 'jaiye-journeys' ),
+                    ],
+                ],
+                'sales_open_at'  => [
+                    'type'  => 'datetime',
+                    'label' => __( 'Go on sale at', 'jaiye-journeys' ),
+                    'desc'  => __( 'Optional. A Waitlist trip switches to On sale at this moment. Leave blank to switch by hand.', 'jaiye-journeys' ),
+                ],
+                'sales_close_at' => [
+                    'type'  => 'datetime',
+                    'label' => __( 'Sold out from', 'jaiye-journeys' ),
+                    'desc'  => __( 'Optional. The trip shows as Sold out from this moment.', 'jaiye-journeys' ),
+                ],
+                'waitlist_url'   => [
+                    'type'  => 'url',
+                    'label' => __( 'Waitlist link', 'jaiye-journeys' ),
+                    'desc'  => __( 'Where "Get on The List" goes while the trip is on the waitlist. Keep the checkout link in Book Now URL so the switch to On sale needs no edits.', 'jaiye-journeys' ),
+                ],
+            ],
+        ],
 
         /* ── Hero & intro ─────────────────────────────────────────── */
         'hero' => [
@@ -73,16 +109,6 @@ function jj_trip_schema() {
                     'options' => [
                         'jj-edit' => __( 'Jaiye Journeys Edit', 'jaiye-journeys' ),
                         'btl'     => __( 'Between the Lines retreat', 'jaiye-journeys' ),
-                    ],
-                ],
-                'status'          => [
-                    'type'    => 'select',
-                    'label'   => __( 'Status', 'jaiye-journeys' ),
-                    'desc'    => __( 'Coming soon renders a short waitlist page instead of the full itinerary, and shows "Notify Me" everywhere in place of "Book Now".', 'jaiye-journeys' ),
-                    'default' => 'open',
-                    'options' => [
-                        'open'        => __( 'Open — full trip page', 'jaiye-journeys' ),
-                        'coming-soon' => __( 'Coming soon — waitlist page', 'jaiye-journeys' ),
                     ],
                 ],
                 'destination'     => [
@@ -639,13 +665,90 @@ function jj_trip_earliest_year( $post_id = null ) {
 
 
 /**
+ * Read a stored datetime field as a moment in the site's timezone.
+ *
+ * @param string   $key     Field key.
+ * @param int|null $post_id Post ID.
+ * @return DateTimeImmutable|null Null when unset or unparseable.
+ */
+function jj_trip_datetime( $key, $post_id = null ) {
+    $value = jj_trip_field( $key, $post_id );
+    if ( ! $value ) {
+        return null;
+    }
+
+    $date = DateTimeImmutable::createFromFormat( 'Y-m-d H:i', $value, wp_timezone() );
+
+    return $date ? $date : null;
+}
+
+
+/**
+ * The trip's status right now: 'coming-soon', 'open' or 'sold-out'.
+ *
+ * Worked out on every request from the stored status plus the two optional
+ * switch-over times, rather than rewritten by a cron job — WP-Cron only runs
+ * when someone visits, so a scheduled rewrite could fire late, whereas this
+ * is correct to the minute.
+ *
+ * @param int|null $post_id Post ID.
+ * @return string
+ */
+function jj_trip_status( $post_id = null ) {
+    $status = jj_trip_field( 'status', $post_id, 'open' );
+    $now    = current_datetime();
+
+    if ( 'sold-out' === $status ) {
+        return 'sold-out';
+    }
+
+    $close = jj_trip_datetime( 'sales_close_at', $post_id );
+    if ( $close && $now >= $close ) {
+        return 'sold-out';
+    }
+
+    if ( 'coming-soon' === $status ) {
+        $open = jj_trip_datetime( 'sales_open_at', $post_id );
+        return ( $open && $now >= $open ) ? 'open' : 'coming-soon';
+    }
+
+    return 'open';
+}
+
+
+/**
+ * Human label for a status key.
+ *
+ * @param string $status Status key.
+ * @return string
+ */
+function jj_trip_status_label( $status ) {
+    $fields  = jj_trip_all_fields();
+    $options = $fields['status']['options'];
+
+    return isset( $options[ $status ] ) ? $options[ $status ] : $options['open'];
+}
+
+
+/**
  * Is this trip a not-yet-bookable "coming soon" entry?
  *
  * @param int|null $post_id Post ID.
  * @return bool
  */
 function jj_trip_is_coming_soon( $post_id = null ) {
-    return 'coming-soon' === jj_trip_field( 'status', $post_id, 'open' );
+    return 'coming-soon' === jj_trip_status( $post_id );
+}
+
+
+/**
+ * Has this trip sold out?
+ *
+ * @param int|null $post_id Post ID.
+ * @return bool
+ */
+function jj_trip_is_sold_out( $post_id = null ) {
+    return 'sold-out' === jj_trip_status( $post_id );
 }
 
 
@@ -701,6 +804,12 @@ function jj_trip_sanitise_value( $value, $type ) {
 
         case 'checkbox':
             return $value ? '1' : '';
+
+        case 'datetime':
+            // datetime-local submits 2026-11-01T10:00; stored with a space so
+            // jj_trip_datetime() can parse it in the site timezone.
+            $date = DateTimeImmutable::createFromFormat( 'Y-m-d\TH:i', trim( (string) $value ), wp_timezone() );
+            return $date ? $date->format( 'Y-m-d H:i' ) : '';
 
         case 'gallery':
             $ids = array_map( 'absint', explode( ',', (string) $value ) );

@@ -23,7 +23,7 @@ function jj_trip_add_meta_boxes() {
             $box['title'],
             'jj_trip_render_meta_box',
             'trip',
-            'normal',
+            isset( $box['context'] ) ? $box['context'] : 'normal',
             'high',
             [ 'box_id' => $box_id ]
         );
@@ -59,6 +59,10 @@ function jj_trip_render_meta_box( $post, $args ) {
 
     if ( ! empty( $box['desc'] ) ) {
         echo '<p class="jj-trip-box__desc">' . esc_html( $box['desc'] ) . '</p>';
+    }
+
+    if ( 'sales' === $box_id ) {
+        jj_trip_render_live_status( $post->ID );
     }
 
     foreach ( $box['fields'] as $key => $field ) {
@@ -211,6 +215,16 @@ function jj_trip_render_field( $name, $field, $value, $id = '' ) {
             echo '<button type="button" class="button jj-trip-media__select">' . esc_html__( 'Select images', 'jaiye-journeys' ) . '</button> ';
             echo '<button type="button" class="button-link jj-trip-media__clear">' . esc_html__( 'Clear', 'jaiye-journeys' ) . '</button>';
             echo '</div>';
+            break;
+
+        case 'datetime':
+            $date = DateTimeImmutable::createFromFormat( 'Y-m-d H:i', (string) $value, wp_timezone() );
+            printf(
+                '<input type="datetime-local" id="%s" name="%s" value="%s" class="widefat">',
+                esc_attr( $id ),
+                esc_attr( $name ),
+                esc_attr( $date ? $date->format( 'Y-m-d\\TH:i' ) : '' )
+            );
             break;
 
         case 'number':
@@ -475,3 +489,121 @@ function jj_trip_admin_assets( $hook ) {
     );
 }
 add_action( 'admin_enqueue_scripts', 'jj_trip_admin_assets' );
+
+
+/**
+ * One-line summary of what visitors see now, and what changes next.
+ *
+ * Shared by the Sales Status box and the Trips list column so the two can
+ * never describe the same trip differently.
+ *
+ * @param int $post_id Post ID.
+ * @return string Plain text.
+ */
+function jj_trip_status_summary( $post_id ) {
+    $status = jj_trip_status( $post_id );
+    $now    = current_datetime();
+    $open   = jj_trip_datetime( 'sales_open_at', $post_id );
+    $close  = jj_trip_datetime( 'sales_close_at', $post_id );
+    $format = get_option( 'date_format' ) . ', ' . get_option( 'time_format' );
+    $next   = '';
+
+    if ( 'coming-soon' === $status && $open ) {
+        /* translators: %s: date and time */
+        $next = sprintf( __( 'On sale %s', 'jaiye-journeys' ), wp_date( $format, $open->getTimestamp() ) );
+    } elseif ( 'open' === $status && $close && $close > $now ) {
+        /* translators: %s: date and time */
+        $next = sprintf( __( 'Sold out from %s', 'jaiye-journeys' ), wp_date( $format, $close->getTimestamp() ) );
+    }
+
+    return $next ? jj_trip_status_label( $status ) . ' — ' . $next : jj_trip_status_label( $status );
+}
+
+
+/**
+ * "Right now visitors see …" line at the top of the Sales Status box.
+ *
+ * Reflects the last save, not unsaved edits in the form below it.
+ *
+ * @param int $post_id Post ID.
+ */
+function jj_trip_render_live_status( $post_id ) {
+    printf(
+        '<p class="jj-trip-live jj-trip-live--%s"><strong>%s</strong> %s</p>',
+        esc_attr( jj_trip_status( $post_id ) ),
+        esc_html__( 'Live now:', 'jaiye-journeys' ),
+        esc_html( jj_trip_status_summary( $post_id ) )
+    );
+    printf(
+        '<p class="description">%s</p>',
+        esc_html(
+            sprintf(
+                /* translators: %s: timezone name */
+                __( 'Times are in the site timezone (%s), set under Settings → General.', 'jaiye-journeys' ),
+                wp_timezone_string()
+            )
+        )
+    );
+}
+
+
+/**
+ * Sales Status column on the Trips list, beside the Date column.
+ *
+ * @param array $columns List table columns.
+ * @return array
+ */
+function jj_trip_admin_columns( $columns ) {
+    $out = [];
+    foreach ( $columns as $key => $label ) {
+        if ( 'date' === $key ) {
+            $out['jj_sales_status'] = __( 'Sales Status', 'jaiye-journeys' );
+        }
+        $out[ $key ] = $label;
+    }
+    return $out;
+}
+add_filter( 'manage_trip_posts_columns', 'jj_trip_admin_columns' );
+
+
+/**
+ * Render the Sales Status column.
+ *
+ * @param string $column  Column key.
+ * @param int    $post_id Post ID.
+ */
+function jj_trip_admin_column_content( $column, $post_id ) {
+    if ( 'jj_sales_status' !== $column ) {
+        return;
+    }
+
+    printf(
+        '<span class="jj-trip-live jj-trip-live--%s">%s</span>',
+        esc_attr( jj_trip_status( $post_id ) ),
+        esc_html( jj_trip_status_summary( $post_id ) )
+    );
+}
+add_action( 'manage_trip_posts_custom_column', 'jj_trip_admin_column_content', 10, 2 );
+
+
+/**
+ * Status colours for the Trips list.
+ *
+ * The edit screen gets these from trip-meta.css; the list screen doesn't load
+ * that file, and a few lines don't justify a second stylesheet.
+ */
+function jj_trip_admin_list_styles() {
+    $screen = get_current_screen();
+    if ( ! $screen || 'edit-trip' !== $screen->id ) {
+        return;
+    }
+    ?>
+    <style>
+      .jj-trip-live { font-weight: 600; }
+      .jj-trip-live--coming-soon { color: #996800; }
+      .jj-trip-live--open { color: #00753a; }
+      .jj-trip-live--sold-out { color: #b32d2e; }
+    </style>
+    <?php
+}
+add_action( 'admin_head', 'jj_trip_admin_list_styles' );

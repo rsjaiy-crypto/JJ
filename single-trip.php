@@ -44,6 +44,13 @@ while ( have_posts() ) :
         require get_template_directory() . '/inc/trip-coming-soon.php';
         continue;
     }
+
+    // Sold out keeps the full page (it still sells the next departure) but
+    // drops every Book link; the CTAs below fall back to Enquire.
+    $sold_out = jj_trip_is_sold_out( $trip_id );
+    if ( $sold_out ) {
+        $booking_url = '';
+    }
     ?>
 
 <main id="main-content" class="trip trip--<?php echo esc_attr( $brand ); ?>">
@@ -68,8 +75,18 @@ while ( have_posts() ) :
     </div>
 
     <div class="container trip-hero__inner">
-      <?php if ( $is_btl ) : ?>
-        <p class="trip-hero__eyebrow"><?php esc_html_e( 'Between the Lines', 'jaiye-journeys' ); ?></p>
+      <?php if ( $is_btl || $sold_out ) : ?>
+        <p class="trip-hero__eyebrow">
+          <?php
+          if ( $is_btl && $sold_out ) {
+              esc_html_e( 'Between the Lines · Sold Out', 'jaiye-journeys' );
+          } elseif ( $is_btl ) {
+              esc_html_e( 'Between the Lines', 'jaiye-journeys' );
+          } else {
+              esc_html_e( 'Sold Out', 'jaiye-journeys' );
+          }
+          ?>
+        </p>
       <?php endif; ?>
       <h1 class="trip-hero__title"><?php echo esc_html( jj_trip_volume_title( $trip_id ) ); ?></h1>
 
@@ -295,7 +312,7 @@ while ( have_posts() ) :
                     <?php endif; ?>
                   </li>
                 </ul>
-                <?php if ( ! empty( $departure['book_url'] ) ) : ?>
+                <?php if ( ! $sold_out && ! empty( $departure['book_url'] ) ) : ?>
                   <a href="<?php echo esc_url( $departure['book_url'] ); ?>" class="btn btn--accent trip-booking__chapter-cta" target="_blank" rel="noopener">
                     <?php
                     printf(
@@ -358,7 +375,9 @@ while ( have_posts() ) :
           <?php endif; ?>
 
           <div class="trip-booking__actions">
-            <?php if ( $booking_url ) : ?>
+            <?php if ( $sold_out ) : ?>
+              <p class="trip-booking__sold-out"><?php esc_html_e( 'This trip is sold out. Enquire to hear about the next departure.', 'jaiye-journeys' ); ?></p>
+            <?php elseif ( $booking_url ) : ?>
               <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent" target="_blank" rel="noopener">
                 <?php esc_html_e( 'Book Now', 'jaiye-journeys' ); ?>
               </a>
@@ -678,7 +697,15 @@ while ( have_posts() ) :
        ============================================================ -->
   <section class="trip-cta">
     <div class="container trip-cta__inner js-reveal">
-      <h2 class="trip-cta__title"><?php esc_html_e( 'Ready to secure your place?', 'jaiye-journeys' ); ?></h2>
+      <h2 class="trip-cta__title">
+        <?php
+        echo esc_html(
+            $sold_out
+                ? __( 'Want a place on the next one?', 'jaiye-journeys' )
+                : __( 'Ready to secure your place?', 'jaiye-journeys' )
+        );
+        ?>
+      </h2>
       <div class="trip-cta__actions">
         <?php if ( $booking_url ) : ?>
           <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent" target="_blank" rel="noopener">

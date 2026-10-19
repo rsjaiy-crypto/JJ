@@ -640,6 +640,14 @@
   width: 100%;
 }
 
+.trip-booking__sold-out {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
 .trip-booking__terms {
   margin-top: var(--space-4);
   font-family: var(--font-body);

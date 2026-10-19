@@ -174,3 +174,20 @@
   font-weight: 600;
   color: #2271b1;
 }
+
+/* ── Sales status ────────────────────────────────────────────────── */
+
+.jj-trip-live {
+  margin: 0 0 4px;
+  padding: 8px 10px;
+  border-left: 4px solid currentColor;
+  background: #f6f7f7;
+}
+
+.jj-trip-live strong {
+  color: #1d2327;
+}
+
+.jj-trip-live--coming-soon { color: #996800; }
+.jj-trip-live--open { color: #00753a; }
+.jj-trip-live--sold-out { color: #b32d2e; }

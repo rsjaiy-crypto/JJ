@@ -23,7 +23,9 @@ function jj_trip_card( $post_id ) {
     $title       = jj_trip_volume_title( $post_id );
     $region      = jj_trip_field( 'region', $post_id );
     $pace_band   = jj_trip_pace_band( jj_trip_field( 'meter_pace', $post_id, 50 ) );
-    $coming_soon = jj_trip_is_coming_soon( $post_id );
+    $status      = jj_trip_status( $post_id );
+    $coming_soon = ( 'coming-soon' === $status );
+    $sold_out    = ( 'sold-out' === $status );
     $price       = jj_trip_field( 'price_from', $post_id );
     $duration    = jj_trip_field( 'duration', $post_id );
     $destination = jj_trip_field( 'destination', $post_id );
@@ -34,7 +36,7 @@ function jj_trip_card( $post_id ) {
       data-brand="<?php echo esc_attr( $brand ); ?>"
       data-region="<?php echo esc_attr( $region ); ?>"
       data-pace="<?php echo esc_attr( $pace_band ); ?>"
-      data-status="<?php echo esc_attr( $coming_soon ? 'coming-soon' : 'open' ); ?>"
+      data-status="<?php echo esc_attr( $status ); ?>"
       data-price="<?php echo esc_attr( $price ? (int) $price : 0 ); ?>"
       data-year="<?php echo esc_attr( $year ); ?>"
       data-title="<?php echo esc_attr( $title ); ?>"
@@ -60,6 +62,10 @@ function jj_trip_card( $post_id ) {
           <?php if ( $coming_soon ) : ?>
             <span class="jcard__badge jcard__badge--soon">
               <?php esc_html_e( 'Coming Soon', 'jaiye-journeys' ); ?>
+            </span>
+          <?php elseif ( $sold_out ) : ?>
+            <span class="jcard__badge jcard__badge--soon jcard__badge--sold-out">
+              <?php esc_html_e( 'Sold Out', 'jaiye-journeys' ); ?>
             </span>
           <?php endif; ?>
         </div>
