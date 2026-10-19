@@ -1,0 +1,12 @@
+# Keep the theme's notes for developers and AI agents (HANDOVER.md, AGENTS.md,
+# CLAUDE.md) off the public web. WP Pusher deploys the whole repository into
+# wp-content/themes/JJ, so without this they'd be readable by anyone.
+<FilesMatch "\.md$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>

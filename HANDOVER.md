@@ -1,6 +1,10 @@
 # Jaiye Journeys — Build Handover
-**Last updated: 28 May 2026**  
+**Last updated: 28 May 2026** (deployment sections updated 19 October 2026)  
 Prepared for: continuation in a new Claude Code session
+
+> **Start with AGENTS.md.** It has the current deploy workflow (GitHub + WP Pusher),
+> the trip Sales Status rules and house style. Parts of this document predate
+> those and are kept as background.
 
 ---
 
@@ -13,11 +17,11 @@ Prepared for: continuation in a new Claude Code session
 - **PHP** page templates (WordPress Template Hierarchy)
 - **CSS** — mobile-first, CSS custom properties, no preprocessor, no build step
 - **JavaScript** — vanilla only (nav toggle, hero slideshow), no framework
-- **Fonts** — Google Fonts: Cormorant Garamond (headings, serif) + Jost (body, sans-serif)
+- **Fonts** — Google Fonts: Bodoni Moda (headings, serif) + Jost (body, sans-serif)
 - **Forms** — Tally.so (external links, some open in new tab, some link to `/contact/`)
 - **Travel network** — FORA advisor platform
 
-### Local Environment
+### Local Environment (out of date — no longer used)
 - **App:** LocalWP (formerly Local by Flywheel)
 - **Local URL:** `http://jaiye-journeys.local`
 - **Theme folder (local):** `/Users/reginajaiy/Local Sites/jaiye-journeys/app/public/wp-content/themes/jaiye-journeys-theme/`
@@ -30,33 +34,15 @@ Prepared for: continuation in a new Claude Code session
 
 ---
 
-## 2. SFTP Connection Details
+## 2. Deployment
 
-Config file: `.vscode/sftp.json` at the project root (one level above the theme, alongside the `.vscode/` folder).
+The theme lives in GitHub (`rsjaiy-crypto/JJ`). Pushing to `main` deploys it:
+the WP Pusher plugin pulls the repo into `wp-content/themes/JJ` on the live
+server within about a minute. There is no staging site. Work on a branch and
+merge only when the owner approves. See AGENTS.md.
 
-| Setting | Value |
-|---|---|
-| Host | `(removed)` |
-| Port | `22` |
-| Protocol | `sftp` |
-| Username | `(removed)` |
-| Remote path | `/wordpress/wp-content/themes/jaiye-journeys-theme` |
-| Upload on save | `true` |
-| Password | *(in `.vscode/sftp.json` — not recorded here)* |
-
-### SFTP Extension Setup
-1. Install the **SFTP** extension by liximomo in VS Code (`liximomo.sftp`).
-2. The `.vscode/sftp.json` is already configured — no additional setup needed.
-3. `uploadOnSave: true` auto-pushes a file to live every time you save it in VS Code.
-4. Manual upload: right-click any file in Explorer → **SFTP: Upload File**.
-
-### Known Issue: "Sync Local → Remote" Hangs Indefinitely
-**Problem:** Right-clicking the theme folder and choosing Sync Local → Remote spins forever and uploads nothing.
-
-**Workaround:** Do not use folder-level sync. Instead:
-- Rely on `uploadOnSave: true` — saving a file pushes it automatically.
-- For a file that didn't auto-upload, right-click it → **SFTP: Upload File**.
-- Never use the folder-level "Sync Local → Remote" option.
+The old VS Code SFTP upload-on-save setup is retired. Its paths no longer match
+the live theme folder, so don't use it to deploy.
 
 ---
 
@@ -95,7 +81,7 @@ site that is CMS-managed rather than hardcoded.
 
 - **URLs:** `/trips/<slug>/`. The homepage links to `/trips/jj-bali/` and
   `/trips/jj-cape-town/`, so those two slugs must keep existing.
-- **Rewrite flush:** because the site deploys over SFTP rather than by activating the
+- **Rewrite flush:** because the site deploys via WP Pusher rather than by activating the
   theme, rewrite rules would never flush on their own and every trip URL would 404.
   `JJ_TRIP_REWRITE_VERSION` in `inc/trip-cpt.php` handles this — **bump it whenever the
   CPT slug or rewrite args change**, or the change won't take effect on live.
@@ -238,7 +224,7 @@ site that is CMS-managed rather than hardcoded.
 
 ### Typography
 ```css
---font-heading:  'Cormorant Garamond', Georgia, serif
+--font-heading:  'Bodoni Moda', Georgia, serif
 --font-body:     'Jost', system-ui, sans-serif
 
 --fw-light:    300
@@ -321,12 +307,6 @@ site that is CMS-managed rather than hardcoded.
 
 ## 7. Current Outstanding Issues
 
-### 1. SFTP "Sync Local → Remote" hangs indefinitely
-- **Status:** Unresolved
-- **Impact:** Cannot bulk-sync the theme folder; must upload file by file
-- **Workaround:** Use `uploadOnSave` (automatic on Cmd+S) or right-click individual files → SFTP: Upload File
-- **Do not use** the folder-level "Sync Local → Remote" option
-
 ### 2. Empty ruleset warning in `global.css` at line 843
 - **Status:** Cosmetic — does not affect rendering
 - **Detail:** `.fp-pathways {}` contains only a comment (`/* Full bleed — no container */`) and no CSS declarations. CSS linters flag this as an empty ruleset.
@@ -408,7 +388,7 @@ site that is CMS-managed rather than hardcoded.
 | No page builder | Custom PHP templates only | Full control over markup; no Gutenberg/Elementor overhead |
 | Single CSS file | `global.css` | Simple to maintain at this scale; no build step needed |
 | Fluid type scale | CSS `clamp()` | Smooth scaling across all viewports without brittle breakpoints |
-| Font pairing | Cormorant Garamond (headings) + Jost (body) | Cormorant = luxury/editorial; Jost = modern/clean — matches the JJ brand voice |
+| Font pairing | Bodoni Moda (headings) + Jost (body) | Bodoni Moda = luxury/editorial; Jost = modern/clean — matches the JJ brand voice |
 | Primary palette | Forest `#093923`, Cream `#f5e9db`, Salmon `#e48168` | Forest = nature/calm, Cream = warmth/luxury, Salmon = distinctive energy |
 | Service tile links | Internal services → `/contact/`; Ticketing Desk → Tally form | Ticketing Desk is direct/self-service; other services need a conversation first |
 | Service tile link style | `color: inherit; text-decoration: none;` on all title links | Titles read as headings — the tile itself communicates interactivity |
@@ -421,47 +401,22 @@ site that is CMS-managed rather than hardcoded.
 
 ---
 
-## 11. How to Start a New Claude Code Session
+## 11. How to Start a New Claude Code (or Codex) Session
 
-1. **Open VS Code.**
-2. **Open the theme folder:**  
-   File → Open Folder → `/Users/reginajaiy/Local Sites/jaiye-journeys/app/public/wp-content/themes/jaiye-journeys-theme/`
-3. **Open the integrated Terminal:**  
-   `` Ctrl+` `` or Terminal → New Terminal
-4. **Launch Claude Code:**
-   ```
-   claude
-   ```
-5. **Paste this as your first message:**
-   > Read HANDOVER.md and pick up where we left off. The theme is at `/Users/reginajaiy/Local Sites/jaiye-journeys/app/public/wp-content/themes/jaiye-journeys-theme/`.
+From any computer, or Claude Code on the web: open this repository. Claude Code
+and Codex read AGENTS.md automatically (Claude Code via CLAUDE.md). A good first
+message:
 
-Keep LocalWP running in the background so you can preview changes at `http://jaiye-journeys.local` as you work.
+> Read AGENTS.md. I'd like to change …
 
 ---
 
 ## 12. Workflow for Making Live Changes
 
-1. **Claude Code edits the file** in the theme directory.
-2. **You press Cmd+S** in VS Code. The `uploadOnSave` setting in `sftp.json` pushes the file to the live server automatically.
-3. **Hard refresh the live site** to verify: `https://jaiyejourneys.com` → Cmd+Shift+R (bypasses browser cache).
-4. **If uploadOnSave did not fire** (SFTP connection dropped or timed out): right-click the changed file in the VS Code Explorer → **SFTP: Upload File**.
+1. The agent creates a branch, makes the change and tests it.
+2. It shows you the diff and what it tested.
+3. When you say "merge" or "push live", it merges to `main` and pushes. WP Pusher
+   deploys within about a minute.
+4. Hard refresh the live site to check: `https://jaiyejourneys.com` → Cmd+Shift+R.
 
-> **Never use** "Sync Local → Remote" on the theme folder — it hangs indefinitely without uploading. Always upload file by file.
-
----
-
-## 13. File Paths Reference
-
-```
-Theme root (local):
-/Users/reginajaiy/Local Sites/jaiye-journeys/app/public/wp-content/themes/jaiye-journeys-theme/
-
-WordPress install root (local):
-/Users/reginajaiy/Local Sites/jaiye-journeys/app/public/
-
-SFTP remote root (live):
-/wordpress/wp-content/themes/jaiye-journeys-theme/
-
-SFTP config:
-/Users/reginajaiy/Local Sites/jaiye-journeys/.vscode/sftp.json
-```
+Trip content (itineraries, dates, statuses, FAQs) is edited in wp-admin, not here.
