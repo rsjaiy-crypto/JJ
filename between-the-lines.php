@@ -494,10 +494,9 @@ get_header();
 .btl-pipeline-card__cta {
   margin-top: auto;
   padding-top: var(--space-3);
-  font-family: var(--font-body);
-  font-size: var(--text-xs);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-style: italic;
   color: var(--color-salmon);
 }
 

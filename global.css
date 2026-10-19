@@ -1613,11 +1613,22 @@ textarea::placeholder {
   margin: 0;
 }
 
+/* "Step inside": sized to its words, set in the heading serif's italic
+   rather than the tracked caps the other buttons use */
 .trip-card__cta {
+  align-self: flex-start;
   margin-top: auto;
-  width: 100%;
-  text-align: center;
-  padding-top: var(--space-4);
+  padding: var(--space-2) var(--space-6);
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  font-style: italic;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Keep a little air above the button when the card is the tallest in its row */
+.trip-card__body > :has(+ .trip-card__cta) {
+  margin-bottom: var(--space-4);
 }
 
 /* "View All Trips" button row */
