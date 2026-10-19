@@ -546,7 +546,9 @@ function jj_trip_start_checkout( $trip_id ) {
         exit;
     };
 
-    if ( 'open' !== jj_trip_public_status( $trip_id ) || ! jj_trip_booking_ready( $trip_id ) ) {
+    // Editors can run test-mode bookings before a trip goes on sale.
+    $test_preview = 'test' === jj_stripe_mode() && current_user_can( 'edit_post', $trip_id );
+    if ( ( 'open' !== jj_trip_public_status( $trip_id ) && ! $test_preview ) || ! jj_trip_booking_ready( $trip_id ) ) {
         $fail( 'closed' );
     }
 
