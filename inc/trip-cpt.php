@@ -190,7 +190,7 @@ function jj_btl_seed_volume_names() {
 
     $names = [
         'btl-marrakech'           => 'Scents and Sounds',
-        'sintra-mist-manuscripts' => 'Mysts and Mysteries',
+        'sintra-mist-manuscripts' => 'Mists and Mysteries',
     ];
 
     foreach ( $names as $slug => $name ) {
