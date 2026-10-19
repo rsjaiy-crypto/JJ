@@ -491,31 +491,14 @@ get_header();
   margin: 0;
 }
 
-.btl-pipeline-card__pill {
-  display: inline-block;
-  align-self: flex-start;
+.btl-pipeline-card__cta {
   margin-top: auto;
-  padding: 4px 12px;
-  border-radius: var(--radius-full);
+  padding-top: var(--space-3);
   font-family: var(--font-body);
   font-size: var(--text-xs);
-  font-weight: var(--fw-regular);
-  letter-spacing: 0.06em;
-}
-
-.btl-pipeline-card__pill--coming {
-  background-color: var(--color-salmon);
-  color: var(--color-cream);
-}
-
-.btl-pipeline-card__pill--open {
-  background-color: var(--color-forest);
-  color: var(--color-cream);
-}
-
-.btl-pipeline-card__pill--horizon {
-  background-color: var(--color-sage);
-  color: var(--color-forest);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-salmon);
 }
 
 @media (min-width: 768px) {
@@ -887,26 +870,17 @@ get_header();
         <?php esc_html_e( 'Every chapter has its season.', 'jaiye-journeys' ); ?>
       </h2>
 
-      <?php
-      // One card per published BTL trip, read from the trip itself so the
-      // label, dates, intro and status can't drift from the trip page.
-      $btl_pills = [
-          'announced'   => [ 'horizon', __( 'On the Horizon', 'jaiye-journeys' ) ],
-          'coming-soon' => [ 'coming', __( 'Join the Waitlist', 'jaiye-journeys' ) ],
-          'open'        => [ 'open', __( 'Booking Now', 'jaiye-journeys' ) ],
-          'sold-out'    => [ 'horizon', __( 'Sold Out', 'jaiye-journeys' ) ],
-      ];
-      ?>
+      <?php // One card per published BTL trip, read from the trip itself so the label, dates, intro and status can't drift from the trip page. ?>
       <ul class="btl-pipeline__grid" role="list">
         <?php foreach ( jj_btl_trip_ids() as $btl_id ) : ?>
           <?php
           $btl_name       = jj_trip_field( 'volume_name', $btl_id );
           $btl_intro      = jj_trip_field( 'intro_statement', $btl_id );
           $btl_departures = jj_trip_rows( 'departures', $btl_id );
-          $btl_pill       = $btl_pills[ jj_trip_public_status( $btl_id ) ];
           ?>
           <li>
             <article class="btl-pipeline-card">
+              <?php jj_trip_status_tag( $btl_id ); ?>
               <p class="btl-pipeline-card__label">
                 <?php echo esc_html( jj_trip_volume_title( $btl_id ) ); ?>
               </p>
@@ -938,9 +912,7 @@ get_header();
               <?php if ( $btl_intro ) : ?>
                 <p class="btl-pipeline-card__desc"><?php echo esc_html( $btl_intro ); ?></p>
               <?php endif; ?>
-              <span class="btl-pipeline-card__pill btl-pipeline-card__pill--<?php echo esc_attr( $btl_pill[0] ); ?>">
-                <?php echo esc_html( $btl_pill[1] ); ?>
-              </span>
+              <span class="btl-pipeline-card__cta" aria-hidden="true"><?php esc_html_e( 'Step inside', 'jaiye-journeys' ); ?></span>
             </article>
           </li>
         <?php endforeach; ?>

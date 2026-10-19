@@ -908,6 +908,35 @@ function jj_trip_public_status( $post_id = null ) {
 
 
 /**
+ * Print the small status tag shown on every trip card.
+ *
+ * Driven by what visitors see (jj_trip_public_status()), so a card can't
+ * say something different from the trip page it links to.
+ *
+ * @param int $post_id Post ID.
+ */
+function jj_trip_status_tag( $post_id ) {
+    $status = jj_trip_public_status( $post_id );
+    $is_btl = ( 'btl' === jj_trip_field( 'brand', $post_id, 'jj-edit' ) );
+
+    $labels = [
+        'announced'   => __( 'Coming soon', 'jaiye-journeys' ),
+        'coming-soon' => __( 'Waitlist open', 'jaiye-journeys' ),
+        'open'        => __( 'On sale', 'jaiye-journeys' ),
+        'sold-out'    => $is_btl
+            ? __( 'Sold out · join the list for the next chapter', 'jaiye-journeys' )
+            : __( 'Sold out', 'jaiye-journeys' ),
+    ];
+
+    printf(
+        '<span class="trip-status-tag trip-status-tag--%s">%s</span>',
+        esc_attr( $status ),
+        esc_html( isset( $labels[ $status ] ) ? $labels[ $status ] : $labels['open'] )
+    );
+}
+
+
+/**
  * Human label for a status key.
  *
  * @param string $status Status key.

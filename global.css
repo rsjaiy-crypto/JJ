@@ -1541,6 +1541,26 @@ textarea::placeholder {
   gap: var(--space-2);
 }
 
+/* Sales status tag on every trip card (homepage, Our Journeys, Between the
+   Lines). Small caps tracking to match the trip hero eyebrow. Wraps rather
+   than truncating so the long retreat sold-out line stays whole at 390px. */
+.trip-status-tag {
+  display: inline-block;
+  align-self: flex-start;
+  max-width: 100%;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-cream);
+  color: var(--color-salmon);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  line-height: 1.4;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  white-space: normal;
+}
+
 .trip-card__type {
   margin: 0;
   max-width: none;

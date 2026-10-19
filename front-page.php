@@ -370,6 +370,7 @@ get_header();
                 </div>
               <?php endif; ?>
               <div class="trip-card__body">
+                <?php jj_trip_status_tag( $fp_trip_id ); ?>
                 <p class="trip-card__type">
                   <span class="overline">
                     <?php echo esc_html( $fp_btl ? __( 'Between the Lines', 'jaiye-journeys' ) : __( 'Group Trip', 'jaiye-journeys' ) ); ?>
@@ -389,7 +390,7 @@ get_header();
                   href="<?php echo esc_url( get_permalink( $fp_trip_id ) ); ?>"
                   class="btn btn--secondary btn--sm trip-card__cta"
                 >
-                  <?php esc_html_e( 'Find Out More', 'jaiye-journeys' ); ?>
+                  <?php esc_html_e( 'Step inside', 'jaiye-journeys' ); ?>
                 </a>
               </div>
             </article>

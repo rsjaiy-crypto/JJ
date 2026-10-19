@@ -47,6 +47,7 @@ get_header();
                 <?php endif; ?>
 
                 <div class="trip-card__body">
+                  <?php jj_trip_status_tag( get_the_ID() ); ?>
                   <p class="trip-card__type">
                     <span class="overline"><?php esc_html_e( 'Group Trip', 'jaiye-journeys' ); ?></span>
                   </p>
@@ -63,7 +64,7 @@ get_header();
                   <?php endif; ?>
 
                   <a href="<?php the_permalink(); ?>" class="btn btn--secondary btn--sm trip-card__cta">
-                    <?php esc_html_e( 'Find Out More', 'jaiye-journeys' ); ?>
+                    <?php esc_html_e( 'Step inside', 'jaiye-journeys' ); ?>
                   </a>
                 </div>
               </article>

@@ -243,18 +243,6 @@
   color: var(--color-surface);
 }
 
-.jcard__badge--soon {
-  top: auto;
-  bottom: var(--space-4);
-  left: var(--space-4);
-  background-color: var(--color-cream);
-  color: var(--color-forest);
-}
-
-.jcard__badge--sold-out {
-  background-color: var(--color-forest);
-  color: var(--color-cream);
-}
 
 /* ── Body ── */
 
@@ -263,6 +251,10 @@
   flex-direction: column;
   flex: 1;
   padding: var(--space-5);
+}
+
+.jcard__body .trip-status-tag {
+  margin-bottom: var(--space-3);
 }
 
 .jcard__title {

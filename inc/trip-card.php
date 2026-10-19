@@ -61,24 +61,10 @@ function jj_trip_card( $post_id ) {
             <?php echo esc_html( jj_trip_brand_label( $brand ) ); ?>
           </span>
 
-          <?php if ( $coming_soon ) : ?>
-            <span class="jcard__badge jcard__badge--soon">
-              <?php
-              echo esc_html(
-                  'coming-soon' === $status
-                      ? __( 'Waitlist Open', 'jaiye-journeys' )
-                      : __( 'Coming Soon', 'jaiye-journeys' )
-              );
-              ?>
-            </span>
-          <?php elseif ( $sold_out ) : ?>
-            <span class="jcard__badge jcard__badge--soon jcard__badge--sold-out">
-              <?php esc_html_e( 'Sold Out', 'jaiye-journeys' ); ?>
-            </span>
-          <?php endif; ?>
         </div>
 
         <div class="jcard__body">
+          <?php jj_trip_status_tag( $post_id ); ?>
           <h3 class="jcard__title"><?php echo esc_html( $title ); ?></h3>
 
           <?php if ( $destination ) : ?>
@@ -97,9 +83,7 @@ function jj_trip_card( $post_id ) {
           </p>
 
           <p class="jcard__foot">
-            <?php if ( $coming_soon ) : ?>
-              <span class="jcard__cta"><?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?></span>
-            <?php else : ?>
+            <?php if ( ! $coming_soon ) : ?>
               <?php if ( $price ) : ?>
                 <span class="jcard__price">
                   <?php
@@ -111,8 +95,8 @@ function jj_trip_card( $post_id ) {
                   ?>
                 </span>
               <?php endif; ?>
-              <span class="jcard__cta"><?php esc_html_e( 'Find out more', 'jaiye-journeys' ); ?></span>
             <?php endif; ?>
+            <span class="jcard__cta"><?php esc_html_e( 'Step inside', 'jaiye-journeys' ); ?></span>
           </p>
         </div>
 
