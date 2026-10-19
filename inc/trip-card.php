@@ -37,7 +37,7 @@ function jj_trip_card( $post_id ) {
       data-region="<?php echo esc_attr( $region ); ?>"
       data-pace="<?php echo esc_attr( $pace_band ); ?>"
       data-status="<?php echo esc_attr( $status ); ?>"
-      data-price="<?php echo esc_attr( $price ? (int) $price : 0 ); ?>"
+      data-price="<?php echo esc_attr( ( $price && ! $coming_soon ) ? (int) $price : 0 ); // Pre-sale prices stay out of the page source. ?>"
       data-year="<?php echo esc_attr( $year ); ?>"
       data-title="<?php echo esc_attr( $title ); ?>"
     >
