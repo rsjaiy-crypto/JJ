@@ -903,7 +903,7 @@ get_header();
           $btl_name       = jj_trip_field( 'volume_name', $btl_id );
           $btl_intro      = jj_trip_field( 'intro_statement', $btl_id );
           $btl_departures = jj_trip_rows( 'departures', $btl_id );
-          $btl_pill       = $btl_pills[ jj_trip_status( $btl_id ) ];
+          $btl_pill       = $btl_pills[ jj_trip_public_status( $btl_id ) ];
           ?>
           <li>
             <article class="btl-pipeline-card">

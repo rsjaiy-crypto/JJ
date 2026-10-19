@@ -23,13 +23,14 @@ function jj_trip_card( $post_id ) {
     $title       = jj_trip_volume_title( $post_id );
     $region      = jj_trip_field( 'region', $post_id );
     $pace_band   = jj_trip_pace_band( jj_trip_field( 'meter_pace', $post_id, 50 ) );
-    $status      = jj_trip_status( $post_id );
+    $status      = jj_trip_public_status( $post_id );
     $coming_soon = jj_trip_is_presale( $post_id );
     $sold_out    = ( 'sold-out' === $status );
     $price       = jj_trip_field( 'price_from', $post_id );
     $duration    = jj_trip_field( 'duration', $post_id );
     $destination = jj_trip_field( 'destination', $post_id );
     $year        = jj_trip_earliest_year( $post_id );
+    $first_ts    = jj_trip_first_departure_ts( $post_id );
     ?>
     <article
       class="jcard<?php echo $coming_soon ? ' jcard--soon' : ''; ?>"
@@ -39,6 +40,7 @@ function jj_trip_card( $post_id ) {
       data-status="<?php echo esc_attr( $status ); ?>"
       data-price="<?php echo esc_attr( ( $price && ! $coming_soon ) ? (int) $price : 0 ); // Pre-sale prices stay out of the page source. ?>"
       data-year="<?php echo esc_attr( $year ); ?>"
+      data-date="<?php echo esc_attr( PHP_INT_MAX === $first_ts ? 0 : $first_ts ); ?>"
       data-title="<?php echo esc_attr( $title ); ?>"
     >
       <a class="jcard__link" href="<?php echo esc_url( get_permalink( $post_id ) ); ?>">
@@ -61,7 +63,13 @@ function jj_trip_card( $post_id ) {
 
           <?php if ( $coming_soon ) : ?>
             <span class="jcard__badge jcard__badge--soon">
-              <?php esc_html_e( 'Coming Soon', 'jaiye-journeys' ); ?>
+              <?php
+              echo esc_html(
+                  'coming-soon' === $status
+                      ? __( 'Waitlist Open', 'jaiye-journeys' )
+                      : __( 'Coming Soon', 'jaiye-journeys' )
+              );
+              ?>
             </span>
           <?php elseif ( $sold_out ) : ?>
             <span class="jcard__badge jcard__badge--soon jcard__badge--sold-out">

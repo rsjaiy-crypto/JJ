@@ -884,6 +884,30 @@ function jj_trip_status( $post_id = null ) {
 
 
 /**
+ * The status visitors actually see, for the page and every card that
+ * labels the trip.
+ *
+ * Same as jj_trip_status() except for one transitional case: a Waitlist trip
+ * with no Day by Day yet shows as Coming soon until the one-off status review
+ * on the Trips screen is done (see jj_trip_presale_review_notice()).
+ *
+ * @param int|null $post_id Post ID.
+ * @return string
+ */
+function jj_trip_public_status( $post_id = null ) {
+    $status = jj_trip_status( $post_id );
+
+    if ( 'coming-soon' === $status
+        && ! get_option( JJ_TRIP_PRESALE_REVIEW )
+        && ! jj_trip_rows( 'days', $post_id ) ) {
+        return 'announced';
+    }
+
+    return $status;
+}
+
+
+/**
  * Human label for a status key.
  *
  * @param string $status Status key.

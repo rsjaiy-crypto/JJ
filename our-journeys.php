@@ -22,9 +22,16 @@ $trips = get_posts( [
     'post_type'      => 'trip',
     'post_status'    => 'publish',
     'posts_per_page' => -1,
-    'orderby'        => 'menu_order title',
+    'orderby'        => 'title',
     'order'          => 'ASC',
 ] );
+
+// Soonest departure first, matching the default "Soonest first" sort so the
+// order is right before the filter script runs (and without it). Undated
+// trips go last, alphabetically — the title order above is the tiebreak.
+usort( $trips, function ( $a, $b ) {
+    return jj_trip_first_departure_ts( $a->ID ) <=> jj_trip_first_departure_ts( $b->ID );
+} );
 
 // Only offer a filter option for a region that actually has trips behind it.
 $regions_present = [];

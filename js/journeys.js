@@ -63,8 +63,10 @@
 
 				case 'soonest':
 				default:
-					var ya = parseInt( a.dataset.year, 10 ) || 0;
-					var yb = parseInt( b.dataset.year, 10 ) || 0;
+					// data-date is the first departure's start (Unix time), so
+					// trips in the same year still sort by month and day.
+					var ya = parseInt( a.dataset.date, 10 ) || 0;
+					var yb = parseInt( b.dataset.date, 10 ) || 0;
 
 					// Undated (coming soon) trips go last rather than first.
 					if ( ya === 0 && yb === 0 ) {

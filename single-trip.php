@@ -38,14 +38,11 @@ while ( have_posts() ) :
     $brand    = jj_trip_field( 'brand', $trip_id, 'jj-edit' );
     $is_btl   = ( 'btl' === $brand );
 
-    $status   = jj_trip_status( $trip_id );
+    $status   = jj_trip_public_status( $trip_id );
     $waitlist = ( 'coming-soon' === $status );
 
-    // Coming soon gets the short "Get on The List" page. So does a Waitlist
-    // trip with no Day by Day yet until the one-off status review on the
-    // Trips screen is done, so nothing changed for those before the owner
-    // chose which trips move to Coming soon.
-    if ( 'announced' === $status || ( $waitlist && ! $days && ! get_option( JJ_TRIP_PRESALE_REVIEW ) ) ) {
+    // Coming soon gets the short "Get on The List" page.
+    if ( 'announced' === $status ) {
         require get_template_directory() . '/inc/trip-coming-soon.php';
         continue;
     }
