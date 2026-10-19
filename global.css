@@ -1550,7 +1550,7 @@ textarea::placeholder {
   max-width: 100%;
   padding: 5px 12px;
   border-radius: var(--radius-full);
-  background-color: var(--color-cream);
+  background-color: var(--color-cream); /* Coming soon */
   color: var(--color-salmon);
   font-family: var(--font-body);
   font-size: 11px;
@@ -1559,6 +1559,22 @@ textarea::placeholder {
   letter-spacing: 0.18em;
   text-transform: uppercase;
   white-space: normal;
+}
+
+/* Each status gets its own colour so they read apart at a glance */
+.trip-status-tag--coming-soon {
+  background-color: var(--color-forest); /* Waitlist open: brand green */
+  color: var(--color-cream);
+}
+
+.trip-status-tag--open {
+  background-color: var(--color-salmon); /* On sale */
+  color: var(--color-deep-green);
+}
+
+.trip-status-tag--sold-out {
+  background-color: var(--color-sage);
+  color: var(--color-forest);
 }
 
 .trip-card__type {

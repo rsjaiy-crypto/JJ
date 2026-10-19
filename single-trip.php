@@ -672,6 +672,20 @@ while ( have_posts() ) :
   </section>
 
 
+  <!-- ============================================================
+       15. OTHER JOURNEYS
+       Same button, label and style as the short Coming soon page, so
+       every trip page ends the same way.
+       ============================================================ -->
+  <section class="trip-other">
+    <div class="container trip-other__inner">
+      <a href="<?php echo esc_url( home_url( '/our-journeys/' ) ); ?>" class="btn btn--primary">
+        <?php esc_html_e( 'Other journeys', 'jaiye-journeys' ); ?>
+      </a>
+    </div>
+  </section>
+
+
   <!-- Mobile sticky booking bar (hidden on desktop), with the contents list -->
   <div class="trip-mobile-bar" id="trip-mobile-bar">
     <details class="trip-toc js-toc">

@@ -1502,6 +1502,16 @@
   padding-block: var(--section-gap);
 }
 
+/* "Other journeys" button closing every trip page */
+.trip-other {
+  padding-bottom: var(--section-gap);
+}
+
+.trip-other__inner {
+  display: flex;
+  justify-content: center;
+}
+
 .trip-enquire__grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -1652,7 +1662,7 @@
   }
 
   /* Stop the bar covering the last section's content */
-  .trip-enquire {
+  .trip-other {
     padding-bottom: calc(var(--section-gap) + 72px);
   }
 }

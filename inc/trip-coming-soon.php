@@ -135,8 +135,8 @@ if ( ! empty( $cs_departures[0] ) ) {
 
     <div class="container container--narrow">
       <p class="trip-soon__back">
-        <a href="<?php echo esc_url( home_url( '/our-journeys/' ) ); ?>">
-          <?php esc_html_e( 'See our other journeys', 'jaiye-journeys' ); ?>
+        <a href="<?php echo esc_url( home_url( '/our-journeys/' ) ); ?>" class="btn btn--primary">
+          <?php esc_html_e( 'Other journeys', 'jaiye-journeys' ); ?>
         </a>
       </p>
     </div>
