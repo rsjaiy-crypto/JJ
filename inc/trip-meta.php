@@ -508,7 +508,7 @@ function jj_trip_status_summary( $post_id ) {
     $format = get_option( 'date_format' ) . ', ' . get_option( 'time_format' );
     $next   = '';
 
-    if ( 'coming-soon' === $status && $open ) {
+    if ( jj_trip_is_presale( $post_id ) && $open ) {
         /* translators: %s: date and time */
         $next = sprintf( __( 'On sale %s', 'jaiye-journeys' ), wp_date( $format, $open->getTimestamp() ) );
     } elseif ( 'open' === $status && $close && $close > $now ) {
@@ -600,6 +600,7 @@ function jj_trip_admin_list_styles() {
     ?>
     <style>
       .jj-trip-live { font-weight: 600; }
+      .jj-trip-live--announced,
       .jj-trip-live--coming-soon { color: #996800; }
       .jj-trip-live--open { color: #00753a; }
       .jj-trip-live--sold-out { color: #b32d2e; }
@@ -607,3 +608,133 @@ function jj_trip_admin_list_styles() {
     <?php
 }
 add_action( 'admin_head', 'jj_trip_admin_list_styles' );
+
+
+/**
+ * One-off review when the Coming soon status arrived.
+ *
+ * Every pre-existing pre-sale trip was saved as Waitlist. Trips with no Day by
+ * Day itinerary would now show a thin teaser, so this lists them on the Trips
+ * screen for the owner to move to Coming soon. Nothing changes until they tick
+ * trips and submit; submitting (even with nothing ticked) closes the review.
+ * Marrakesh is never pre-ticked — it stays on Waitlist by request.
+ */
+define( 'JJ_TRIP_PRESALE_REVIEW', 'jj_trip_presale_review_done' );
+
+/**
+ * Waitlist trips with no Day by Day rows.
+ *
+ * @return WP_Post[]
+ */
+function jj_trip_presale_review_candidates() {
+    $trips = get_posts( [
+        'post_type'      => 'trip',
+        'post_status'    => [ 'publish', 'draft', 'pending', 'private', 'future' ],
+        'posts_per_page' => -1,
+        'meta_key'       => JJ_TRIP_META_PREFIX . 'status', // phpcs:ignore WordPress.DB.SlowDBQuery -- admin-only, a handful of trips.
+        'meta_value'     => 'coming-soon',                  // phpcs:ignore WordPress.DB.SlowDBQuery
+    ] );
+
+    return array_values( array_filter( $trips, function ( $trip ) {
+        return ! jj_trip_rows( 'days', $trip->ID );
+    } ) );
+}
+
+/**
+ * Show the review panel above the Trips list.
+ */
+function jj_trip_presale_review_notice() {
+    $screen = get_current_screen();
+    if ( ! $screen || 'edit-trip' !== $screen->id || get_option( JJ_TRIP_PRESALE_REVIEW ) || ! current_user_can( 'edit_posts' ) ) {
+        return;
+    }
+
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display-only flag set by our own redirect.
+    if ( isset( $_GET['jj_presale_switched'] ) ) {
+        return;
+    }
+
+    $candidates = jj_trip_presale_review_candidates();
+    if ( ! $candidates ) {
+        return;
+    }
+    ?>
+    <div class="notice notice-warning">
+      <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+        <input type="hidden" name="action" value="jj_trip_presale_review">
+        <?php wp_nonce_field( 'jj_trip_presale_review' ); ?>
+        <p><strong><?php esc_html_e( 'New status: Coming soon', 'jaiye-journeys' ); ?></strong></p>
+        <p><?php esc_html_e( 'Waitlist pages now show the itinerary, inclusions, trip notes and FAQs. These Waitlist trips have no Day by Day itinerary yet. Tick the ones to move to Coming soon (the short page they show today). Unticked trips stay on Waitlist.', 'jaiye-journeys' ); ?></p>
+        <ul>
+          <?php foreach ( $candidates as $trip ) : ?>
+            <?php $keep = ( false !== stripos( $trip->post_name . ' ' . $trip->post_title, 'marrake' ) ); ?>
+            <li>
+              <label>
+                <input type="checkbox" name="jj_trip_ids[]" value="<?php echo esc_attr( $trip->ID ); ?>" <?php checked( ! $keep ); ?>>
+                <?php echo esc_html( get_the_title( $trip ) ); ?>
+                <?php if ( $keep ) : ?>
+                  <em><?php esc_html_e( '(stays on Waitlist unless you tick it)', 'jaiye-journeys' ); ?></em>
+                <?php endif; ?>
+              </label>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+        <p><button type="submit" class="button button-primary"><?php esc_html_e( 'Move ticked trips to Coming soon', 'jaiye-journeys' ); ?></button></p>
+      </form>
+    </div>
+    <?php
+}
+add_action( 'admin_notices', 'jj_trip_presale_review_notice' );
+
+/**
+ * Apply the review: move ticked Waitlist trips to Coming soon.
+ */
+function jj_trip_presale_review_save() {
+    check_admin_referer( 'jj_trip_presale_review' );
+
+    $ids   = isset( $_POST['jj_trip_ids'] ) ? array_map( 'absint', (array) wp_unslash( $_POST['jj_trip_ids'] ) ) : [];
+    $moved = 0;
+
+    foreach ( $ids as $id ) {
+        // Re-checked here: only a trip still saved as Waitlist is touched.
+        if ( 'trip' !== get_post_type( $id ) || ! current_user_can( 'edit_post', $id ) ) {
+            continue;
+        }
+        if ( 'coming-soon' !== get_post_meta( $id, JJ_TRIP_META_PREFIX . 'status', true ) ) {
+            continue;
+        }
+        update_post_meta( $id, JJ_TRIP_META_PREFIX . 'status', 'announced' );
+        $moved++;
+    }
+
+    update_option( JJ_TRIP_PRESALE_REVIEW, current_time( 'mysql' ), false );
+
+    wp_safe_redirect( add_query_arg( [ 'post_type' => 'trip', 'jj_presale_switched' => $moved ], admin_url( 'edit.php' ) ) );
+    exit;
+}
+add_action( 'admin_post_jj_trip_presale_review', 'jj_trip_presale_review_save' );
+
+/**
+ * Confirm how many trips moved.
+ */
+function jj_trip_presale_review_done_notice() {
+    $screen = get_current_screen();
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- display-only.
+    if ( ! $screen || 'edit-trip' !== $screen->id || ! isset( $_GET['jj_presale_switched'] ) ) {
+        return;
+    }
+
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+    $moved = absint( $_GET['jj_presale_switched'] );
+    printf(
+        '<div class="notice notice-success is-dismissible"><p>%s</p></div>',
+        esc_html(
+            sprintf(
+                /* translators: %d: number of trips */
+                _n( '%d trip moved to Coming soon.', '%d trips moved to Coming soon.', $moved, 'jaiye-journeys' ),
+                $moved
+            )
+        )
+    );
+}
+add_action( 'admin_notices', 'jj_trip_presale_review_done_notice' );

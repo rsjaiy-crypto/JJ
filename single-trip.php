@@ -38,9 +38,9 @@ while ( have_posts() ) :
     $brand    = jj_trip_field( 'brand', $trip_id, 'jj-edit' );
     $is_btl   = ( 'btl' === $brand );
 
-    // Not-yet-bookable trips get a short waitlist page instead of the full
-    // itinerary — a template full of empty sections reads as unfinished.
-    if ( jj_trip_is_coming_soon( $trip_id ) ) {
+    // Not-yet-bookable trips (Coming soon, Waitlist) get the condensed page
+    // instead: no prices, no booking card. Waitlist adds the itinerary.
+    if ( jj_trip_is_presale( $trip_id ) ) {
         require get_template_directory() . '/inc/trip-coming-soon.php';
         continue;
     }
@@ -229,30 +229,7 @@ while ( have_posts() ) :
           </div>
         <?php endif; ?>
 
-        <?php
-        $meters = [
-            'meter_pace'       => __( 'Pace', 'jaiye-journeys' ),
-            'meter_culture'    => __( 'Culture', 'jaiye-journeys' ),
-            'meter_food'       => __( 'Food', 'jaiye-journeys' ),
-            'meter_adventure'  => __( 'Adventure', 'jaiye-journeys' ),
-            'meter_nightlife'  => __( 'Nightlife', 'jaiye-journeys' ),
-            'meter_relaxation' => __( 'Relaxation', 'jaiye-journeys' ),
-        ];
-        ?>
-        <div class="trip-meters js-reveal">
-          <h3 class="trip-meters__title"><?php esc_html_e( 'Trip style', 'jaiye-journeys' ); ?></h3>
-          <?php foreach ( $meters as $meter_key => $meter_label ) : ?>
-            <?php $meter_value = absint( jj_trip_field( $meter_key, $trip_id, 50 ) ); ?>
-            <div class="trip-meter">
-              <span class="trip-meter__label"><?php echo esc_html( $meter_label ); ?></span>
-              <span class="trip-meter__track"
-                    role="img"
-                    aria-label="<?php echo esc_attr( sprintf( '%1$s: %2$d out of 100', $meter_label, $meter_value ) ); ?>">
-                <span class="trip-meter__fill js-meter-fill" style="--meter-value: <?php echo esc_attr( $meter_value ); ?>%;"></span>
-              </span>
-            </div>
-          <?php endforeach; ?>
-        </div>
+        <?php require get_template_directory() . '/inc/trip-sections/meters.php'; ?>
       </div>
 
       <!-- Booking card: sticky on desktop, bottom bar on mobile -->
@@ -425,94 +402,7 @@ while ( have_posts() ) :
     </section>
   <?php endif; ?>
 
-  <?php
-  $not_included = jj_trip_lines( jj_trip_field( 'not_included', $trip_id ) );
-  $route_map    = absint( jj_trip_field( 'route_map', $trip_id ) );
-  $route_copy   = jj_trip_field( 'route_copy', $trip_id );
-  ?>
-  <?php if ( $included || $not_included || $route_map || $route_copy ) : ?>
-    <?php
-    // Side image: explicit field first, else reuse the opening carousel shot.
-    $inclusions_image = absint( jj_trip_field( 'inclusions_image', $trip_id ) );
-    if ( ! $inclusions_image && ! empty( $carousel[0] ) ) {
-        $inclusions_image = absint( $carousel[0] );
-    }
-    ?>
-    <section class="trip-inclusions" id="inclusions">
-      <div class="container trip-inclusions__grid">
-        <div class="trip-inclusions__main">
-
-        <?php if ( $included ) : ?>
-          <details class="trip-accordion js-accordion" open>
-            <summary class="trip-accordion__summary"><?php esc_html_e( "What's Included", 'jaiye-journeys' ); ?></summary>
-            <div class="trip-accordion__body">
-              <?php foreach ( $included as $group ) : ?>
-                <?php $items = jj_trip_lines( isset( $group['items'] ) ? $group['items'] : '' ); ?>
-                <div class="trip-included-group">
-                  <?php if ( ! empty( $group['group_title'] ) ) : ?>
-                    <h4 class="trip-included-group__title"><?php echo esc_html( $group['group_title'] ); ?></h4>
-                  <?php endif; ?>
-                  <?php if ( $items ) : ?>
-                    <ul class="trip-list" role="list">
-                      <?php foreach ( $items as $item ) : ?>
-                        <li><?php echo esc_html( $item ); ?></li>
-                      <?php endforeach; ?>
-                    </ul>
-                  <?php endif; ?>
-                </div>
-              <?php endforeach; ?>
-            </div>
-          </details>
-        <?php endif; ?>
-
-        <?php if ( $not_included ) : ?>
-          <details class="trip-accordion js-accordion">
-            <summary class="trip-accordion__summary"><?php esc_html_e( "What's Not Included", 'jaiye-journeys' ); ?></summary>
-            <div class="trip-accordion__body">
-              <ul class="trip-list trip-list--excluded" role="list">
-                <?php foreach ( $not_included as $item ) : ?>
-                  <li><?php echo esc_html( $item ); ?></li>
-                <?php endforeach; ?>
-              </ul>
-            </div>
-          </details>
-        <?php endif; ?>
-
-        <?php if ( $route_map || $route_copy ) : ?>
-          <details class="trip-accordion js-accordion">
-            <summary class="trip-accordion__summary"><?php esc_html_e( "Where You'll Go", 'jaiye-journeys' ); ?></summary>
-            <div class="trip-accordion__body">
-              <?php if ( $route_copy ) : ?>
-                <div class="trip-prose"><?php echo wp_kses_post( wpautop( $route_copy ) ); ?></div>
-              <?php endif; ?>
-              <?php if ( $route_map ) : ?>
-                <?php
-                echo wp_get_attachment_image( $route_map, 'large', false, [
-                    'class'   => 'trip-route-map',
-                    'loading' => 'lazy',
-                ] );
-                ?>
-              <?php endif; ?>
-            </div>
-          </details>
-        <?php endif; ?>
-
-        </div><!-- /.trip-inclusions__main -->
-
-        <?php if ( $inclusions_image ) : ?>
-          <div class="trip-inclusions__media js-reveal">
-            <?php
-            echo wp_get_attachment_image( $inclusions_image, 'large', false, [
-                'class'   => 'trip-inclusions__img',
-                'loading' => 'lazy',
-            ] );
-            ?>
-          </div>
-        <?php endif; ?>
-
-      </div>
-    </section>
-  <?php endif; ?>
+  <?php require get_template_directory() . '/inc/trip-sections/inclusions.php'; ?>
 
 
   <!-- ============================================================
@@ -543,153 +433,13 @@ while ( have_posts() ) :
   <!-- ============================================================
        8. DAY BY DAY (tabbed)
        ============================================================ -->
-  <?php if ( $days ) : ?>
-    <section class="trip-days" id="day-by-day">
-      <div class="container">
-        <h2 class="trip-heading js-reveal"><?php esc_html_e( 'Day by Day', 'jaiye-journeys' ); ?></h2>
-
-        <div class="trip-days__tabs" role="tablist" aria-label="<?php esc_attr_e( 'Itinerary days', 'jaiye-journeys' ); ?>">
-          <?php foreach ( $days as $i => $day ) : ?>
-            <button type="button"
-                    class="trip-days__tab<?php echo 0 === $i ? ' is-active' : ''; ?>"
-                    role="tab"
-                    id="day-tab-<?php echo (int) ( $i + 1 ); ?>"
-                    aria-controls="day-panel-<?php echo (int) ( $i + 1 ); ?>"
-                    aria-selected="<?php echo 0 === $i ? 'true' : 'false'; ?>"
-                    tabindex="<?php echo 0 === $i ? '0' : '-1'; ?>">
-              <?php
-              // BTL chapters use named days (The Prologue, The Crescendo…);
-              // Edits stay plainly numbered.
-              if ( ! empty( $day['day_name'] ) ) {
-                  echo esc_html( $day['day_name'] );
-              } else {
-                  printf(
-                      /* translators: %d: day number */
-                      esc_html__( 'Day %d', 'jaiye-journeys' ),
-                      (int) ( $i + 1 )
-                  );
-              }
-              ?>
-            </button>
-          <?php endforeach; ?>
-        </div>
-
-        <?php foreach ( $days as $i => $day ) : ?>
-          <div class="trip-days__panel<?php echo 0 === $i ? ' is-active' : ''; ?>"
-               id="day-panel-<?php echo (int) ( $i + 1 ); ?>"
-               role="tabpanel"
-               aria-labelledby="day-tab-<?php echo (int) ( $i + 1 ); ?>"
-               <?php echo 0 === $i ? '' : 'hidden'; ?>>
-            <div class="trip-day">
-              <div class="trip-day__copy">
-                <?php if ( ! empty( $day['location'] ) ) : ?>
-                  <p class="trip-day__location overline"><?php echo esc_html( $day['location'] ); ?></p>
-                <?php endif; ?>
-                <?php if ( ! empty( $day['headline'] ) ) : ?>
-                  <h3 class="trip-day__headline"><?php echo esc_html( $day['headline'] ); ?></h3>
-                <?php endif; ?>
-                <?php if ( ! empty( $day['body'] ) ) : ?>
-                  <div class="trip-prose"><?php echo wp_kses_post( wpautop( $day['body'] ) ); ?></div>
-                <?php endif; ?>
-              </div>
-
-              <?php if ( ! empty( $day['image_1'] ) || ! empty( $day['image_2'] ) ) : ?>
-                <div class="trip-day__media">
-                  <?php foreach ( [ 'image_1', 'image_2' ] as $image_key ) : ?>
-                    <?php if ( ! empty( $day[ $image_key ] ) ) : ?>
-                      <?php
-                      echo wp_get_attachment_image( absint( $day[ $image_key ] ), 'large', false, [
-                          'class'   => 'trip-day__img',
-                          'loading' => 'lazy',
-                      ] );
-                      ?>
-                    <?php endif; ?>
-                  <?php endforeach; ?>
-                </div>
-              <?php endif; ?>
-            </div>
-          </div>
-        <?php endforeach; ?>
-      </div>
-    </section>
-  <?php endif; ?>
+  <?php require get_template_directory() . '/inc/trip-sections/days.php'; ?>
 
 
   <!-- ============================================================
        9. TRIP NOTES
        ============================================================ -->
-  <?php if ( $notes ) : ?>
-    <section class="trip-notes" id="trip-notes">
-      <div class="container">
-        <h2 class="trip-heading js-reveal"><?php esc_html_e( 'Trip Notes', 'jaiye-journeys' ); ?></h2>
-
-        <?php
-        // Split out the featured note so it can anchor the left column.
-        $featured_note = null;
-        $stack_notes   = [];
-
-        foreach ( $notes as $note ) {
-            if ( null === $featured_note && ! empty( $note['featured'] ) ) {
-                $featured_note = $note;
-            } else {
-                $stack_notes[] = $note;
-            }
-        }
-        ?>
-
-        <div class="trip-notes__layout<?php echo $featured_note ? '' : ' trip-notes__layout--no-feature'; ?>">
-
-          <?php if ( $featured_note ) : ?>
-            <article class="trip-note-feature js-reveal">
-              <span class="trip-note-feature__icon" aria-hidden="true">
-                <?php echo jj_trip_note_icon( isset( $featured_note['icon'] ) ? $featured_note['icon'] : 'plane' ); // phpcs:ignore WordPress.Security.EscapeOutput -- fixed inline SVG. ?>
-              </span>
-              <?php if ( ! empty( $featured_note['title'] ) ) : ?>
-                <h3 class="trip-note-feature__title"><?php echo esc_html( $featured_note['title'] ); ?></h3>
-              <?php endif; ?>
-              <?php if ( ! empty( $featured_note['body'] ) ) : ?>
-                <div class="trip-note-feature__body"><?php echo wp_kses_post( wpautop( $featured_note['body'] ) ); ?></div>
-              <?php endif; ?>
-            </article>
-          <?php endif; ?>
-
-          <?php if ( $stack_notes ) : ?>
-            <!--
-              Scroll accordion. Defaults to every panel open; trip.js adds
-              .is-interactive to switch on collapsing, so this stays readable
-              with JS off or under prefers-reduced-motion.
-            -->
-            <div class="trip-note-stack js-note-stack">
-              <?php foreach ( $stack_notes as $index => $note ) : ?>
-                <article class="trip-note-item<?php echo 0 === $index ? ' is-open' : ''; ?>">
-                  <h3 class="trip-note-item__heading">
-                    <button type="button"
-                            class="trip-note-item__trigger"
-                            aria-expanded="<?php echo 0 === $index ? 'true' : 'false'; ?>"
-                            aria-controls="note-panel-<?php echo (int) $index; ?>">
-                      <span class="trip-note-item__icon" aria-hidden="true">
-                        <?php echo jj_trip_note_icon( isset( $note['icon'] ) ? $note['icon'] : 'route' ); // phpcs:ignore WordPress.Security.EscapeOutput -- fixed inline SVG. ?>
-                      </span>
-                      <span class="trip-note-item__title"><?php echo esc_html( isset( $note['title'] ) ? $note['title'] : '' ); ?></span>
-                      <span class="trip-note-item__chevron" aria-hidden="true"></span>
-                    </button>
-                  </h3>
-                  <div class="trip-note-item__panel" id="note-panel-<?php echo (int) $index; ?>">
-                    <div class="trip-note-item__panel-inner">
-                      <?php if ( ! empty( $note['body'] ) ) : ?>
-                        <?php echo wp_kses_post( wpautop( $note['body'] ) ); ?>
-                      <?php endif; ?>
-                    </div>
-                  </div>
-                </article>
-              <?php endforeach; ?>
-            </div>
-          <?php endif; ?>
-
-        </div>
-      </div>
-    </section>
-  <?php endif; ?>
+  <?php require get_template_directory() . '/inc/trip-sections/notes.php'; ?>
 
 
   <!-- ============================================================
@@ -821,23 +571,7 @@ while ( have_posts() ) :
   <!-- ============================================================
        13. FAQ (two columns)
        ============================================================ -->
-  <?php if ( $faqs ) : ?>
-    <section class="trip-faq" id="faq">
-      <div class="container">
-        <h2 class="trip-heading js-reveal"><?php esc_html_e( 'Frequently Asked Questions', 'jaiye-journeys' ); ?></h2>
-        <div class="trip-faq__columns">
-          <?php foreach ( $faqs as $faq ) : ?>
-            <details class="trip-accordion js-accordion">
-              <summary class="trip-accordion__summary"><?php echo esc_html( isset( $faq['question'] ) ? $faq['question'] : '' ); ?></summary>
-              <div class="trip-accordion__body">
-                <div class="trip-prose"><?php echo wp_kses_post( wpautop( isset( $faq['answer'] ) ? $faq['answer'] : '' ) ); ?></div>
-              </div>
-            </details>
-          <?php endforeach; ?>
-        </div>
-      </div>
-    </section>
-  <?php endif; ?>
+  <?php require get_template_directory() . '/inc/trip-sections/faq.php'; ?>
 
 
   <!-- ============================================================

@@ -71,9 +71,14 @@ function jj_trip_schema() {
                 'status'         => [
                     'type'    => 'select',
                     'label'   => __( 'Status', 'jaiye-journeys' ),
-                    'desc'    => __( 'Waitlist shows a short "Get on The List" page instead of the full itinerary. Sold out keeps the full page but removes every Book button.', 'jaiye-journeys' ),
+                    'desc'    => __( 'Coming soon shows only the hero, dates and "Get on The List". Waitlist adds the itinerary, inclusions, trip notes and FAQs, still with no prices or booking. Sold out keeps the full page but removes every Book button.', 'jaiye-journeys' ),
                     'default' => 'open',
+                    // Keys are what's stored. 'coming-soon' predates the
+                    // split and every trip saved before it means Waitlist by
+                    // it, so the key stays and the new minimal state gets
+                    // 'announced' instead — no saved trip changes meaning.
                     'options' => [
+                        'announced'   => __( 'Coming soon', 'jaiye-journeys' ),
                         'coming-soon' => __( 'Waitlist', 'jaiye-journeys' ),
                         'open'        => __( 'On sale', 'jaiye-journeys' ),
                         'sold-out'    => __( 'Sold out', 'jaiye-journeys' ),
@@ -82,7 +87,7 @@ function jj_trip_schema() {
                 'sales_open_at'  => [
                     'type'  => 'datetime',
                     'label' => __( 'Go on sale at', 'jaiye-journeys' ),
-                    'desc'  => __( 'Optional. A Waitlist trip switches to On sale at this moment. Leave blank to switch by hand.', 'jaiye-journeys' ),
+                    'desc'  => __( 'Optional. A Coming soon or Waitlist trip switches to On sale at this moment. Leave blank to switch by hand.', 'jaiye-journeys' ),
                 ],
                 'sales_close_at' => [
                     'type'  => 'datetime',
@@ -684,7 +689,8 @@ function jj_trip_datetime( $key, $post_id = null ) {
 
 
 /**
- * The trip's status right now: 'coming-soon', 'open' or 'sold-out'.
+ * The trip's status right now: 'announced' (Coming soon), 'coming-soon'
+ * (Waitlist), 'open' or 'sold-out'.
  *
  * Worked out on every request from the stored status plus the two optional
  * switch-over times, rather than rewritten by a cron job — WP-Cron only runs
@@ -707,9 +713,9 @@ function jj_trip_status( $post_id = null ) {
         return 'sold-out';
     }
 
-    if ( 'coming-soon' === $status ) {
+    if ( 'announced' === $status || 'coming-soon' === $status ) {
         $open = jj_trip_datetime( 'sales_open_at', $post_id );
-        return ( $open && $now >= $open ) ? 'open' : 'coming-soon';
+        return ( $open && $now >= $open ) ? 'open' : $status;
     }
 
     return 'open';
@@ -731,13 +737,15 @@ function jj_trip_status_label( $status ) {
 
 
 /**
- * Is this trip a not-yet-bookable "coming soon" entry?
+ * Is this trip not yet bookable — Coming soon or Waitlist?
+ *
+ * Either way it gets the condensed page with no prices or booking.
  *
  * @param int|null $post_id Post ID.
  * @return bool
  */
-function jj_trip_is_coming_soon( $post_id = null ) {
-    return 'coming-soon' === jj_trip_status( $post_id );
+function jj_trip_is_presale( $post_id = null ) {
+    return in_array( jj_trip_status( $post_id ), [ 'announced', 'coming-soon' ], true );
 }
 
 

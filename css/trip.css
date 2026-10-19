@@ -1721,6 +1721,17 @@
   font-size: var(--text-sm);
 }
 
+/* Meters sit between the facts and the CTA instead of in the welcome column */
+.trip-soon .trip-meters {
+  margin: 0 0 var(--space-10);
+}
+
+/* Closing "other journeys" link after the shared itinerary sections, which
+   already carry their own bottom padding */
+.trip-soon--end {
+  padding-top: 0;
+}
+
 @media (max-width: 700px) {
   .trip-soon__gallery {
     grid-template-columns: 1fr 1fr;

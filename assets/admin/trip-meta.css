@@ -188,6 +188,7 @@
   color: #1d2327;
 }
 
+.jj-trip-live--announced,
 .jj-trip-live--coming-soon { color: #996800; }
 .jj-trip-live--open { color: #00753a; }
 .jj-trip-live--sold-out { color: #b32d2e; }

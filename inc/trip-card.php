@@ -24,7 +24,7 @@ function jj_trip_card( $post_id ) {
     $region      = jj_trip_field( 'region', $post_id );
     $pace_band   = jj_trip_pace_band( jj_trip_field( 'meter_pace', $post_id, 50 ) );
     $status      = jj_trip_status( $post_id );
-    $coming_soon = ( 'coming-soon' === $status );
+    $coming_soon = jj_trip_is_presale( $post_id );
     $sold_out    = ( 'sold-out' === $status );
     $price       = jj_trip_field( 'price_from', $post_id );
     $duration    = jj_trip_field( 'duration', $post_id );
