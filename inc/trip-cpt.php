@@ -174,3 +174,32 @@ function jj_trip_body_class( $classes ) {
     return $classes;
 }
 add_filter( 'body_class', 'jj_trip_body_class' );
+
+
+/**
+ * Fill in the two existing volume names once, when the field was added.
+ *
+ * They lived as hard-coded text on the Between the Lines page before the
+ * cards read from the trips. Only an empty field is filled, so a name typed
+ * in wp-admin is never overwritten, and the flag stops it running again.
+ */
+function jj_btl_seed_volume_names() {
+    if ( get_option( 'jj_btl_volume_names_seeded' ) ) {
+        return;
+    }
+
+    $names = [
+        'btl-marrakech'           => 'Scents and Sounds',
+        'sintra-mist-manuscripts' => 'Mysts and Mysteries',
+    ];
+
+    foreach ( $names as $slug => $name ) {
+        $trip = get_page_by_path( $slug, OBJECT, 'trip' );
+        if ( $trip && '' === (string) get_post_meta( $trip->ID, JJ_TRIP_META_PREFIX . 'volume_name', true ) ) {
+            update_post_meta( $trip->ID, JJ_TRIP_META_PREFIX . 'volume_name', $name );
+        }
+    }
+
+    update_option( 'jj_btl_volume_names_seeded', current_time( 'mysql' ), false );
+}
+add_action( 'init', 'jj_btl_seed_volume_names', 20 );

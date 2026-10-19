@@ -121,6 +121,16 @@ function jj_trip_schema() {
                     'label' => __( 'Destination', 'jaiye-journeys' ),
                     'desc'  => __( 'Used in the "Welcome to …" heading. e.g. Peru', 'jaiye-journeys' ),
                 ],
+                'volume_number'   => [
+                    'type'  => 'number',
+                    'label' => __( 'Volume number (Between the Lines only)', 'jaiye-journeys' ),
+                    'desc'  => __( 'Gives "Volume 1: Marrakesh". Leave blank to number Between the Lines trips in the order they were published.', 'jaiye-journeys' ),
+                ],
+                'volume_name'     => [
+                    'type'  => 'text',
+                    'label' => __( 'Volume name (Between the Lines only)', 'jaiye-journeys' ),
+                    'desc'  => __( 'e.g. Scents and Sounds. The title on the chapter cards on the Between the Lines page.', 'jaiye-journeys' ),
+                ],
                 'region'          => [
                     'type'    => 'select',
                     'label'   => __( 'Region', 'jaiye-journeys' ),
@@ -576,11 +586,81 @@ function jj_trip_volume_title( $post_id = null ) {
         return get_the_title( $post_id ); // Destination not filled in yet — fall back rather than show "Volume:" with nothing after it.
     }
 
+    $number = jj_trip_volume_number( $post_id );
+
+    if ( ! $number ) {
+        return sprintf(
+            /* translators: %s: destination name */
+            __( 'Volume: %s', 'jaiye-journeys' ),
+            $destination
+        );
+    }
+
     return sprintf(
-        /* translators: %s: destination name */
-        __( 'Volume: %s', 'jaiye-journeys' ),
+        /* translators: 1: volume number, 2: destination name */
+        __( 'Volume %1$d: %2$s', 'jaiye-journeys' ),
+        $number,
         $destination
     );
+}
+
+
+/**
+ * Published Between the Lines trips, in volume order.
+ *
+ * Volume order is publish order, so a new volume always lands at the end and
+ * the existing numbers never shift. An explicit Volume number on a trip
+ * overrides its position.
+ *
+ * @return int[] Post IDs.
+ */
+function jj_btl_trip_ids() {
+    static $ids = null;
+    if ( null !== $ids ) {
+        return $ids;
+    }
+
+    $ids = get_posts( [
+        'post_type'      => 'trip',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => 'date',
+        'order'          => 'ASC',
+        'fields'         => 'ids',
+        'meta_key'       => JJ_TRIP_META_PREFIX . 'brand', // phpcs:ignore WordPress.DB.SlowDBQuery -- a handful of trips.
+        'meta_value'     => 'btl',                          // phpcs:ignore WordPress.DB.SlowDBQuery
+    ] );
+
+    $position = array_flip( $ids );
+    usort( $ids, function ( $a, $b ) use ( $position ) {
+        return jj_trip_volume_number( $a, $position ) - jj_trip_volume_number( $b, $position );
+    } );
+
+    return $ids;
+}
+
+
+/**
+ * A Between the Lines trip's volume number.
+ *
+ * @param int|null $post_id  Post ID.
+ * @param array    $position Publish-order positions, passed while
+ *                           jj_btl_trip_ids() is still building its list.
+ * @return int 0 when the trip isn't a published BTL trip.
+ */
+function jj_trip_volume_number( $post_id = null, $position = null ) {
+    $post_id  = $post_id ? $post_id : get_the_ID();
+    $explicit = absint( jj_trip_field( 'volume_number', $post_id ) );
+
+    if ( $explicit ) {
+        return $explicit;
+    }
+
+    if ( null === $position ) {
+        $position = array_flip( jj_btl_trip_ids() );
+    }
+
+    return isset( $position[ $post_id ] ) ? $position[ $post_id ] + 1 : 0;
 }
 
 

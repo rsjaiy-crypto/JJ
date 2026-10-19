@@ -432,6 +432,46 @@ get_header();
   line-height: 1.2;
 }
 
+/* The title link covers the whole card, so the card is one tap target */
+.btl-pipeline-card {
+  position: relative;
+  transition: box-shadow 200ms ease, transform 200ms ease;
+}
+
+.btl-pipeline-card__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.btl-pipeline-card__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.btl-pipeline-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px color-mix(in srgb, var(--color-deep-green) 14%, transparent);
+}
+
+.btl-pipeline-card__link:focus-visible {
+  outline: none;
+}
+
+.btl-pipeline-card:has(.btl-pipeline-card__link:focus-visible) {
+  outline: 2px solid var(--color-salmon);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btl-pipeline-card,
+  .btl-pipeline-card:hover {
+    transition: none;
+    transform: none;
+  }
+}
+
 .btl-pipeline-card__date {
   font-family: var(--font-body);
   font-size: var(--text-sm);
@@ -847,48 +887,50 @@ get_header();
         <?php esc_html_e( 'Every chapter has its season.', 'jaiye-journeys' ); ?>
       </h2>
 
+      <?php
+      // One card per published BTL trip, read from the trip itself so the
+      // label, dates, intro and status can't drift from the trip page.
+      $btl_pills = [
+          'announced'   => [ 'horizon', __( 'On the Horizon', 'jaiye-journeys' ) ],
+          'coming-soon' => [ 'coming', __( 'Join the Waitlist', 'jaiye-journeys' ) ],
+          'open'        => [ 'open', __( 'Booking Now', 'jaiye-journeys' ) ],
+          'sold-out'    => [ 'horizon', __( 'Sold Out', 'jaiye-journeys' ) ],
+      ];
+      ?>
       <ul class="btl-pipeline__grid" role="list">
-
-        <li>
-          <article class="btl-pipeline-card">
-            <p class="btl-pipeline-card__label">
-              <?php esc_html_e( 'Volume: Marrakesh', 'jaiye-journeys' ); ?>
-            </p>
-            <h3 class="btl-pipeline-card__title">
-              <?php esc_html_e( 'Scents and Sounds', 'jaiye-journeys' ); ?>
-            </h3>
-            <p class="btl-pipeline-card__date">
-              <time datetime="2027-03"><?php esc_html_e( 'March 2027', 'jaiye-journeys' ); ?></time>
-            </p>
-            <p class="btl-pipeline-card__desc">
-              <?php esc_html_e( 'The first full BTL residency. Moroccan desert air, medina mornings, and long reading afternoons in a riad courtyard.', 'jaiye-journeys' ); ?>
-            </p>
-            <span class="btl-pipeline-card__pill btl-pipeline-card__pill--horizon">
-              <?php esc_html_e( 'On the Horizon', 'jaiye-journeys' ); ?>
-            </span>
-          </article>
-        </li>
-
-        <li>
-          <article class="btl-pipeline-card">
-            <p class="btl-pipeline-card__label">
-              <?php esc_html_e( 'Chapter Two', 'jaiye-journeys' ); ?>
-            </p>
-            <h3 class="btl-pipeline-card__title">
-              <?php esc_html_e( 'The Sintra Edition', 'jaiye-journeys' ); ?>
-            </h3>
-            <p class="btl-pipeline-card__date">
-              <time datetime="2027-10"><?php esc_html_e( 'October 2027', 'jaiye-journeys' ); ?></time>
-            </p>
-            <p class="btl-pipeline-card__desc">
-              <?php esc_html_e( 'Fairy-tale palaces, forested hills, and a literary atmosphere that feels like it was made for readers.', 'jaiye-journeys' ); ?>
-            </p>
-            <span class="btl-pipeline-card__pill btl-pipeline-card__pill--horizon">
-              <?php esc_html_e( 'On the Horizon', 'jaiye-journeys' ); ?>
-            </span>
-          </article>
-        </li>
-
+        <?php foreach ( jj_btl_trip_ids() as $btl_id ) : ?>
+          <?php
+          $btl_name       = jj_trip_field( 'volume_name', $btl_id );
+          $btl_intro      = jj_trip_field( 'intro_statement', $btl_id );
+          $btl_departures = jj_trip_rows( 'departures', $btl_id );
+          $btl_pill       = $btl_pills[ jj_trip_status( $btl_id ) ];
+          $btl_when       = '';
+          if ( ! empty( $btl_departures[0] ) ) {
+              $btl_when = trim( ( isset( $btl_departures[0]['dates'] ) ? $btl_departures[0]['dates'] : '' ) . ' ' . ( isset( $btl_departures[0]['year'] ) ? $btl_departures[0]['year'] : '' ) );
+          }
+          ?>
+          <li>
+            <article class="btl-pipeline-card">
+              <p class="btl-pipeline-card__label">
+                <?php echo esc_html( jj_trip_volume_title( $btl_id ) ); ?>
+              </p>
+              <h3 class="btl-pipeline-card__title">
+                <a class="btl-pipeline-card__link" href="<?php echo esc_url( get_permalink( $btl_id ) ); ?>">
+                  <?php echo esc_html( $btl_name ? $btl_name : get_the_title( $btl_id ) ); ?>
+                </a>
+              </h3>
+              <?php if ( $btl_when ) : ?>
+                <p class="btl-pipeline-card__date"><?php echo esc_html( $btl_when ); ?></p>
+              <?php endif; ?>
+              <?php if ( $btl_intro ) : ?>
+                <p class="btl-pipeline-card__desc"><?php echo esc_html( $btl_intro ); ?></p>
+              <?php endif; ?>
+              <span class="btl-pipeline-card__pill btl-pipeline-card__pill--<?php echo esc_attr( $btl_pill[0] ); ?>">
+                <?php echo esc_html( $btl_pill[1] ); ?>
+              </span>
+            </article>
+          </li>
+        <?php endforeach; ?>
       </ul>
     </div>
   </section><!-- /.btl-pipeline -->
