@@ -651,7 +651,7 @@ get_header();
             <?php esc_html_e( 'Each retreat is built around four things: radical rest, authentic culture, genuine community, and the kind of unhurried reading time that real life rarely allows. No packed schedules. No 10am checkouts. Just you, your book, and a beautifully produced experience in a destination worth writing home about.', 'jaiye-journeys' ); ?>
           </p>
           <p>
-            <?php esc_html_e( 'Every retreat is limited to 12 guests. Every detail is handled. All you need to bring is your reading list.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Every retreat has limited spaces. Every detail is handled. All you need to bring is your reading list.', 'jaiye-journeys' ); ?>
           </p>
           <a
             href="https://tally.so/r/Gxq2JL"

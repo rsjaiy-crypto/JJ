@@ -27,17 +27,21 @@ $faq_categories = [
     'heading' => __( 'Booking & Payment', 'jaiye-journeys' ),
     'items'   => [
       [
-        'q' => __( 'What do I need to pay to secure my spot?', 'jaiye-journeys' ),
-        'a' => __( "A 25% deposit holds your place, and it's non-refundable from the moment it's paid. The rest is due before departure, per your trip's payment schedule.", 'jaiye-journeys' ),
+        'q'       => __( 'What do I need to pay to secure my spot?', 'jaiye-journeys' ),
+        'a_parts' => [
+          __( "A deposit of £500 / $700 holds your place. It's non-refundable once you book, outside the 60-day cool-off period. The rest is due before departure, per your trip's payment schedule. Full detail is on our", 'jaiye-journeys' ),
+          'link',
+          __( 'page.', 'jaiye-journeys' ),
+        ],
       ],
       [
         'q' => __( 'Can I pay in instalments?', 'jaiye-journeys' ),
-        'a' => __( 'Yes, no interest for spreading it out. Life happens, budgets breathe.', 'jaiye-journeys' ),
+        'a' => __( 'Yes, with a monthly payment plan and no interest for spreading it out. Your payment dates are confirmed when you book. Life happens, budgets breathe.', 'jaiye-journeys' ),
       ],
       [
         'q'       => __( 'What if I change my mind right after booking?', 'jaiye-journeys' ),
         'a_parts' => [
-          __( 'Cancel within 48 hours, and your trip is more than 30 days away, you get your deposit back in full. Full detail is on our', 'jaiye-journeys' ),
+          __( "You're covered by our 60-Day Cool-Off Period: if you change your mind within 60 days of booking, we'll refund your deposit in full. Full detail is on our", 'jaiye-journeys' ),
           'link',
           __( 'page.', 'jaiye-journeys' ),
         ],

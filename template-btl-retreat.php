@@ -257,7 +257,7 @@ get_header();
         </details>
         <details class="btlr-accordion-item">
           <summary><?php esc_html_e( 'Payment Terms', 'jaiye-journeys' ); ?></summary>
-          <p><?php esc_html_e( 'A holding deposit secures your spot, refundable until the cohort reaches its minimum. The remaining balance is due 60 days before departure. Payment plans and Klarna available at checkout.', 'jaiye-journeys' ); ?></p>
+          <p><?php esc_html_e( 'A £500 / $700 deposit secures your place, refunded in full if you change your mind within 60 days of booking. The remaining balance is due 60 days before departure, or spread across a monthly payment plan with no interest.', 'jaiye-journeys' ); ?></p>
         </details>
         <details class="btlr-accordion-item">
           <summary><?php esc_html_e( 'Getting There', 'jaiye-journeys' ); ?></summary>
