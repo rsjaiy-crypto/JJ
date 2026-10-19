@@ -376,7 +376,7 @@ function jj_trip_seed_definitions() {
 
                 'booking_url'   => 'https://tally.so/r/1ApXBp',
                 'enquiry_url'   => '',
-                'payment_terms' => 'A £500 / $700 deposit secures your place, refunded in full if you change your mind within 60 days of booking. The remaining balance is due 60 days before departure, or spread across a monthly payment plan with no interest.',
+                'payment_terms' => 'A £500 / $700 deposit secures your place, refunded in full if you change your mind within 60 days of booking. The balance is then taken in automatic monthly payments with no interest, up to the trip’s final payment date, or you can pay in full at booking.',
 
                 'departures' => [
                     [
@@ -639,7 +639,7 @@ function jj_trip_seed_definitions() {
 
                 'booking_url'   => 'https://tally.so/r/Gxq2JL',
                 'enquiry_url'   => '',
-                'payment_terms' => 'A £500 / $700 deposit secures your place, refunded in full if you change your mind within 60 days of booking. The remaining balance is due 60 days before departure, or spread across a monthly payment plan with no interest.',
+                'payment_terms' => 'A £500 / $700 deposit secures your place, refunded in full if you change your mind within 60 days of booking. The balance is then taken in automatic monthly payments with no interest, up to the trip’s final payment date, or you can pay in full at booking.',
 
                 'departures' => [
                     [
@@ -942,7 +942,7 @@ function jj_trip_seed_definitions() {
                 'group_size'      => 'Max 12 travellers',
                 'welcome_copy'    => 'Placeholder copy. This trip was created so the homepage link resolves; fill it in properly in Trips → The Islands Edit.',
                 'booking_url'     => 'https://tally.so/r/RGVxVj',
-                'payment_terms'   => 'A £500 / $700 deposit secures your place, refunded in full if you change your mind within 60 days of booking. The remaining balance is due 60 days before departure, or spread across a monthly payment plan with no interest.',
+                'payment_terms'   => 'A £500 / $700 deposit secures your place, refunded in full if you change your mind within 60 days of booking. The balance is then taken in automatic monthly payments with no interest, up to the trip’s final payment date, or you can pay in full at booking.',
             ],
         ],
 
@@ -960,7 +960,7 @@ function jj_trip_seed_definitions() {
                 'group_size'      => 'Max 12 travellers',
                 'welcome_copy'    => 'Placeholder copy. This trip was created so the homepage link resolves; fill it in properly in Trips → The Cape Town Edit.',
                 'booking_url'     => 'https://tally.so/r/aQa9D2',
-                'payment_terms'   => 'A £500 / $700 deposit secures your place, refunded in full if you change your mind within 60 days of booking. The remaining balance is due 60 days before departure, or spread across a monthly payment plan with no interest.',
+                'payment_terms'   => 'A £500 / $700 deposit secures your place, refunded in full if you change your mind within 60 days of booking. The balance is then taken in automatic monthly payments with no interest, up to the trip’s final payment date, or you can pay in full at booking.',
             ],
         ],
     ];

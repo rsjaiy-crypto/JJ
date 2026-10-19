@@ -62,23 +62,38 @@ historical reasons. Don't rename them, because saved trips depend on them.
   text are fine.
 - Status can be changed per trip, or in Quick Edit / Bulk Edit on the Trips list.
 
-### Booking page
+### Booking page and payment plans
 
 `/trips/<slug>/book/` (`single-trip-book.php`, `inc/trip-booking.php`,
 `css/booking.css`, `js/booking.js`). Guests pick a departure, a room (the
-trip's **Rooms** repeater), travellers and deposit or full payment, and the
-site creates a Stripe Checkout Session and redirects to it.
+trip's **Rooms** repeater), travellers, £ or $, and **payment plan** (default)
+or **pay in full** (the room's discounted pay-in-full price).
 
-- Switched on per trip by adding Rooms, once a Stripe key is saved in
-  Trips → Booking Settings (stored in the `jj_stripe_secret_key` option, or a
-  `JJ_STRIPE_SECRET_KEY` constant in wp-config.php). **Never put the key in
-  this repo; it's public.** Without both, Book buttons keep the old Book Now URL.
-- Only reachable while the trip is On sale (editors can preview it).
+- Payment plan: Checkout takes the trip's deposit per person
+  (`deposit_gbp` / `deposit_usd`, £500 / $700) and saves the card
+  (`setup_future_usage=off_session`). The balance is split equally over the
+  trip's **Payment plan dates** still ahead (after today); the last payment
+  takes any odd pence. With no dates ahead, only pay in full is offered.
+  There is no "60 days before departure" rule; the dates are per trip.
+- On `checkout.session.completed` the webhook (`/wp-json/jj/v1/stripe`,
+  signature-checked) records a **Booking** (Trips → Bookings, CPT
+  `jj_booking`, meta `_jj_bk_*`) and creates a Stripe subscription schedule:
+  one phase per date, yearly price so nothing renews inside a phase,
+  `billing_cycle_anchor=phase_start`, no proration, cancels after the last.
+  Idempotency keys stop duplicates.
+- Failed / authentication-needed invoices mark the booking overdue; Stripe's
+  own retry and card-update emails handle the guest. A daily cron emails the
+  owner once after 14 days unpaid. Nothing is ever cancelled automatically.
+- Currency: `?currency=` or the £ / $ switch, else country.is lookup of the
+  visitor IP (US → $, everyone else £). Fixed once paid, since the schedule
+  uses the session's currency.
+- Keys: Trips → Booking Settings (`jj_stripe_secret_key`,
+  `jj_stripe_webhook_secret`) or `JJ_STRIPE_SECRET_KEY` /
+  `JJ_STRIPE_WEBHOOK_SECRET` in wp-config.php. **Never put keys in this
+  repo; it's public.** The page is off until rooms, key and webhook secret
+  are all set. Test mode offers a "Quick test schedule" (payments 5 min apart).
 - Amounts are always computed on the server from the trip's fields; the form
-  only sends indexes. Stripe metadata carries trip, departure, room,
-  travellers and deposit/full.
-- Stripe returns guests to the same URL with `?session_id=`, which shows the
-  confirmation after checking the session is paid.
+  only sends indexes. `js/booking.js` mirrors `jj_booking_quote()`.
 
 ### Cards and listings
 

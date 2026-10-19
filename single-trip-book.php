@@ -2,9 +2,10 @@
 /**
  * Trip booking page: /trips/<slug>/book/.
  *
- * Guests choose their dates, room, number of travellers and deposit or full
- * payment, then continue to Stripe Checkout (see inc/trip-booking.php).
- * Works without JavaScript; js/booking.js keeps the summary up to date.
+ * Guests choose their dates, room, number of travellers, currency and
+ * payment plan or pay in full, then continue to Stripe Checkout (see
+ * inc/trip-booking.php). Works without JavaScript for the choices;
+ * js/booking.js keeps prices, the plan and the summary up to date.
  * Only reachable while the trip is On sale, apart from editors previewing it.
  *
  * @package jaiye-journeys
@@ -27,6 +28,10 @@ while ( have_posts() ) :
     $departures = jj_trip_bookable_departures( $trip_id );
     $has_dates  = (bool) jj_trip_rows( 'departures', $trip_id );
     $terms_note = jj_trip_field( 'payment_terms', $trip_id );
+    $plan_dates = jj_trip_plan_dates( $trip_id );
+    $currencies = jj_trip_booking_currencies( $trip_id );
+    $currency   = jj_booking_visitor_currency( $currencies );
+    $symbols    = jj_booking_currencies();
 
     $enquiry_url = jj_trip_field( 'enquiry_url', $trip_id );
     if ( empty( $enquiry_url ) ) {
@@ -64,14 +69,41 @@ while ( have_posts() ) :
     $preview_note = '';
     if ( 'open' !== jj_trip_public_status( $trip_id ) ) {
         $preview_note = __( 'Preview: visitors can’t see this page until the trip is On sale.', 'jaiye-journeys' );
-    } elseif ( ! jj_stripe_key() ) {
-        $preview_note = __( 'Preview: visitors can’t see this page until a Stripe key is saved in Trips → Booking Settings.', 'jaiye-journeys' );
+    } elseif ( ! jj_stripe_key() || ! jj_stripe_webhook_secret() ) {
+        $preview_note = __( 'Preview: visitors can’t see this page until the Stripe key and webhook secret are saved in Trips → Booking Settings.', 'jaiye-journeys' );
     } elseif ( ! $rooms ) {
         $preview_note = __( 'Preview: add Rooms to this trip to switch on its booking page.', 'jaiye-journeys' );
+    } elseif ( 'test' === jj_stripe_mode() ) {
+        $preview_note = __( 'Stripe test mode: no real money is taken. Pay with the test card 4242 4242 4242 4242.', 'jaiye-journeys' );
     }
 
-    $money = function ( $amount ) {
-        return '£' . number_format_i18n( (int) $amount );
+    // First render, before JavaScript takes over the numbers.
+    $first_room = isset( $rooms[ $sel_room ] ) ? $rooms[ $sel_room ] : null;
+    $first_plan = $first_room ? jj_booking_quote( $trip_id, $first_room, 1, $currency, 'plan' ) : null;
+    $first_full = $first_room ? jj_booking_quote( $trip_id, $first_room, 1, $currency, 'full' ) : null;
+    $first      = $first_plan ? $first_plan : $first_full;
+    $first_dep  = isset( $departures[ $sel_dep ] ) ? jj_trip_departure_label( $trip_id, $sel_dep, $departures[ $sel_dep ] ) : '';
+
+    $date_labels = array_map( function ( $ts ) {
+        return wp_date( 'j M Y', $ts );
+    }, $plan_dates );
+
+    // Room price lines, one per currency; CSS shows the chosen currency's.
+    $room_price = function ( $room ) use ( $currencies ) {
+        $out = '';
+        foreach ( $currencies as $cur ) {
+            $p     = $room['prices'][ $cur ];
+            $plan  = jj_booking_money( $p['plan'] * 100, $cur );
+            $out  .= '<span class="booking-cur booking-cur--' . esc_attr( $cur ) . '">';
+            /* translators: %s: price */
+            $out  .= esc_html( sprintf( __( '%s per person', 'jaiye-journeys' ), $plan ) );
+            if ( $p['full'] < $p['plan'] ) {
+                /* translators: %s: pay-in-full price */
+                $out .= '<span class="booking-room__deposit">' . esc_html( sprintf( __( 'or %s paid in full', 'jaiye-journeys' ), jj_booking_money( $p['full'] * 100, $cur ) ) ) . '</span>';
+            }
+            $out .= '</span>';
+        }
+        return $out;
     };
     ?>
 
@@ -119,9 +151,12 @@ while ( have_posts() ) :
         <div class="booking-done">
           <?php if ( $session ) : ?>
             <?php
-            $meta  = $session['metadata'];
-            $name  = isset( $session['customer_details']['name'] ) ? strtok( (string) $session['customer_details']['name'], ' ' ) : '';
-            $email = isset( $session['customer_details']['email'] ) ? $session['customer_details']['email'] : '';
+            $meta     = $session['metadata'];
+            $cur      = isset( $meta['currency'] ) ? $meta['currency'] : 'gbp';
+            $plan     = jj_booking_unpack_plan( isset( $meta['plan'] ) ? $meta['plan'] : '' );
+            $is_plan  = 'plan' === $meta['payment'] && $plan;
+            $name     = isset( $session['customer_details']['name'] ) ? strtok( (string) $session['customer_details']['name'], ' ' ) : '';
+            $email    = isset( $session['customer_details']['email'] ) ? $session['customer_details']['email'] : '';
             ?>
             <p class="booking-done__eyebrow"><?php esc_html_e( 'Payment received', 'jaiye-journeys' ); ?></p>
             <h2 class="booking-done__title">
@@ -150,10 +185,18 @@ while ( have_posts() ) :
               <div><dt><?php esc_html_e( 'Room', 'jaiye-journeys' ); ?></dt><dd><?php echo esc_html( $meta['room'] ); ?></dd></div>
               <div><dt><?php esc_html_e( 'Travellers', 'jaiye-journeys' ); ?></dt><dd><?php echo esc_html( $meta['travellers'] ); ?></dd></div>
               <div>
-                <dt><?php echo esc_html( 'deposit' === $meta['payment'] ? __( 'Deposit paid', 'jaiye-journeys' ) : __( 'Paid', 'jaiye-journeys' ) ); ?></dt>
-                <dd><?php echo esc_html( $money( $session['amount_total'] / 100 ) ); ?></dd>
+                <dt><?php echo esc_html( $is_plan ? __( 'Deposit paid', 'jaiye-journeys' ) : __( 'Paid in full', 'jaiye-journeys' ) ); ?></dt>
+                <dd><?php echo esc_html( jj_booking_money( $session['amount_total'], $cur ) ); ?></dd>
               </div>
+              <?php if ( $is_plan ) : ?>
+                <?php foreach ( $plan as $payment ) : ?>
+                  <div><dt><?php echo esc_html( wp_date( 'j M Y', $payment[0] ) ); ?></dt><dd><?php echo esc_html( jj_booking_money( $payment[1], $cur ) ); ?></dd></div>
+                <?php endforeach; ?>
+              <?php endif; ?>
             </dl>
+            <?php if ( $is_plan ) : ?>
+              <p class="booking-done__copy"><?php esc_html_e( 'Your card is saved securely with Stripe and the payments above are taken automatically. We’ll email you if one ever needs your attention.', 'jaiye-journeys' ); ?></p>
+            <?php endif; ?>
           <?php else : ?>
             <h2 class="booking-done__title"><?php esc_html_e( 'Thank you', 'jaiye-journeys' ); ?></h2>
             <p class="booking-done__copy">
@@ -181,16 +224,34 @@ while ( have_posts() ) :
         <?php endif; ?>
 
         <form class="booking-form js-booking" method="post" action="<?php echo esc_url( $book_url ); ?>#booking"
-              data-rate="<?php echo esc_attr( jj_fx_gbp_usd_rate() ); ?>">
+              data-currency="<?php echo esc_attr( $currency ); ?>"
+              data-dates="<?php echo esc_attr( wp_json_encode( $date_labels ) ); ?>"
+              <?php foreach ( $currencies as $cur ) : ?>
+                data-deposit-<?php echo esc_attr( $cur ); ?>="<?php echo (int) jj_trip_deposit( $trip_id, $cur ); ?>"
+              <?php endforeach; ?>>
           <input type="hidden" name="jj_checkout" value="1">
+          <input type="hidden" name="currency" value="<?php echo esc_attr( $currency ); ?>">
 
           <div class="booking-form__steps">
+
+            <?php if ( count( $currencies ) > 1 ) : ?>
+              <p class="booking-currency" aria-label="<?php esc_attr_e( 'Currency', 'jaiye-journeys' ); ?>">
+                <?php foreach ( $currencies as $cur ) : ?>
+                  <a href="<?php echo esc_url( add_query_arg( [ 'currency' => $cur, 'chapter' => $sel_dep + 1 ], $book_url ) . '#booking' ); ?>"
+                     class="booking-currency__option js-currency<?php echo $cur === $currency ? ' is-active' : ''; ?>"
+                     data-currency="<?php echo esc_attr( $cur ); ?>"
+                     <?php echo $cur === $currency ? 'aria-current="true"' : ''; ?>><?php echo esc_html( $symbols[ $cur ] ); ?></a>
+                <?php endforeach; ?>
+              </p>
+            <?php endif; ?>
+
+            <?php $step = 0; ?>
 
             <?php /* ── Dates ── */ ?>
             <?php if ( count( $departures ) > 1 ) : ?>
               <fieldset class="booking-step">
                 <legend class="booking-step__title">
-                  <span class="booking-step__num">1</span>
+                  <span class="booking-step__num"><?php echo (int) ++$step; ?></span>
                   <?php echo esc_html( $is_btl ? __( 'Choose your chapter', 'jaiye-journeys' ) : __( 'Choose your dates', 'jaiye-journeys' ) ); ?>
                 </legend>
                 <div class="booking-choices">
@@ -213,7 +274,7 @@ while ( have_posts() ) :
             <?php /* ── Room ── */ ?>
             <fieldset class="booking-step">
               <legend class="booking-step__title">
-                <span class="booking-step__num"><?php echo count( $departures ) > 1 ? 2 : 1; ?></span>
+                <span class="booking-step__num"><?php echo (int) ++$step; ?></span>
                 <?php esc_html_e( 'Choose your room', 'jaiye-journeys' ); ?>
               </legend>
               <div class="booking-rooms">
@@ -221,8 +282,10 @@ while ( have_posts() ) :
                   <label class="booking-room<?php echo $room['sold_out'] ? ' is-sold-out' : ''; ?>">
                     <input type="radio" name="room" value="<?php echo (int) $i; ?>"
                            data-name="<?php echo esc_attr( $room['name'] ); ?>"
-                           data-price="<?php echo (int) $room['price']; ?>"
-                           data-deposit="<?php echo (int) $room['deposit']; ?>"
+                           <?php foreach ( $currencies as $cur ) : ?>
+                             data-plan-<?php echo esc_attr( $cur ); ?>="<?php echo (int) $room['prices'][ $cur ]['plan']; ?>"
+                             data-full-<?php echo esc_attr( $cur ); ?>="<?php echo (int) $room['prices'][ $cur ]['full']; ?>"
+                           <?php endforeach; ?>
                            data-max="<?php echo (int) $room['max_guests']; ?>"
                            <?php checked( $sel_room, $i ); ?>
                            <?php disabled( $room['sold_out'] ); ?>
@@ -241,18 +304,7 @@ while ( have_posts() ) :
                         <?php if ( $room['sold_out'] ) : ?>
                           <?php esc_html_e( 'Sold out', 'jaiye-journeys' ); ?>
                         <?php else : ?>
-                          <?php
-                          /* translators: %s: price */
-                          echo esc_html( sprintf( __( '%s per person', 'jaiye-journeys' ), $money( $room['price'] ) ) );
-                          ?>
-                          <?php if ( $room['deposit'] ) : ?>
-                            <span class="booking-room__deposit">
-                              <?php
-                              /* translators: %s: deposit */
-                              echo esc_html( sprintf( __( '%s deposit', 'jaiye-journeys' ), $money( $room['deposit'] ) ) );
-                              ?>
-                            </span>
-                          <?php endif; ?>
+                          <?php echo $room_price( $room ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped when built. ?>
                         <?php endif; ?>
                       </span>
                     </span>
@@ -264,7 +316,7 @@ while ( have_posts() ) :
             <?php /* ── Travellers ── */ ?>
             <fieldset class="booking-step">
               <legend class="booking-step__title">
-                <span class="booking-step__num"><?php echo count( $departures ) > 1 ? 3 : 2; ?></span>
+                <span class="booking-step__num"><?php echo (int) ++$step; ?></span>
                 <?php esc_html_e( 'Travellers', 'jaiye-journeys' ); ?>
               </legend>
               <div class="booking-pills">
@@ -279,22 +331,42 @@ while ( have_posts() ) :
             </fieldset>
 
             <?php /* ── Payment ── */ ?>
-            <?php if ( array_filter( array_column( $rooms, 'deposit' ) ) ) : ?>
-              <fieldset class="booking-step js-booking-payment">
+            <?php if ( $first_plan ) : ?>
+              <fieldset class="booking-step">
                 <legend class="booking-step__title">
-                  <span class="booking-step__num"><?php echo count( $departures ) > 1 ? 4 : 3; ?></span>
+                  <span class="booking-step__num"><?php echo (int) ++$step; ?></span>
                   <?php esc_html_e( 'How would you like to pay?', 'jaiye-journeys' ); ?>
                 </legend>
                 <div class="booking-choices">
-                  <label class="booking-choice js-booking-deposit">
-                    <input type="radio" name="payment" value="deposit" checked>
-                    <span class="booking-choice__text"><?php esc_html_e( 'Pay a deposit', 'jaiye-journeys' ); ?></span>
-                    <span class="booking-choice__note"><?php esc_html_e( 'Secure your place today and pay the balance later', 'jaiye-journeys' ); ?></span>
+                  <label class="booking-choice js-booking-plan">
+                    <input type="radio" name="payment" value="plan" checked>
+                    <span class="booking-choice__text"><?php esc_html_e( 'Payment plan', 'jaiye-journeys' ); ?></span>
+                    <span class="booking-choice__note" data-note="plan">
+                      <?php
+                      echo esc_html( sprintf(
+                          /* translators: 1: deposit, 2: number of payments */
+                          _n( '%1$s deposit today, then %2$d automatic payment', '%1$s deposit today, then %2$d automatic payments', count( $plan_dates ), 'jaiye-journeys' ),
+                          jj_booking_money( $first_plan['today'], $currency ),
+                          count( $plan_dates )
+                      ) );
+                      ?>
+                    </span>
                   </label>
                   <label class="booking-choice">
                     <input type="radio" name="payment" value="full">
                     <span class="booking-choice__text"><?php esc_html_e( 'Pay in full', 'jaiye-journeys' ); ?></span>
-                    <span class="booking-choice__note"><?php esc_html_e( 'Settle everything now', 'jaiye-journeys' ); ?></span>
+                    <span class="booking-choice__note" data-note="full">
+                      <?php
+                      $saving = $first_plan['total'] - $first_full['total'];
+                      echo esc_html(
+                          $saving > 0
+                              /* translators: 1: total, 2: saving */
+                              ? sprintf( __( '%1$s today, saving %2$s', 'jaiye-journeys' ), jj_booking_money( $first_full['total'], $currency ), jj_booking_money( $saving, $currency ) )
+                              /* translators: %s: total */
+                              : sprintf( __( '%s today, nothing more to pay', 'jaiye-journeys' ), jj_booking_money( $first_full['total'], $currency ) )
+                      );
+                      ?>
+                    </span>
                   </label>
                 </div>
               </fieldset>
@@ -304,11 +376,6 @@ while ( have_posts() ) :
           </div>
 
           <?php /* ── Summary ── */ ?>
-          <?php
-          $first_room = isset( $rooms[ $sel_room ] ) ? $rooms[ $sel_room ] : null;
-          $first_dep  = isset( $departures[ $sel_dep ] ) ? jj_trip_departure_label( $trip_id, $sel_dep, $departures[ $sel_dep ] ) : '';
-          $first_now  = $first_room ? ( $first_room['deposit'] ? $first_room['deposit'] : $first_room['price'] ) : 0;
-          ?>
           <aside class="booking-summary" aria-label="<?php esc_attr_e( 'Your booking', 'jaiye-journeys' ); ?>">
             <h2 class="booking-summary__title"><?php esc_html_e( 'Your booking', 'jaiye-journeys' ); ?></h2>
             <dl class="booking-summary__list">
@@ -323,20 +390,21 @@ while ( have_posts() ) :
             <div class="booking-summary__totals">
               <div class="booking-summary__row">
                 <span><?php esc_html_e( 'Journey total', 'jaiye-journeys' ); ?></span>
-                <span data-summary="total"><?php echo esc_html( $first_room ? $money( $first_room['price'] ) : '' ); ?></span>
+                <span data-summary="total"><?php echo esc_html( $first ? jj_booking_money( $first['total'], $currency ) : '' ); ?></span>
               </div>
               <div class="booking-summary__row booking-summary__row--due">
                 <span><?php esc_html_e( 'Due today', 'jaiye-journeys' ); ?></span>
-                <span data-summary="due"><?php echo esc_html( $money( $first_now ) ); ?></span>
+                <span data-summary="due"><?php echo esc_html( $first ? jj_booking_money( $first['today'], $currency ) : '' ); ?></span>
               </div>
-              <p class="booking-summary__fx" data-summary="fx" hidden></p>
-              <p class="booking-summary__balance" data-summary="balance" <?php echo ( $first_room && $first_room['deposit'] ) ? '' : 'hidden'; ?>>
-                <?php
-                if ( $first_room && $first_room['deposit'] ) {
-                    /* translators: %s: balance amount */
-                    echo esc_html( sprintf( __( 'Balance of %s due later', 'jaiye-journeys' ), $money( $first_room['price'] - $first_room['deposit'] ) ) );
-                }
-                ?>
+              <ol class="booking-summary__plan" data-summary="plan" <?php echo ( $first && $first['plan'] ) ? '' : 'hidden'; ?>>
+                <?php if ( $first ) : ?>
+                  <?php foreach ( $first['plan'] as $payment ) : ?>
+                    <li><span><?php echo esc_html( wp_date( 'j M Y', $payment[0] ) ); ?></span><span><?php echo esc_html( jj_booking_money( $payment[1], $currency ) ); ?></span></li>
+                  <?php endforeach; ?>
+                <?php endif; ?>
+              </ol>
+              <p class="booking-summary__balance" data-summary="plannote" <?php echo ( $first && $first['plan'] ) ? '' : 'hidden'; ?>>
+                <?php esc_html_e( 'Your card is saved securely with Stripe and charged automatically on these dates.', 'jaiye-journeys' ); ?>
               </p>
             </div>
 

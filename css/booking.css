@@ -401,11 +401,9 @@
   font-size: var(--text-md);
 }
 
-.booking-summary__fx,
 .booking-summary__balance {
-  margin: var(--space-2) 0 0;
+  margin: var(--space-3) 0 0;
   font-size: var(--text-xs);
-  text-align: right;
   opacity: 0.8;
 }
 
@@ -521,4 +519,68 @@
   margin: 0;
   text-align: right;
   font-family: var(--font-heading);
+}
+
+/* ── Currency: £ / $ switch, and prices shown in the chosen one ── */
+
+.booking-currency {
+  display: inline-flex;
+  justify-self: end;
+  margin: 0;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+}
+
+.booking-currency__option {
+  display: grid;
+  place-items: center;
+  min-width: 40px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-heading);
+  font-size: var(--text-base);
+  color: var(--color-forest);
+  text-decoration: none;
+}
+
+.booking-currency__option.is-active {
+  background-color: var(--color-forest);
+  color: var(--color-cream);
+}
+
+.booking-cur {
+  display: none;
+}
+
+.booking-form[data-currency="gbp"] .booking-cur--gbp,
+.booking-form[data-currency="usd"] .booking-cur--usd {
+  display: block;
+}
+
+/* ── Summary: the payment plan dates ───────────────────────────── */
+
+.booking-summary__plan {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+  padding: var(--space-4) 0 0;
+  border-top: 1px dashed color-mix(in srgb, var(--color-cream) 25%, transparent);
+  list-style: none;
+  font-size: var(--text-sm);
+}
+
+.booking-summary__plan[hidden] {
+  display: none;
+}
+
+.booking-summary__plan li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.booking-summary__plan li span:first-child {
+  opacity: 0.8;
 }

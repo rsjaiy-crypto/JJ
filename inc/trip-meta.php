@@ -227,6 +227,15 @@ function jj_trip_render_field( $name, $field, $value, $id = '' ) {
             );
             break;
 
+        case 'date':
+            printf(
+                '<input type="date" id="%s" name="%s" value="%s" class="widefat">',
+                esc_attr( $id ),
+                esc_attr( $name ),
+                esc_attr( $value )
+            );
+            break;
+
         case 'number':
             printf(
                 '<input type="number" id="%s" name="%s" value="%s" class="widefat" placeholder="%s">',

@@ -1,16 +1,24 @@
 <?php
 /**
- * Trip booking page and Stripe Checkout.
+ * Trip booking page, Stripe Checkout and automatic payment plans.
  *
- * Each on-sale trip with Rooms gets /trips/<slug>/book/: guests pick a
- * departure, a room, how many travellers and deposit or full payment, and
- * the site opens a Stripe Checkout for exactly that. Prices are always read
- * from the trip here, never from the form, so they can't be altered in the
- * browser.
+ * Each on-sale trip with Rooms gets /trips/<slug>/book/. Guests pick a
+ * departure, room, travellers, currency (£ or $) and either:
  *
- * The Stripe key is entered in Trips → Booking Settings and lives in the
- * database, never in this (public) repository. A JJ_STRIPE_SECRET_KEY
- * constant in wp-config.php overrides it.
+ * - Payment plan (default): the deposit now, with the card saved, then the
+ *   balance in equal payments on the trip's plan dates still ahead of them,
+ *   collected by a Stripe subscription schedule (one phase per date).
+ * - Pay in full: the discounted pay-in-full price now.
+ *
+ * Amounts are always worked out here from the trip's fields, never taken
+ * from the form. The schedule is created when Stripe confirms the deposit
+ * (checkout.session.completed webhook), and each booking is recorded under
+ * Trips → Bookings, where failed payments are tracked. After 14 days unpaid
+ * the owner is emailed; nothing is cancelled automatically.
+ *
+ * Keys live in the database (Trips → Booking Settings), never in this public
+ * repository. JJ_STRIPE_SECRET_KEY / JJ_STRIPE_WEBHOOK_SECRET constants in
+ * wp-config.php override them.
  *
  * @package jaiye-journeys
  */
@@ -18,13 +26,64 @@
 defined( 'ABSPATH' ) || exit;
 
 define( 'JJ_STRIPE_KEY_OPTION', 'jj_stripe_secret_key' );
+define( 'JJ_STRIPE_WEBHOOK_OPTION', 'jj_stripe_webhook_secret' );
+define( 'JJ_BOOKING_NOTIFY_OPTION', 'jj_booking_notify_email' );
+define( 'JJ_BOOKING_FAST_TEST_OPTION', 'jj_booking_fast_test_plan' );
+define( 'JJ_BOOKING_OVERDUE_DAYS', 14 );
 
 
-/* ── Data ──────────────────────────────────────────────────────────── */
+/* ── Money ─────────────────────────────────────────────────────────── */
 
 /**
- * A trip's rooms, keyed by their row index so links stay stable when a
- * room is marked sold out. Rooms with no name or price are skipped.
+ * Currencies a trip can be sold in.
+ *
+ * @return array code => symbol
+ */
+function jj_booking_currencies() {
+    return [
+        'gbp' => '£',
+        'usd' => '$',
+    ];
+}
+
+/**
+ * Format an amount in minor units (pence/cents): £2,950 or £816.67.
+ *
+ * @param int    $minor    Amount in pence/cents.
+ * @param string $currency gbp|usd.
+ * @return string
+ */
+function jj_booking_money( $minor, $currency ) {
+    $symbols = jj_booking_currencies();
+    $minor   = (int) $minor;
+    return $symbols[ $currency ] . number_format( $minor / 100, ( $minor % 100 ) ? 2 : 0 );
+}
+
+/**
+ * Split a balance into equal payments; the last absorbs any odd pence.
+ *
+ * @param int $balance Minor units.
+ * @param int $count   Number of payments.
+ * @return int[]
+ */
+function jj_booking_split( $balance, $count ) {
+    if ( $count < 1 || $balance <= 0 ) {
+        return [];
+    }
+    $each    = intdiv( $balance, $count );
+    $amounts = array_fill( 0, $count, $each );
+    $amounts[ $count - 1 ] += $balance - $each * $count;
+    return $amounts;
+}
+
+
+/* ── Trip data ─────────────────────────────────────────────────────── */
+
+/**
+ * A trip's rooms, keyed by row index so links stay stable when a room is
+ * marked sold out. Prices are whole units per person, per currency; a
+ * missing pay-in-full price means no discount. Rooms without a name or a
+ * £ plan price are skipped.
  *
  * @param int $post_id Trip ID.
  * @return array[]
@@ -32,24 +91,95 @@ define( 'JJ_STRIPE_KEY_OPTION', 'jj_stripe_secret_key' );
 function jj_trip_rooms( $post_id ) {
     $rooms = [];
     foreach ( jj_trip_rows( 'rooms', $post_id ) as $i => $room ) {
-        if ( empty( $room['name'] ) || empty( $room['price'] ) || (int) $room['price'] <= 0 ) {
+        $gbp = isset( $room['price'] ) ? (int) $room['price'] : 0;
+        if ( empty( $room['name'] ) || $gbp <= 0 ) {
             continue;
         }
+        $usd = isset( $room['price_usd'] ) ? (int) $room['price_usd'] : 0;
 
-        $price   = (int) $room['price'];
-        $deposit = isset( $room['deposit'] ) ? (int) $room['deposit'] : 0;
+        $full_gbp = isset( $room['full_price'] ) ? (int) $room['full_price'] : 0;
+        $full_usd = isset( $room['full_price_usd'] ) ? (int) $room['full_price_usd'] : 0;
 
         $rooms[ $i ] = [
             'name'        => $room['name'],
             'description' => isset( $room['description'] ) ? $room['description'] : '',
             'image'       => isset( $room['image'] ) ? absint( $room['image'] ) : 0,
-            'price'       => $price,
-            'deposit'     => ( $deposit > 0 && $deposit < $price ) ? $deposit : 0,
+            'prices'      => [
+                'gbp' => [ 'plan' => $gbp, 'full' => $full_gbp > 0 ? $full_gbp : $gbp ],
+                'usd' => [ 'plan' => $usd, 'full' => $usd ? ( $full_usd > 0 ? $full_usd : $usd ) : 0 ],
+            ],
             'max_guests'  => max( 1, min( 4, isset( $room['max_guests'] ) ? (int) $room['max_guests'] : 2 ) ),
             'sold_out'    => ! empty( $room['sold_out'] ),
         ];
     }
     return $rooms;
+}
+
+/**
+ * Deposit per person, whole units.
+ *
+ * @param int    $post_id  Trip ID.
+ * @param string $currency gbp|usd.
+ * @return int
+ */
+function jj_trip_deposit( $post_id, $currency ) {
+    return (int) jj_trip_field( 'usd' === $currency ? 'deposit_usd' : 'deposit_gbp', $post_id );
+}
+
+/**
+ * Currencies this trip can be booked in: £ always, $ when every room has a
+ * $ price and there's a $ deposit.
+ *
+ * @param int $post_id Trip ID.
+ * @return string[]
+ */
+function jj_trip_booking_currencies( $post_id ) {
+    $out   = [ 'gbp' ];
+    $rooms = jj_trip_rooms( $post_id );
+    $usd   = $rooms && jj_trip_deposit( $post_id, 'usd' ) > 0;
+    foreach ( $rooms as $room ) {
+        if ( $room['prices']['usd']['plan'] <= 0 ) {
+            $usd = false;
+        }
+    }
+    if ( $usd ) {
+        $out[] = 'usd';
+    }
+    return $out;
+}
+
+/**
+ * The trip's plan dates still ahead, as timestamps at 9am site time,
+ * soonest first. A date is ahead if it's after today.
+ *
+ * In Stripe test mode, "Quick test schedule" in Booking Settings swaps the
+ * real dates for ones five minutes apart, so a whole plan can be watched
+ * running in an afternoon.
+ *
+ * @param int $post_id Trip ID.
+ * @return int[]
+ */
+function jj_trip_plan_dates( $post_id ) {
+    $today = current_datetime()->setTime( 0, 0 );
+    $dates = [];
+
+    foreach ( jj_trip_rows( 'instalment_dates', $post_id ) as $row ) {
+        $date = DateTimeImmutable::createFromFormat( '!Y-m-d', isset( $row['date'] ) ? $row['date'] : '', wp_timezone() );
+        if ( $date && $date > $today ) {
+            $dates[] = $date->setTime( 9, 0 )->getTimestamp();
+        }
+    }
+    $dates = array_values( array_unique( $dates ) );
+    sort( $dates );
+    $dates = array_slice( $dates, 0, 24 );
+
+    if ( $dates && 'test' === jj_stripe_mode() && get_option( JJ_BOOKING_FAST_TEST_OPTION ) ) {
+        foreach ( $dates as $i => $ts ) {
+            $dates[ $i ] = time() + 300 * ( $i + 1 );
+        }
+    }
+
+    return $dates;
 }
 
 /**
@@ -90,10 +220,47 @@ function jj_trip_departure_label( $post_id, $index, $departure ) {
 }
 
 /**
- * The Stripe secret (or restricted) key, or '' if none is set.
+ * What a booking costs and when it's paid.
  *
- * @return string
+ * @param int    $post_id  Trip ID.
+ * @param array  $room     Room from jj_trip_rooms().
+ * @param int    $guests   Travellers.
+ * @param string $currency gbp|usd.
+ * @param string $payment  plan|full.
+ * @return array|null today, total (minor units), plan [[ts, minor], …]; null if unavailable.
  */
+function jj_booking_quote( $post_id, $room, $guests, $currency, $payment ) {
+    $prices = $room['prices'][ $currency ];
+    if ( $prices['plan'] <= 0 ) {
+        return null;
+    }
+
+    if ( 'plan' === $payment ) {
+        $dates   = jj_trip_plan_dates( $post_id );
+        $deposit = jj_trip_deposit( $post_id, $currency ) * 100 * $guests;
+        $total   = $prices['plan'] * 100 * $guests;
+        $split   = jj_booking_split( $total - $deposit, count( $dates ) );
+        if ( ! $split || $deposit <= 0 ) {
+            return null; // No dates ahead, or no deposit: pay in full only.
+        }
+        return [
+            'today' => $deposit,
+            'total' => $total,
+            'plan'  => array_map( null, $dates, $split ),
+        ];
+    }
+
+    $total = $prices['full'] * 100 * $guests;
+    return [
+        'today' => $total,
+        'total' => $total,
+        'plan'  => [],
+    ];
+}
+
+
+/* ── Stripe ────────────────────────────────────────────────────────── */
+
 function jj_stripe_key() {
     if ( defined( 'JJ_STRIPE_SECRET_KEY' ) && JJ_STRIPE_SECRET_KEY ) {
         return JJ_STRIPE_SECRET_KEY;
@@ -101,15 +268,83 @@ function jj_stripe_key() {
     return (string) get_option( JJ_STRIPE_KEY_OPTION, '' );
 }
 
+function jj_stripe_webhook_secret() {
+    if ( defined( 'JJ_STRIPE_WEBHOOK_SECRET' ) && JJ_STRIPE_WEBHOOK_SECRET ) {
+        return JJ_STRIPE_WEBHOOK_SECRET;
+    }
+    return (string) get_option( JJ_STRIPE_WEBHOOK_OPTION, '' );
+}
+
 /**
- * Is the booking page switched on for this trip? It needs rooms and a
- * Stripe key; until then the trip keeps its old Book Now link.
+ * @return string test|live|'' (no key).
+ */
+function jj_stripe_mode() {
+    $key = jj_stripe_key();
+    if ( ! $key ) {
+        return '';
+    }
+    return false !== strpos( $key, '_test_' ) ? 'test' : 'live';
+}
+
+/**
+ * Call the Stripe API.
+ *
+ * @param string $method      GET or POST.
+ * @param string $path        e.g. checkout/sessions.
+ * @param array  $body        Parameters.
+ * @param string $idempotency Optional Idempotency-Key, so a retried webhook
+ *                            can't create a second schedule.
+ * @return array|WP_Error Decoded response.
+ */
+function jj_stripe_request( $method, $path, $body = [], $idempotency = '' ) {
+    $key = jj_stripe_key();
+    if ( ! $key ) {
+        return new WP_Error( 'jj_stripe_no_key', 'No Stripe key set.' );
+    }
+
+    $headers = [ 'Authorization' => 'Bearer ' . $key ];
+    if ( $idempotency ) {
+        $headers['Idempotency-Key'] = $idempotency;
+    }
+
+    $url = 'https://api.stripe.com/v1/' . $path;
+    if ( 'GET' === $method && $body ) {
+        $url .= '?' . http_build_query( $body, '', '&' );
+        $body = [];
+    }
+
+    $response = wp_remote_request( $url, [
+        'method'  => $method,
+        'timeout' => 25,
+        'headers' => $headers,
+        'body'    => $body ? http_build_query( $body, '', '&' ) : null,
+    ] );
+
+    if ( is_wp_error( $response ) ) {
+        return $response;
+    }
+
+    $data = json_decode( wp_remote_retrieve_body( $response ), true );
+    $code = wp_remote_retrieve_response_code( $response );
+
+    if ( $code >= 300 || ! is_array( $data ) ) {
+        $message = isset( $data['error']['message'] ) ? $data['error']['message'] : 'HTTP ' . $code;
+        return new WP_Error( 'jj_stripe_error', $message );
+    }
+
+    return $data;
+}
+
+/**
+ * Is the booking page switched on for this trip? It needs rooms, a Stripe
+ * key and the webhook secret (without the webhook, payment plans would
+ * never be set up); until then the trip keeps its old Book Now link.
  *
  * @param int $post_id Trip ID.
  * @return bool
  */
 function jj_trip_booking_ready( $post_id ) {
-    return jj_stripe_key() && jj_trip_rooms( $post_id );
+    return jj_stripe_key() && jj_stripe_webhook_secret() && jj_trip_rooms( $post_id );
 }
 
 /**
@@ -125,6 +360,46 @@ function jj_trip_booking_page_url( $post_id, $departure = null ) {
         $url = add_query_arg( 'chapter', (int) $departure + 1, $url );
     }
     return $url;
+}
+
+
+/* ── Visitor currency ──────────────────────────────────────────────── */
+
+/**
+ * $ for visitors in the US, £ for everyone else, unless they've picked one
+ * with the £ / $ switch (?currency=).
+ *
+ * The country comes from the free country.is lookup of the visitor's IP,
+ * cached for a day per IP (stored hashed). Any failure falls back to £.
+ *
+ * @param string[] $available Currencies this trip sells in.
+ * @return string
+ */
+function jj_booking_visitor_currency( $available ) {
+    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+    $asked = isset( $_GET['currency'] ) ? sanitize_key( wp_unslash( $_GET['currency'] ) ) : '';
+    if ( in_array( $asked, $available, true ) ) {
+        return $asked;
+    }
+    if ( ! in_array( 'usd', $available, true ) ) {
+        return 'gbp';
+    }
+
+    $ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+    if ( ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE ) ) {
+        return 'gbp';
+    }
+
+    $cache   = 'jj_geo_' . md5( wp_salt() . $ip );
+    $country = get_transient( $cache );
+    if ( false === $country ) {
+        $response = wp_remote_get( 'https://api.country.is/' . rawurlencode( $ip ), [ 'timeout' => 2 ] );
+        $data     = is_wp_error( $response ) ? null : json_decode( wp_remote_retrieve_body( $response ), true );
+        $country  = isset( $data['country'] ) ? strtoupper( substr( (string) $data['country'], 0, 2 ) ) : '';
+        set_transient( $cache, $country, DAY_IN_SECONDS );
+    }
+
+    return 'US' === $country ? 'usd' : 'gbp';
 }
 
 
@@ -156,7 +431,7 @@ function jj_is_trip_booking_page() {
 
 /**
  * Send visitors back to the trip page when it isn't bookable right now
- * (not on sale, or no rooms/Stripe key yet). Editors can still preview it.
+ * (not on sale, or not set up yet). Editors can still preview it.
  * Also handles the booking form's POST.
  */
 function jj_trip_booking_guard() {
@@ -206,42 +481,53 @@ function jj_trip_booking_document_title( $parts ) {
 add_filter( 'document_title_parts', 'jj_trip_booking_document_title', 20 );
 
 
-/* ── Stripe ────────────────────────────────────────────────────────── */
+/* ── Checkout ──────────────────────────────────────────────────────── */
 
 /**
- * Call the Stripe API.
+ * Pack a plan into session metadata: "ts:amount;ts:amount".
  *
- * @param string $method GET or POST.
- * @param string $path   e.g. checkout/sessions.
- * @param array  $body   Form parameters.
- * @return array|WP_Error Decoded response.
+ * @param array $plan [[ts, minor], …].
+ * @return string
  */
-function jj_stripe_request( $method, $path, $body = [] ) {
-    $key = jj_stripe_key();
-    if ( ! $key ) {
-        return new WP_Error( 'jj_stripe_no_key', 'No Stripe key set.' );
+function jj_booking_pack_plan( $plan ) {
+    return implode( ';', array_map( function ( $p ) {
+        return (int) $p[0] . ':' . (int) $p[1];
+    }, $plan ) );
+}
+
+/**
+ * @param string $packed From jj_booking_pack_plan().
+ * @return array [[ts, minor], …]
+ */
+function jj_booking_unpack_plan( $packed ) {
+    $plan = [];
+    foreach ( array_filter( explode( ';', (string) $packed ) ) as $pair ) {
+        $bits = explode( ':', $pair );
+        if ( 2 === count( $bits ) ) {
+            $plan[] = [ (int) $bits[0], (int) $bits[1] ];
+        }
     }
+    return $plan;
+}
 
-    $response = wp_remote_request( 'https://api.stripe.com/v1/' . $path, [
-        'method'  => $method,
-        'timeout' => 20,
-        'headers' => [ 'Authorization' => 'Bearer ' . $key ],
-        'body'    => $body ? http_build_query( $body, '', '&' ) : null,
-    ] );
+/**
+ * "£816.67 on 1 Dec, £816.67 on 1 Jan and £816.66 on 1 Feb".
+ *
+ * @param array  $plan     [[ts, minor], …].
+ * @param string $currency gbp|usd.
+ * @return string
+ */
+function jj_booking_plan_sentence( $plan, $currency ) {
+    $parts = array_map( function ( $p ) use ( $currency ) {
+        /* translators: 1: amount, 2: date */
+        return sprintf( __( '%1$s on %2$s', 'jaiye-journeys' ), jj_booking_money( $p[1], $currency ), wp_date( 'j M Y', $p[0] ) );
+    }, $plan );
 
-    if ( is_wp_error( $response ) ) {
-        return $response;
+    if ( count( $parts ) < 2 ) {
+        return implode( '', $parts );
     }
-
-    $data = json_decode( wp_remote_retrieve_body( $response ), true );
-    $code = wp_remote_retrieve_response_code( $response );
-
-    if ( $code >= 300 || ! is_array( $data ) ) {
-        $message = isset( $data['error']['message'] ) ? $data['error']['message'] : 'HTTP ' . $code;
-        return new WP_Error( 'jj_stripe_error', $message );
-    }
-
-    return $data;
+    $last = array_pop( $parts );
+    return implode( ', ', $parts ) . ' ' . __( 'and', 'jaiye-journeys' ) . ' ' . $last;
 }
 
 /**
@@ -260,21 +546,25 @@ function jj_trip_start_checkout( $trip_id ) {
         exit;
     };
 
-    if ( 'open' !== jj_trip_public_status( $trip_id ) || ! jj_stripe_key() ) {
+    if ( 'open' !== jj_trip_public_status( $trip_id ) || ! jj_trip_booking_ready( $trip_id ) ) {
         $fail( 'closed' );
     }
 
     // phpcs:disable WordPress.Security.NonceVerification.Missing -- see docblock.
-    $room_i  = isset( $_POST['room'] ) ? (int) $_POST['room'] : -1;
-    $dep_i   = isset( $_POST['departure'] ) ? (int) $_POST['departure'] : -1;
-    $guests  = isset( $_POST['guests'] ) ? (int) $_POST['guests'] : 0;
-    $payment = isset( $_POST['payment'] ) ? sanitize_key( wp_unslash( $_POST['payment'] ) ) : 'full';
-    $terms   = ! empty( $_POST['terms'] );
+    $room_i   = isset( $_POST['room'] ) ? (int) $_POST['room'] : -1;
+    $dep_i    = isset( $_POST['departure'] ) ? (int) $_POST['departure'] : -1;
+    $guests   = isset( $_POST['guests'] ) ? (int) $_POST['guests'] : 0;
+    $payment  = isset( $_POST['payment'] ) && 'full' === $_POST['payment'] ? 'full' : 'plan';
+    $currency = isset( $_POST['currency'] ) ? sanitize_key( wp_unslash( $_POST['currency'] ) ) : 'gbp';
+    $terms    = ! empty( $_POST['terms'] );
     // phpcs:enable
 
     $rooms      = jj_trip_rooms( $trip_id );
     $departures = jj_trip_bookable_departures( $trip_id );
 
+    if ( ! in_array( $currency, jj_trip_booking_currencies( $trip_id ), true ) ) {
+        $currency = 'gbp';
+    }
     if ( ! isset( $rooms[ $room_i ] ) || $rooms[ $room_i ]['sold_out'] ) {
         $fail( 'room' );
     }
@@ -289,15 +579,19 @@ function jj_trip_start_checkout( $trip_id ) {
         $fail( 'terms' );
     }
 
-    $is_deposit = ( 'deposit' === $payment && $room['deposit'] );
-    $unit       = $is_deposit ? $room['deposit'] : $room['price'];
-    $title      = jj_trip_volume_title( $trip_id );
-    $dep_label  = isset( $departures[ $dep_i ] ) ? jj_trip_departure_label( $trip_id, $dep_i, $departures[ $dep_i ] ) : '';
+    $quote = jj_booking_quote( $trip_id, $room, $guests, $currency, $payment );
+    if ( ! $quote && 'plan' === $payment ) {
+        // The last plan date passed while they were choosing: pay in full.
+        $payment = 'full';
+        $quote   = jj_booking_quote( $trip_id, $room, $guests, $currency, 'full' );
+    }
+    if ( ! $quote ) {
+        $fail( 'room' );
+    }
 
-    $description = array_filter( [
-        $dep_label,
-        $is_deposit ? __( 'Deposit per person', 'jaiye-journeys' ) : __( 'Paid in full, per person', 'jaiye-journeys' ),
-    ] );
+    $title     = jj_trip_volume_title( $trip_id );
+    $dep_label = isset( $departures[ $dep_i ] ) ? jj_trip_departure_label( $trip_id, $dep_i, $departures[ $dep_i ] ) : '';
+    $is_plan   = 'plan' === $payment;
 
     $metadata = [
         'trip'       => $title,
@@ -305,8 +599,17 @@ function jj_trip_start_checkout( $trip_id ) {
         'departure'  => $dep_label,
         'room'       => $room['name'],
         'travellers' => $guests,
-        'payment'    => $is_deposit ? 'deposit' : 'full',
+        'payment'    => $payment,
+        'currency'   => $currency,
+        'total'      => $quote['total'],
+        'plan'       => jj_booking_pack_plan( $quote['plan'] ),
     ];
+
+    $line_name = $title . ' — ' . $room['name'];
+    $line_desc = array_filter( [
+        $dep_label,
+        $is_plan ? __( 'Deposit per person', 'jaiye-journeys' ) : __( 'Paid in full, per person', 'jaiye-journeys' ),
+    ] );
 
     $body = [
         'mode'                       => 'payment',
@@ -314,37 +617,41 @@ function jj_trip_start_checkout( $trip_id ) {
         'customer_creation'          => 'always',
         'billing_address_collection' => 'required',
         'phone_number_collection'    => [ 'enabled' => 'true' ],
+        'expires_at'                 => time() + HOUR_IN_SECONDS,
         'line_items'                 => [
             [
                 'quantity'   => $guests,
                 'price_data' => [
-                    'currency'     => 'gbp',
-                    'unit_amount'  => $unit * 100,
+                    'currency'     => $currency,
+                    'unit_amount'  => intdiv( $quote['today'], $guests ),
                     'product_data' => [
-                        'name'        => $title . ' — ' . $room['name'],
-                        'description' => implode( ' · ', $description ),
+                        'name'        => $line_name,
+                        'description' => implode( ' · ', $line_desc ),
                     ],
                 ],
             ],
         ],
         'metadata'                   => $metadata,
         'payment_intent_data'        => [
-            'description' => $title . ' — ' . $room['name'] . ( $dep_label ? ' — ' . $dep_label : '' ),
+            'description' => $line_name . ( $dep_label ? ' — ' . $dep_label : '' ),
             'metadata'    => $metadata,
         ],
         // {CHECKOUT_SESSION_ID} is filled in by Stripe, so it's appended raw.
         'success_url'                => $back . '?session_id={CHECKOUT_SESSION_ID}',
-        'cancel_url'                 => add_query_arg( 'chapter', $dep_i + 1, $back ),
+        'cancel_url'                 => add_query_arg( [ 'chapter' => $dep_i + 1, 'currency' => $currency ], $back ),
     ];
 
-    if ( $is_deposit ) {
-        $balance = ( $room['price'] - $room['deposit'] ) * $guests;
+    if ( $is_plan ) {
+        // Save the card for the plan; Stripe collects authentication (SCA)
+        // now so the later payments can be taken while they're away.
+        $body['payment_intent_data']['setup_future_usage'] = 'off_session';
         $body['custom_text'] = [
             'submit' => [
                 'message' => sprintf(
-                    /* translators: %s: balance amount */
-                    __( 'Today you pay the deposit. The balance of £%s is due as set out in our booking terms.', 'jaiye-journeys' ),
-                    number_format( $balance )
+                    /* translators: 1: deposit, 2: list of payments */
+                    __( 'Today you pay the %1$s deposit. By paying, you agree that Jaiye Journeys will save this card and charge it %2$s, as set out in our booking terms.', 'jaiye-journeys' ),
+                    jj_booking_money( $quote['today'], $currency ),
+                    jj_booking_plan_sentence( $quote['plan'], $currency )
                 ),
             ],
         ];
@@ -369,7 +676,7 @@ function jj_trip_start_checkout( $trip_id ) {
  * @return array|null
  */
 function jj_trip_completed_session( $trip_id ) {
-    $id = isset( $_GET['session_id'] ) ? sanitize_text_field( wp_unslash( $_GET['session_id'] ) ) : '';
+    $id = isset( $_GET['session_id'] ) ? sanitize_text_field( wp_unslash( $_GET['session_id'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
     if ( ! preg_match( '/^cs_(test|live)_[A-Za-z0-9]+$/', $id ) ) {
         return null;
     }
@@ -384,6 +691,611 @@ function jj_trip_completed_session( $trip_id ) {
 
     return $session;
 }
+
+
+/* ── Bookings (wp-admin record) ────────────────────────────────────── */
+
+function jj_register_booking_post_type() {
+    register_post_type( 'jj_booking', [
+        'labels'          => [
+            'name'          => __( 'Bookings', 'jaiye-journeys' ),
+            'singular_name' => __( 'Booking', 'jaiye-journeys' ),
+            'all_items'     => __( 'Bookings', 'jaiye-journeys' ),
+            'edit_item'     => __( 'Booking', 'jaiye-journeys' ),
+            'not_found'     => __( 'No bookings yet.', 'jaiye-journeys' ),
+        ],
+        'public'          => false,
+        'show_ui'         => true,
+        'show_in_menu'    => 'edit.php?post_type=trip',
+        'supports'        => [ 'title' ],
+        'capability_type' => 'post',
+        'capabilities'    => [ 'create_posts' => 'do_not_allow' ],
+        'map_meta_cap'    => true,
+    ] );
+}
+add_action( 'init', 'jj_register_booking_post_type' );
+
+/**
+ * Booking meta helpers (prefix _jj_bk_).
+ */
+function jj_booking_get( $booking_id, $key ) {
+    return get_post_meta( $booking_id, '_jj_bk_' . $key, true );
+}
+
+function jj_booking_set( $booking_id, $key, $value ) {
+    update_post_meta( $booking_id, '_jj_bk_' . $key, $value );
+}
+
+/**
+ * Find a booking by a stored field.
+ *
+ * @return int Booking ID or 0.
+ */
+function jj_booking_find( $key, $value ) {
+    if ( '' === (string) $value ) {
+        return 0;
+    }
+    $ids = get_posts( [
+        'post_type'      => 'jj_booking',
+        'post_status'    => 'any',
+        'posts_per_page' => 1,
+        'fields'         => 'ids',
+        'meta_key'       => '_jj_bk_' . $key,
+        'meta_value'     => $value,
+    ] );
+    return $ids ? (int) $ids[0] : 0;
+}
+
+/**
+ * Email the owner.
+ */
+function jj_booking_notify( $subject, $lines ) {
+    $to = get_option( JJ_BOOKING_NOTIFY_OPTION );
+    if ( ! is_email( $to ) ) {
+        $to = get_option( 'admin_email' );
+    }
+    $mode = 'test' === jj_stripe_mode() ? '[TEST] ' : '';
+    wp_mail( $to, $mode . $subject, implode( "\n", $lines ) );
+}
+
+function jj_booking_dashboard_url( $booking_id ) {
+    $customer = jj_booking_get( $booking_id, 'customer' );
+    $base     = 'https://dashboard.stripe.com/' . ( 'test' === jj_booking_get( $booking_id, 'mode' ) ? 'test/' : '' );
+    return $customer ? $base . 'customers/' . $customer : $base . 'payments';
+}
+
+/**
+ * Record a paid Checkout Session and, for a payment plan, create its
+ * subscription schedule. Safe to run twice for the same session.
+ *
+ * @param array $session Checkout Session from the webhook.
+ */
+function jj_booking_record_checkout( $session ) {
+    $meta = isset( $session['metadata'] ) ? $session['metadata'] : [];
+    if ( empty( $meta['trip_id'] ) ) {
+        return; // Not one of ours.
+    }
+
+    $booking_id = jj_booking_find( 'session', $session['id'] );
+    if ( $booking_id && ( 'full' === jj_booking_get( $booking_id, 'payment' ) || jj_booking_get( $booking_id, 'schedule' ) ) ) {
+        return; // Already done.
+    }
+
+    $name  = isset( $session['customer_details']['name'] ) ? $session['customer_details']['name'] : '';
+    $email = isset( $session['customer_details']['email'] ) ? $session['customer_details']['email'] : '';
+
+    if ( ! $booking_id ) {
+        $booking_id = wp_insert_post( [
+            'post_type'   => 'jj_booking',
+            'post_status' => 'publish',
+            'post_title'  => implode( ' · ', array_filter( [ $name ? $name : $email, $meta['trip'], $meta['room'] ] ) ),
+        ] );
+        if ( ! $booking_id || is_wp_error( $booking_id ) ) {
+            return;
+        }
+
+        $fields = [
+            'session'    => $session['id'],
+            'mode'       => ! empty( $session['livemode'] ) ? 'live' : 'test',
+            'trip_id'    => (int) $meta['trip_id'],
+            'trip'       => $meta['trip'],
+            'departure'  => $meta['departure'],
+            'room'       => $meta['room'],
+            'travellers' => (int) $meta['travellers'],
+            'payment'    => $meta['payment'],
+            'currency'   => $meta['currency'],
+            'total'      => (int) $meta['total'],
+            'plan'       => $meta['plan'],
+            'paid'       => (int) $session['amount_total'],
+            'payments'   => 0,
+            'customer'   => isset( $session['customer'] ) ? $session['customer'] : '',
+            'name'       => $name,
+            'email'      => $email,
+        ];
+        foreach ( $fields as $key => $value ) {
+            jj_booking_set( $booking_id, $key, $value );
+        }
+
+        $currency = $meta['currency'];
+        jj_booking_notify(
+            sprintf( 'New booking: %s, %s', $meta['trip'], $name ),
+            [
+                sprintf( '%s (%s) booked %s.', $name, $email, $meta['trip'] ),
+                'Dates: ' . $meta['departure'],
+                'Room: ' . $meta['room'] . ' · Travellers: ' . $meta['travellers'],
+                'Paid today: ' . jj_booking_money( $session['amount_total'], $currency ),
+                'plan' === $meta['payment']
+                    ? 'Payment plan: ' . jj_booking_plan_sentence( jj_booking_unpack_plan( $meta['plan'] ), $currency )
+                    : 'Paid in full.',
+                '',
+                admin_url( 'post.php?action=edit&post=' . $booking_id ),
+            ]
+        );
+    }
+
+    if ( 'plan' !== $meta['payment'] ) {
+        jj_booking_set( $booking_id, 'status', 'paid' );
+        return;
+    }
+
+    $result = jj_booking_create_schedule( $booking_id, $session );
+    if ( is_wp_error( $result ) ) {
+        jj_booking_set( $booking_id, 'status', 'plan-error' );
+        jj_booking_set( $booking_id, 'error', $result->get_error_message() );
+        jj_booking_notify(
+            'Action needed: payment plan not set up for ' . $name,
+            [
+                'The deposit was paid, but Stripe refused to set up the payment plan:',
+                $result->get_error_message(),
+                '',
+                'Check the Stripe key permissions in Trips → Booking Settings, then open this booking and press "Set up the payment plan again".',
+                admin_url( 'post.php?action=edit&post=' . $booking_id ),
+            ]
+        );
+        return;
+    }
+
+    jj_booking_set( $booking_id, 'schedule', $result['id'] );
+    jj_booking_set( $booking_id, 'status', 'on-plan' );
+    delete_post_meta( $booking_id, '_jj_bk_error' );
+}
+
+/**
+ * Create the Stripe subscription schedule for a plan booking: one phase per
+ * payment date, each billed at its start, ending after the final date.
+ *
+ * Each phase uses a yearly price so nothing renews inside a phase whatever
+ * the gap between dates; proration is off, so leaving a phase never credits
+ * anything back.
+ *
+ * @param int   $booking_id Booking ID.
+ * @param array $session    Checkout Session.
+ * @return array|WP_Error Schedule.
+ */
+function jj_booking_create_schedule( $booking_id, $session ) {
+    $plan = jj_booking_unpack_plan( jj_booking_get( $booking_id, 'plan' ) );
+    if ( ! $plan ) {
+        return new WP_Error( 'jj_no_plan', 'The booking has no payment dates.' );
+    }
+
+    // Quick test schedule: count the five-minute gaps from now, in case the
+    // test checkout took longer than the first gap.
+    if ( 'test' === jj_stripe_mode() && get_option( JJ_BOOKING_FAST_TEST_OPTION ) ) {
+        foreach ( $plan as $i => $payment ) {
+            $plan[ $i ][0] = time() + 300 * ( $i + 1 );
+        }
+        jj_booking_set( $booking_id, 'plan', jj_booking_pack_plan( $plan ) );
+    }
+
+    $full = jj_stripe_request( 'GET', 'checkout/sessions/' . $session['id'], [ 'expand' => [ 'payment_intent' ] ] );
+    if ( is_wp_error( $full ) ) {
+        return $full;
+    }
+    $method = isset( $full['payment_intent']['payment_method'] ) ? $full['payment_intent']['payment_method'] : '';
+    if ( is_array( $method ) ) {
+        $method = $method['id'];
+    }
+    $customer = isset( $full['customer'] ) ? $full['customer'] : '';
+    if ( is_array( $customer ) ) {
+        $customer = $customer['id'];
+    }
+    if ( ! $method || ! $customer ) {
+        return new WP_Error( 'jj_no_card', 'Stripe didn’t return a saved card for this booking.' );
+    }
+    jj_booking_set( $booking_id, 'customer', $customer );
+
+    $product = jj_booking_product( (int) jj_booking_get( $booking_id, 'trip_id' ), jj_booking_get( $booking_id, 'trip' ) );
+    if ( is_wp_error( $product ) ) {
+        return $product;
+    }
+
+    $currency = jj_booking_get( $booking_id, 'currency' );
+    $count    = count( $plan );
+    $phases   = [];
+    foreach ( $plan as $i => $payment ) {
+        $phases[] = [
+            'items'              => [
+                [
+                    'quantity'   => 1,
+                    'price_data' => [
+                        'currency'    => $currency,
+                        'product'     => $product,
+                        'unit_amount' => $payment[1],
+                        'recurring'   => [ 'interval' => 'year' ],
+                    ],
+                ],
+            ],
+            'end_date'           => isset( $plan[ $i + 1 ] ) ? $plan[ $i + 1 ][0] : $payment[0] + DAY_IN_SECONDS,
+            'billing_cycle_anchor' => 'phase_start',
+            'proration_behavior' => 'none',
+            'metadata'           => [
+                'booking_id' => $booking_id,
+                'payment'    => ( $i + 1 ) . ' of ' . $count,
+            ],
+        ];
+    }
+
+    // A first date that passed while the guest was paying is charged now.
+    $start = $plan[0][0] > time() + 60 ? $plan[0][0] : 'now';
+
+    return jj_stripe_request( 'POST', 'subscription_schedules', [
+        'customer'         => $customer,
+        'start_date'       => $start,
+        'end_behavior'     => 'cancel',
+        'default_settings' => [
+            'default_payment_method' => $method,
+            'collection_method'      => 'charge_automatically',
+        ],
+        'phases'           => $phases,
+        'metadata'         => [
+            'booking_id' => $booking_id,
+            'trip'       => jj_booking_get( $booking_id, 'trip' ),
+            'room'       => jj_booking_get( $booking_id, 'room' ),
+            'departure'  => jj_booking_get( $booking_id, 'departure' ),
+        ],
+    ], 'jj-plan-' . $session['id'] );
+}
+
+/**
+ * The Stripe product a trip's plan payments are billed under, created on
+ * first use (separately for test and live mode).
+ *
+ * @return string|WP_Error Product ID.
+ */
+function jj_booking_product( $trip_id, $title ) {
+    $key     = '_jj_stripe_product_' . jj_stripe_mode();
+    $product = get_post_meta( $trip_id, $key, true );
+    if ( $product ) {
+        return $product;
+    }
+
+    $created = jj_stripe_request( 'POST', 'products', [
+        'name'     => $title . ' — payment plan',
+        'metadata' => [ 'trip_id' => $trip_id ],
+    ], 'jj-product-' . jj_stripe_mode() . '-' . $trip_id );
+    if ( is_wp_error( $created ) ) {
+        return $created;
+    }
+
+    update_post_meta( $trip_id, $key, $created['id'] );
+    return $created['id'];
+}
+
+/**
+ * Which booking an invoice belongs to, via the subscription's metadata.
+ *
+ * @param array $invoice Invoice.
+ * @return int Booking ID or 0.
+ */
+function jj_booking_from_invoice( $invoice ) {
+    $details = [];
+    if ( isset( $invoice['parent']['subscription_details'] ) ) {
+        $details = $invoice['parent']['subscription_details'];
+    } elseif ( isset( $invoice['subscription_details'] ) ) {
+        $details = $invoice['subscription_details'];
+    }
+
+    if ( ! empty( $details['metadata']['booking_id'] ) ) {
+        return (int) $details['metadata']['booking_id'];
+    }
+
+    $subscription = isset( $details['subscription'] ) ? $details['subscription'] : ( isset( $invoice['subscription'] ) ? $invoice['subscription'] : '' );
+    if ( is_array( $subscription ) ) {
+        $subscription = $subscription['id'];
+    }
+    if ( ! $subscription ) {
+        return 0;
+    }
+
+    $sub = jj_stripe_request( 'GET', 'subscriptions/' . $subscription );
+    return ( ! is_wp_error( $sub ) && ! empty( $sub['metadata']['booking_id'] ) ) ? (int) $sub['metadata']['booking_id'] : 0;
+}
+
+
+/* ── Webhook: /wp-json/jj/v1/stripe ────────────────────────────────── */
+
+function jj_booking_rest_routes() {
+    register_rest_route( 'jj/v1', '/stripe', [
+        'methods'             => 'POST',
+        'callback'            => 'jj_booking_webhook',
+        'permission_callback' => '__return_true', // Authenticated by Stripe's signature below.
+    ] );
+}
+add_action( 'rest_api_init', 'jj_booking_rest_routes' );
+
+/**
+ * Check the Stripe-Signature header (HMAC-SHA256 of "timestamp.payload").
+ *
+ * @return bool
+ */
+function jj_booking_verify_signature( $payload, $header, $secret ) {
+    $timestamp  = 0;
+    $signatures = [];
+    foreach ( explode( ',', (string) $header ) as $part ) {
+        $kv = explode( '=', trim( $part ), 2 );
+        if ( 2 !== count( $kv ) ) {
+            continue;
+        }
+        if ( 't' === $kv[0] ) {
+            $timestamp = (int) $kv[1];
+        } elseif ( 'v1' === $kv[0] ) {
+            $signatures[] = $kv[1];
+        }
+    }
+    if ( ! $timestamp || ! $signatures || abs( time() - $timestamp ) > 300 ) {
+        return false;
+    }
+
+    $expected = hash_hmac( 'sha256', $timestamp . '.' . $payload, $secret );
+    foreach ( $signatures as $signature ) {
+        if ( hash_equals( $expected, $signature ) ) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * @param WP_REST_Request $request Request.
+ * @return WP_REST_Response
+ */
+function jj_booking_webhook( $request ) {
+    $secret  = jj_stripe_webhook_secret();
+    $payload = $request->get_body();
+
+    if ( ! $secret || ! jj_booking_verify_signature( $payload, $request->get_header( 'stripe-signature' ), $secret ) ) {
+        return new WP_REST_Response( [ 'error' => 'bad signature' ], 400 );
+    }
+
+    $event  = json_decode( $payload, true );
+    $object = isset( $event['data']['object'] ) ? $event['data']['object'] : [];
+    $type   = isset( $event['type'] ) ? $event['type'] : '';
+
+    switch ( $type ) {
+        case 'checkout.session.completed':
+        case 'checkout.session.async_payment_succeeded':
+            if ( isset( $object['payment_status'] ) && 'paid' === $object['payment_status'] ) {
+                jj_booking_record_checkout( $object );
+            }
+            break;
+
+        case 'invoice.paid':
+            $booking_id = jj_booking_from_invoice( $object );
+            if ( $booking_id && ! empty( $object['amount_paid'] ) ) {
+                $made = (int) jj_booking_get( $booking_id, 'payments' ) + 1;
+                $plan = jj_booking_unpack_plan( jj_booking_get( $booking_id, 'plan' ) );
+                jj_booking_set( $booking_id, 'payments', $made );
+                jj_booking_set( $booking_id, 'paid', (int) jj_booking_get( $booking_id, 'paid' ) + (int) $object['amount_paid'] );
+                jj_booking_set( $booking_id, 'status', $made >= count( $plan ) ? 'paid' : 'on-plan' );
+                foreach ( [ 'failed_since', 'pay_url', 'overdue_notified' ] as $key ) {
+                    delete_post_meta( $booking_id, '_jj_bk_' . $key );
+                }
+            }
+            break;
+
+        case 'invoice.payment_failed':
+        case 'invoice.payment_action_required':
+            $booking_id = jj_booking_from_invoice( $object );
+            if ( $booking_id ) {
+                if ( ! jj_booking_get( $booking_id, 'failed_since' ) ) {
+                    jj_booking_set( $booking_id, 'failed_since', time() );
+                }
+                if ( ! empty( $object['hosted_invoice_url'] ) ) {
+                    jj_booking_set( $booking_id, 'pay_url', $object['hosted_invoice_url'] );
+                }
+                jj_booking_set( $booking_id, 'status', 'overdue' );
+            }
+            break;
+    }
+
+    return new WP_REST_Response( [ 'received' => true ], 200 );
+}
+
+
+/* ── 14 days unpaid: tell the owner ────────────────────────────────── */
+
+function jj_booking_schedule_cron() {
+    if ( ! wp_next_scheduled( 'jj_booking_overdue_check' ) ) {
+        wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', 'jj_booking_overdue_check' );
+    }
+}
+add_action( 'init', 'jj_booking_schedule_cron' );
+
+/**
+ * Email the owner once about each booking with a payment unpaid for 14
+ * days. The booking stays as it is; what happens next is their call.
+ */
+function jj_booking_overdue_check() {
+    $ids = get_posts( [
+        'post_type'      => 'jj_booking',
+        'post_status'    => 'any',
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'meta_query'     => [
+            [
+                'key'     => '_jj_bk_failed_since',
+                'value'   => time() - JJ_BOOKING_OVERDUE_DAYS * DAY_IN_SECONDS,
+                'compare' => '<=',
+                'type'    => 'NUMERIC',
+            ],
+            [
+                'key'     => '_jj_bk_overdue_notified',
+                'compare' => 'NOT EXISTS',
+            ],
+        ],
+    ] );
+
+    foreach ( $ids as $booking_id ) {
+        jj_booking_notify(
+            sprintf( 'Payment unpaid for %d days: %s', JJ_BOOKING_OVERDUE_DAYS, get_the_title( $booking_id ) ),
+            [
+                sprintf(
+                    'A payment-plan payment for %s (%s) has been unpaid since %s. Stripe has retried it and emailed them a link to update their card.',
+                    jj_booking_get( $booking_id, 'name' ),
+                    jj_booking_get( $booking_id, 'email' ),
+                    wp_date( 'j F Y', (int) jj_booking_get( $booking_id, 'failed_since' ) )
+                ),
+                'The booking has not been cancelled. What happens next is up to you.',
+                '',
+                'Booking: ' . admin_url( 'post.php?action=edit&post=' . $booking_id ),
+                'Stripe: ' . jj_booking_dashboard_url( $booking_id ),
+            ]
+        );
+        jj_booking_set( $booking_id, 'overdue_notified', time() );
+    }
+}
+add_action( 'jj_booking_overdue_check', 'jj_booking_overdue_check' );
+
+
+/* ── Bookings admin screens ────────────────────────────────────────── */
+
+function jj_booking_status_label( $status ) {
+    $labels = [
+        'on-plan'    => __( 'On payment plan', 'jaiye-journeys' ),
+        'paid'       => __( 'Paid in full', 'jaiye-journeys' ),
+        'overdue'    => __( 'Payment overdue', 'jaiye-journeys' ),
+        'plan-error' => __( 'Plan not set up: action needed', 'jaiye-journeys' ),
+    ];
+    return isset( $labels[ $status ] ) ? $labels[ $status ] : __( 'Deposit paid', 'jaiye-journeys' );
+}
+
+function jj_booking_columns( $columns ) {
+    return [
+        'cb'         => $columns['cb'],
+        'title'      => __( 'Booking', 'jaiye-journeys' ),
+        'jj_dates'   => __( 'Dates', 'jaiye-journeys' ),
+        'jj_status'  => __( 'Status', 'jaiye-journeys' ),
+        'jj_paid'    => __( 'Paid so far', 'jaiye-journeys' ),
+        'date'       => __( 'Booked', 'jaiye-journeys' ),
+    ];
+}
+add_filter( 'manage_jj_booking_posts_columns', 'jj_booking_columns' );
+
+function jj_booking_column( $column, $booking_id ) {
+    $currency = jj_booking_get( $booking_id, 'currency' );
+    switch ( $column ) {
+        case 'jj_dates':
+            echo esc_html( jj_booking_get( $booking_id, 'departure' ) );
+            break;
+        case 'jj_status':
+            echo esc_html( jj_booking_status_label( jj_booking_get( $booking_id, 'status' ) ) );
+            if ( 'test' === jj_booking_get( $booking_id, 'mode' ) ) {
+                echo ' <em>(' . esc_html__( 'test', 'jaiye-journeys' ) . ')</em>';
+            }
+            break;
+        case 'jj_paid':
+            if ( $currency ) {
+                echo esc_html( jj_booking_money( jj_booking_get( $booking_id, 'paid' ), $currency ) . ' / ' . jj_booking_money( jj_booking_get( $booking_id, 'total' ), $currency ) );
+            }
+            break;
+    }
+}
+add_action( 'manage_jj_booking_posts_custom_column', 'jj_booking_column', 10, 2 );
+
+function jj_booking_meta_boxes() {
+    add_meta_box( 'jj-booking-details', __( 'Booking details', 'jaiye-journeys' ), 'jj_booking_details_box', 'jj_booking', 'normal', 'high' );
+}
+add_action( 'add_meta_boxes', 'jj_booking_meta_boxes' );
+
+function jj_booking_details_box( $post ) {
+    $id       = $post->ID;
+    $currency = jj_booking_get( $id, 'currency' );
+    $plan     = jj_booking_unpack_plan( jj_booking_get( $id, 'plan' ) );
+    $made     = (int) jj_booking_get( $id, 'payments' );
+    $rows     = [
+        __( 'Status', 'jaiye-journeys' )     => jj_booking_status_label( jj_booking_get( $id, 'status' ) ) . ( 'test' === jj_booking_get( $id, 'mode' ) ? ' (Stripe test mode)' : '' ),
+        __( 'Guest', 'jaiye-journeys' )      => trim( jj_booking_get( $id, 'name' ) . ' · ' . jj_booking_get( $id, 'email' ), ' ·' ),
+        __( 'Journey', 'jaiye-journeys' )    => jj_booking_get( $id, 'trip' ),
+        __( 'Dates', 'jaiye-journeys' )      => jj_booking_get( $id, 'departure' ),
+        __( 'Room', 'jaiye-journeys' )       => jj_booking_get( $id, 'room' ),
+        __( 'Travellers', 'jaiye-journeys' ) => jj_booking_get( $id, 'travellers' ),
+        __( 'Total', 'jaiye-journeys' )      => $currency ? jj_booking_money( jj_booking_get( $id, 'total' ), $currency ) : '',
+        __( 'Paid so far', 'jaiye-journeys' ) => $currency ? jj_booking_money( jj_booking_get( $id, 'paid' ), $currency ) : '',
+    ];
+    echo '<table class="widefat striped"><tbody>';
+    foreach ( $rows as $label => $value ) {
+        printf( '<tr><th style="width:12em">%s</th><td>%s</td></tr>', esc_html( $label ), esc_html( $value ) );
+    }
+    echo '</tbody></table>';
+
+    if ( $plan ) {
+        echo '<h4>' . esc_html__( 'Payment plan', 'jaiye-journeys' ) . '</h4><ol>';
+        foreach ( $plan as $i => $payment ) {
+            printf(
+                '<li>%s · %s%s</li>',
+                esc_html( wp_date( 'j F Y', $payment[0] ) ),
+                esc_html( jj_booking_money( $payment[1], $currency ) ),
+                $i < $made ? ' · <strong>' . esc_html__( 'paid', 'jaiye-journeys' ) . '</strong>' : ''
+            );
+        }
+        echo '</ol>';
+    }
+
+    $failed = (int) jj_booking_get( $id, 'failed_since' );
+    if ( $failed ) {
+        printf(
+            '<p><strong>%s</strong> %s</p>',
+            esc_html__( 'A payment has been unpaid since', 'jaiye-journeys' ),
+            esc_html( wp_date( 'j F Y', $failed ) )
+        );
+        $pay_url = jj_booking_get( $id, 'pay_url' );
+        if ( $pay_url ) {
+            printf( '<p>%s <a href="%s" target="_blank" rel="noopener">%s</a></p>', esc_html__( 'Payment link you can send them:', 'jaiye-journeys' ), esc_url( $pay_url ), esc_html( $pay_url ) );
+        }
+    }
+
+    $error = jj_booking_get( $id, 'error' );
+    if ( 'plan-error' === jj_booking_get( $id, 'status' ) ) {
+        printf( '<p style="color:#b32d2e"><strong>%s</strong> %s</p>', esc_html__( 'Stripe said:', 'jaiye-journeys' ), esc_html( $error ) );
+        printf(
+            '<p><a class="button button-primary" href="%s">%s</a></p>',
+            esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=jj_booking_retry&booking=' . $id ), 'jj_booking_retry_' . $id ) ),
+            esc_html__( 'Set up the payment plan again', 'jaiye-journeys' )
+        );
+    }
+
+    printf( '<p><a href="%s" target="_blank" rel="noopener">%s</a></p>', esc_url( jj_booking_dashboard_url( $id ) ), esc_html__( 'Open in Stripe', 'jaiye-journeys' ) );
+}
+
+/**
+ * Retry a payment plan that failed to set up (e.g. after fixing the key's
+ * permissions). The same idempotency key means it can never create two.
+ */
+function jj_booking_retry() {
+    $id = isset( $_GET['booking'] ) ? absint( $_GET['booking'] ) : 0;
+    check_admin_referer( 'jj_booking_retry_' . $id );
+    if ( ! current_user_can( 'edit_post', $id ) ) {
+        wp_die( esc_html__( 'Not allowed.', 'jaiye-journeys' ) );
+    }
+
+    $session = jj_stripe_request( 'GET', 'checkout/sessions/' . jj_booking_get( $id, 'session' ) );
+    if ( ! is_wp_error( $session ) ) {
+        jj_booking_record_checkout( $session );
+    }
+    wp_safe_redirect( admin_url( 'post.php?action=edit&post=' . $id ) );
+    exit;
+}
+add_action( 'admin_post_jj_booking_retry', 'jj_booking_retry' );
 
 
 /* ── Booking Settings screen ───────────────────────────────────────── */
@@ -406,20 +1318,34 @@ function jj_booking_settings_register() {
         'sanitize_callback' => 'jj_booking_sanitise_key',
         'default'           => '',
     ] );
+    register_setting( 'jj_booking', JJ_STRIPE_WEBHOOK_OPTION, [
+        'type'              => 'string',
+        'sanitize_callback' => 'jj_booking_sanitise_webhook_secret',
+        'default'           => '',
+    ] );
+    register_setting( 'jj_booking', JJ_BOOKING_NOTIFY_OPTION, [
+        'type'              => 'string',
+        'sanitize_callback' => 'sanitize_email',
+        'default'           => '',
+    ] );
+    register_setting( 'jj_booking', JJ_BOOKING_FAST_TEST_OPTION, [
+        'type'              => 'string',
+        'sanitize_callback' => function ( $value ) {
+            return $value ? '1' : '';
+        },
+        'default'           => '',
+    ] );
 }
 add_action( 'admin_init', 'jj_booking_settings_register' );
 
 /**
- * Keep the saved key when the box is left blank (it's never shown again);
- * clear it only when "Remove" is ticked.
- *
- * @param string $value Submitted key.
- * @return string
+ * Keep a saved secret when its box is left blank (it's never shown again);
+ * clear it only when its "Remove" box is ticked.
  */
-function jj_booking_sanitise_key( $value ) {
-    $old = (string) get_option( JJ_STRIPE_KEY_OPTION, '' );
+function jj_booking_sanitise_secret( $value, $option, $pattern, $message ) {
+    $old = (string) get_option( $option, '' );
 
-    if ( ! empty( $_POST['jj_stripe_key_remove'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- options.php checks the settings nonce.
+    if ( ! empty( $_POST[ $option . '_remove' ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification -- options.php checks the settings nonce.
         return '';
     }
 
@@ -427,53 +1353,95 @@ function jj_booking_sanitise_key( $value ) {
     if ( '' === $value ) {
         return $old;
     }
-
-    if ( ! preg_match( '/^(sk|rk)_(test|live)_[A-Za-z0-9]+$/', $value ) ) {
-        add_settings_error( JJ_STRIPE_KEY_OPTION, 'jj_bad_key', __( 'That doesn’t look like a Stripe secret or restricted key (it should start with rk_live_ or sk_live_). Nothing was changed.', 'jaiye-journeys' ) );
+    if ( ! preg_match( $pattern, $value ) ) {
+        add_settings_error( $option, $option . '_bad', $message );
         return $old;
     }
-
     return $value;
 }
 
+function jj_booking_sanitise_key( $value ) {
+    return jj_booking_sanitise_secret( $value, JJ_STRIPE_KEY_OPTION, '/^(sk|rk)_(test|live)_[A-Za-z0-9]+$/', __( 'That doesn’t look like a Stripe secret or restricted key (it starts sk_ or rk_). Nothing was changed.', 'jaiye-journeys' ) );
+}
+
+function jj_booking_sanitise_webhook_secret( $value ) {
+    return jj_booking_sanitise_secret( $value, JJ_STRIPE_WEBHOOK_OPTION, '/^whsec_[A-Za-z0-9]+$/', __( 'That doesn’t look like a webhook signing secret (it starts whsec_). Nothing was changed.', 'jaiye-journeys' ) );
+}
+
+/**
+ * One secret field: saved state, a replace box and a remove tick.
+ */
+function jj_booking_secret_field( $option, $constant, $placeholder ) {
+    $value = defined( $constant ) && constant( $constant ) ? constant( $constant ) : (string) get_option( $option, '' );
+    if ( $value ) {
+        echo '<p>' . esc_html( sprintf( /* translators: %s: last four characters */ __( 'Saved: ending …%s', 'jaiye-journeys' ), substr( $value, -4 ) ) );
+        if ( defined( $constant ) && constant( $constant ) ) {
+            echo ' ' . esc_html__( '(set in wp-config.php)', 'jaiye-journeys' ) . '</p>';
+            return;
+        }
+        echo '</p>';
+    }
+    printf(
+        '<input type="password" name="%s" value="" class="regular-text" autocomplete="off" placeholder="%s">',
+        esc_attr( $option ),
+        esc_attr( $value ? __( 'Paste a new one to replace it', 'jaiye-journeys' ) : $placeholder )
+    );
+    if ( $value ) {
+        printf( '<p><label><input type="checkbox" name="%s_remove" value="1"> %s</label></p>', esc_attr( $option ), esc_html__( 'Remove (turns off booking pages)', 'jaiye-journeys' ) );
+    }
+}
+
 function jj_booking_settings_page() {
-    $key      = jj_stripe_key();
-    $constant = defined( 'JJ_STRIPE_SECRET_KEY' ) && JJ_STRIPE_SECRET_KEY;
+    $mode = jj_stripe_mode();
     ?>
     <div class="wrap">
       <h1><?php esc_html_e( 'Booking Settings', 'jaiye-journeys' ); ?></h1>
-      <p><?php esc_html_e( 'Trips with Rooms get a booking page, which sends guests to Stripe to pay. It switches on once a Stripe key is saved here.', 'jaiye-journeys' ); ?></p>
+      <p><?php esc_html_e( 'Trips with Rooms get a booking page that takes payment through Stripe. It switches on once the key and webhook secret are both saved.', 'jaiye-journeys' ); ?></p>
+      <?php if ( $mode ) : ?>
+        <p><strong><?php echo esc_html( 'test' === $mode ? __( 'Stripe TEST mode: no real money is taken. Use Stripe’s test cards.', 'jaiye-journeys' ) : __( 'Stripe LIVE mode: real payments.', 'jaiye-journeys' ) ); ?></strong></p>
+      <?php endif; ?>
 
       <form method="post" action="options.php">
         <?php settings_fields( 'jj_booking' ); ?>
         <table class="form-table" role="presentation">
           <tr>
-            <th scope="row"><label for="jj-stripe-key"><?php esc_html_e( 'Stripe key', 'jaiye-journeys' ); ?></label></th>
+            <th scope="row"><?php esc_html_e( 'Stripe key', 'jaiye-journeys' ); ?></th>
             <td>
-              <?php if ( $key ) : ?>
-                <p>
-                  <strong><?php echo esc_html( 0 === strpos( $key, substr( $key, 0, 3 ) . 'test_' ) ? __( 'Test mode', 'jaiye-journeys' ) : __( 'Live', 'jaiye-journeys' ) ); ?></strong>
-                  · <?php echo esc_html( sprintf( /* translators: %s: last four characters */ __( 'key ending …%s is saved', 'jaiye-journeys' ), substr( $key, -4 ) ) ); ?>
-                  <?php if ( $constant ) : ?>
-                    <?php esc_html_e( '(set in wp-config.php)', 'jaiye-journeys' ); ?>
-                  <?php endif; ?>
-                </p>
-              <?php endif; ?>
-              <?php if ( ! $constant ) : ?>
-                <input type="password" id="jj-stripe-key" name="<?php echo esc_attr( JJ_STRIPE_KEY_OPTION ); ?>" value="" class="regular-text" autocomplete="off" placeholder="<?php echo esc_attr( $key ? __( 'Paste a new key to replace it', 'jaiye-journeys' ) : 'rk_live_…' ); ?>">
-                <?php if ( $key ) : ?>
-                  <p><label><input type="checkbox" name="jj_stripe_key_remove" value="1"> <?php esc_html_e( 'Remove the saved key (turns off booking pages)', 'jaiye-journeys' ); ?></label></p>
-                <?php endif; ?>
-                <p class="description">
-                  <?php esc_html_e( 'In Stripe: Developers → API keys → Create restricted key. Give it "Checkout Sessions: Write" and nothing else, then paste it here. A key starting rk_test_ lets you try bookings with test cards first.', 'jaiye-journeys' ); ?>
-                </p>
-              <?php endif; ?>
+              <?php jj_booking_secret_field( JJ_STRIPE_KEY_OPTION, 'JJ_STRIPE_SECRET_KEY', 'sk_test_… or rk_live_…' ); ?>
+              <p class="description"><?php esc_html_e( 'For testing, your test-mode secret key (sk_test_…). For launch, a live restricted key (rk_live_…) with the permissions listed in the setup notes.', 'jaiye-journeys' ); ?></p>
             </td>
           </tr>
+          <tr>
+            <th scope="row"><?php esc_html_e( 'Webhook signing secret', 'jaiye-journeys' ); ?></th>
+            <td>
+              <?php jj_booking_secret_field( JJ_STRIPE_WEBHOOK_OPTION, 'JJ_STRIPE_WEBHOOK_SECRET', 'whsec_…' ); ?>
+              <p class="description">
+                <?php esc_html_e( 'In Stripe: Developers → Webhooks → Add endpoint. Endpoint URL:', 'jaiye-journeys' ); ?>
+                <code><?php echo esc_html( rest_url( 'jj/v1/stripe' ) ); ?></code><br>
+                <?php esc_html_e( 'Events: checkout.session.completed, checkout.session.async_payment_succeeded, invoice.paid, invoice.payment_failed, invoice.payment_action_required. Then copy its signing secret here. Test and live mode each have their own.', 'jaiye-journeys' ); ?>
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row"><label for="jj-notify"><?php esc_html_e( 'Send booking emails to', 'jaiye-journeys' ); ?></label></th>
+            <td>
+              <input type="email" id="jj-notify" name="<?php echo esc_attr( JJ_BOOKING_NOTIFY_OPTION ); ?>" value="<?php echo esc_attr( get_option( JJ_BOOKING_NOTIFY_OPTION ) ); ?>" class="regular-text" placeholder="<?php echo esc_attr( get_option( 'admin_email' ) ); ?>">
+              <p class="description"><?php esc_html_e( 'New bookings, payment plans that couldn’t be set up, and payments unpaid for 14 days. Blank uses the site admin email.', 'jaiye-journeys' ); ?></p>
+            </td>
+          </tr>
+          <?php if ( 'test' === $mode ) : ?>
+            <tr>
+              <th scope="row"><?php esc_html_e( 'Quick test schedule', 'jaiye-journeys' ); ?></th>
+              <td>
+                <label>
+                  <input type="checkbox" name="<?php echo esc_attr( JJ_BOOKING_FAST_TEST_OPTION ); ?>" value="1" <?php checked( get_option( JJ_BOOKING_FAST_TEST_OPTION ), '1' ); ?>>
+                  <?php esc_html_e( 'Charge test payment plans every 5 minutes instead of on the real dates, so you can watch a whole plan run. Test mode only.', 'jaiye-journeys' ); ?>
+                </label>
+              </td>
+            </tr>
+          <?php endif; ?>
         </table>
-        <?php if ( ! $constant ) : ?>
-          <?php submit_button(); ?>
-        <?php endif; ?>
+        <?php submit_button(); ?>
       </form>
     </div>
     <?php

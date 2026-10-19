@@ -1,8 +1,9 @@
 /**
- * Trip booking page: keeps the summary in step with the guest's choices,
- * limits travellers to what the chosen room takes, and hides the deposit
- * option for rooms without one. The form works without this; it only
- * makes the totals live. Prices are re-checked on the server regardless.
+ * Trip booking page: keeps prices, the payment plan and the summary in step
+ * with the guest's choices. Handles the £ / $ switch without a reload,
+ * limits travellers to what the chosen room takes, and offers the payment
+ * plan only where it applies. The maths matches jj_booking_quote() in
+ * inc/trip-booking.php, which re-checks everything on the server anyway.
  */
 ( function () {
 	'use strict';
@@ -12,15 +13,40 @@
 		return;
 	}
 
-	var rate     = parseFloat( form.getAttribute( 'data-rate' ) ) || 0;
+	var symbols  = { gbp: '£', usd: '$' };
+	var dates    = JSON.parse( form.getAttribute( 'data-dates' ) || '[]' );
+	var currency = form.getAttribute( 'data-currency' ) || 'gbp';
 	var autoFull = false;
 
-	function money( n ) {
-		return '£' + Math.round( n ).toLocaleString( 'en-GB' );
+	/* Minor units (pence/cents) to "£2,950" or "£816.67". */
+	function money( minor ) {
+		var whole = minor % 100 === 0;
+		return symbols[ currency ] + ( minor / 100 ).toLocaleString( 'en-GB', {
+			minimumFractionDigits: whole ? 0 : 2,
+			maximumFractionDigits: whole ? 0 : 2
+		} );
+	}
+
+	/* Equal payments; the last takes any odd pence. */
+	function split( balance, count ) {
+		if ( count < 1 || balance <= 0 ) {
+			return [];
+		}
+		var each = Math.floor( balance / count );
+		var out  = [];
+		for ( var i = 0; i < count; i++ ) {
+			out.push( each );
+		}
+		out[ count - 1 ] += balance - each * count;
+		return out;
 	}
 
 	function checked( name ) {
 		return form.querySelector( 'input[name="' + name + '"]:checked' );
+	}
+
+	function num( el, attr ) {
+		return parseInt( el.getAttribute( attr ), 10 ) || 0;
 	}
 
 	function setText( key, text ) {
@@ -36,10 +62,10 @@
 		if ( ! room ) {
 			return;
 		}
+		form.setAttribute( 'data-currency', currency );
+		form.querySelector( 'input[name="currency"]' ).value = currency;
 
-		var price   = parseInt( room.getAttribute( 'data-price' ), 10 ) || 0;
-		var deposit = parseInt( room.getAttribute( 'data-deposit' ), 10 ) || 0;
-		var max     = parseInt( room.getAttribute( 'data-max' ), 10 ) || 1;
+		var max = num( room, 'data-max' ) || 1;
 
 		// Travellers: only as many as this room takes.
 		var pills = form.querySelectorAll( 'input[name="guests"]' );
@@ -62,26 +88,41 @@
 				: 'Prices are per person. This room is for one traveller.';
 		}
 
-		// Deposit only where the room has one.
-		var depositChoice = form.querySelector( '.js-booking-deposit' );
-		if ( depositChoice ) {
-			var depositInput = depositChoice.querySelector( 'input' );
-			depositChoice.hidden = ! deposit;
-			depositInput.disabled = ! deposit;
-			if ( ! deposit && depositInput.checked ) {
-				// Switched for them, so switch back if they pick a room with a deposit.
-				form.querySelector( 'input[name="payment"][value="full"]' ).checked = true;
-				autoFull = true;
-			} else if ( deposit && autoFull ) {
-				depositInput.checked = true;
+		var deposit   = num( form, 'data-deposit-' + currency ) * 100 * guests;
+		var planTotal = num( room, 'data-plan-' + currency ) * 100 * guests;
+		var fullTotal = num( room, 'data-full-' + currency ) * 100 * guests;
+		var payments  = deposit > 0 ? split( planTotal - deposit, dates.length ) : [];
+
+		// Payment plan only where there are dates ahead and a balance to spread.
+		var planChoice = form.querySelector( '.js-booking-plan' );
+		if ( planChoice ) {
+			var planInput = planChoice.querySelector( 'input' );
+			var fullInput = form.querySelector( 'input[name="payment"][value="full"]' );
+			planChoice.hidden  = ! payments.length;
+			planInput.disabled = ! payments.length;
+			if ( ! payments.length && planInput.checked ) {
+				fullInput.checked = true;
+				autoFull = true; // Switched for them; switch back when the plan returns.
+			} else if ( payments.length && autoFull ) {
+				planInput.checked = true;
 				autoFull = false;
 			}
-		}
-		var payment   = checked( 'payment' );
-		var byDeposit = deposit && ( ! payment || 'deposit' === payment.value );
 
-		var total = price * guests;
-		var due   = ( byDeposit ? deposit : price ) * guests;
+			var planNote = form.querySelector( '[data-note="plan"]' );
+			if ( planNote && payments.length ) {
+				planNote.textContent = money( deposit ) + ' deposit today, then ' + payments.length +
+					( 1 === payments.length ? ' automatic payment' : ' automatic payments' );
+			}
+			var fullNote = form.querySelector( '[data-note="full"]' );
+			if ( fullNote ) {
+				var saving = planTotal - fullTotal;
+				fullNote.textContent = money( fullTotal ) + ' today' +
+					( saving > 0 ? ', saving ' + money( saving ) : ', nothing more to pay' );
+			}
+		}
+
+		var payment = checked( 'payment' );
+		var onPlan  = payments.length && ( ! payment || 'plan' === payment.value );
 
 		var departure = checked( 'departure' );
 		if ( departure ) {
@@ -89,20 +130,41 @@
 		}
 		setText( 'room', room.getAttribute( 'data-name' ) );
 		setText( 'guests', String( guests ) );
-		setText( 'total', money( total ) );
-		setText( 'due', money( due ) );
+		setText( 'total', money( onPlan ? planTotal : fullTotal ) );
+		setText( 'due', money( onPlan ? deposit : fullTotal ) );
 
-		var balance = setText( 'balance', 'Balance of ' + money( total - due ) + ' due later' );
-		if ( balance ) {
-			balance.hidden = ! byDeposit;
+		var list = form.querySelector( '[data-summary="plan"]' );
+		var note = form.querySelector( '[data-summary="plannote"]' );
+		if ( list ) {
+			list.innerHTML = '';
+			if ( onPlan ) {
+				payments.forEach( function ( amount, i ) {
+					var li = document.createElement( 'li' );
+					var d  = document.createElement( 'span' );
+					var a  = document.createElement( 'span' );
+					d.textContent = dates[ i ];
+					a.textContent = money( amount );
+					li.appendChild( d );
+					li.appendChild( a );
+					list.appendChild( li );
+				} );
+			}
+			list.hidden = ! onPlan;
+		}
+		if ( note ) {
+			note.hidden = ! onPlan;
 		}
 
-		// Same rounding as the trip page's estimate: nearest $50.
-		var fx = form.querySelector( '[data-summary="fx"]' );
-		if ( fx && rate > 0 ) {
-			fx.textContent = 'Approx. $' + ( Math.round( due * rate / 50 ) * 50 ).toLocaleString( 'en-US' ) + ' USD today';
-			fx.hidden = false;
-		}
+		// The currency switch.
+		Array.prototype.forEach.call( form.querySelectorAll( '.js-currency' ), function ( link ) {
+			var on = link.getAttribute( 'data-currency' ) === currency;
+			link.classList.toggle( 'is-active', on );
+			if ( on ) {
+				link.setAttribute( 'aria-current', 'true' );
+			} else {
+				link.removeAttribute( 'aria-current' );
+			}
+		} );
 	}
 
 	form.addEventListener( 'change', function ( e ) {
@@ -111,5 +173,16 @@
 		}
 		update();
 	} );
+
+	form.addEventListener( 'click', function ( e ) {
+		var link = e.target.closest( '.js-currency' );
+		if ( ! link ) {
+			return;
+		}
+		e.preventDefault();
+		currency = link.getAttribute( 'data-currency' );
+		update();
+	} );
+
 	update();
 }() );

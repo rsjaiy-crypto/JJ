@@ -268,7 +268,7 @@ get_header();
         </details>
         <details class="jje-accordion-item">
           <summary><?php esc_html_e( 'Payment Terms', 'jaiye-journeys' ); ?></summary>
-          <p><?php esc_html_e( 'A £500 / $700 deposit secures your place, refunded in full if you change your mind within 60 days of booking. The remaining balance is due 60 days before departure, or spread across a monthly payment plan with no interest.', 'jaiye-journeys' ); ?></p>
+          <p><?php esc_html_e( 'A £500 / $700 deposit secures your place, refunded in full if you change your mind within 60 days of booking. The balance is then taken in automatic monthly payments with no interest, up to the trip’s final payment date, or you can pay in full at booking.', 'jaiye-journeys' ); ?></p>
         </details>
         <details class="jje-accordion-item">
           <summary><?php esc_html_e( 'Getting There', 'jaiye-journeys' ); ?></summary>

@@ -254,22 +254,43 @@ function jj_trip_schema() {
                         'book_url'     => [ 'type' => 'url', 'label' => __( 'Book URL (optional)', 'jaiye-journeys' ) ],
                     ],
                 ],
+                'deposit_gbp'    => [
+                    'type'    => 'number',
+                    'label'   => __( 'Deposit per person (£)', 'jaiye-journeys' ),
+                    'default' => '500',
+                ],
+                'deposit_usd'    => [
+                    'type'    => 'number',
+                    'label'   => __( 'Deposit per person ($)', 'jaiye-journeys' ),
+                    'default' => '700',
+                ],
+                'instalment_dates' => [
+                    'type'      => 'repeater',
+                    'label'     => __( 'Payment plan dates', 'jaiye-journeys' ),
+                    'desc'      => __( 'The dates the balance is collected after the deposit, in any order; the latest is the final payment date. Guests are charged on the dates still ahead of them when they book, in equal payments. With none ahead, they pay in full at booking.', 'jaiye-journeys' ),
+                    'row_label' => __( 'Payment date', 'jaiye-journeys' ),
+                    'subfields' => [
+                        'date' => [ 'type' => 'date', 'label' => __( 'Date', 'jaiye-journeys' ) ],
+                    ],
+                ],
                 'rooms'          => [
                     'type'      => 'repeater',
                     'label'     => __( 'Rooms (booking page)', 'jaiye-journeys' ),
-                    'desc'      => __( 'Add rooms to switch on the booking page, where guests pick their dates, room and number of travellers, then pay on Stripe. Prices are per person, in whole pounds. Needs the Stripe key in Trips → Booking Settings.', 'jaiye-journeys' ),
+                    'desc'      => __( 'Add rooms to switch on the booking page, where guests pick their dates, room and number of travellers, then pay on Stripe. Prices are per person, in whole pounds and dollars. Leave the $ prices blank to sell in pounds only. Needs the Stripe settings in Trips → Booking Settings.', 'jaiye-journeys' ),
                     'row_label' => __( 'Room', 'jaiye-journeys' ),
                     'subfields' => [
-                        'name'        => [ 'type' => 'text', 'label' => __( 'Room name', 'jaiye-journeys' ), 'placeholder' => 'Private double' ],
-                        'description' => [ 'type' => 'textarea', 'label' => __( 'Short description', 'jaiye-journeys' ), 'rows' => 3 ],
-                        'image'       => [ 'type' => 'image', 'label' => __( 'Photo', 'jaiye-journeys' ) ],
-                        'price'       => [ 'type' => 'number', 'label' => __( 'Price per person (£)', 'jaiye-journeys' ) ],
-                        'deposit'     => [
+                        'name'           => [ 'type' => 'text', 'label' => __( 'Room name', 'jaiye-journeys' ), 'placeholder' => 'Private double' ],
+                        'description'    => [ 'type' => 'textarea', 'label' => __( 'Short description', 'jaiye-journeys' ), 'rows' => 3 ],
+                        'image'          => [ 'type' => 'image', 'label' => __( 'Photo', 'jaiye-journeys' ) ],
+                        'price'          => [ 'type' => 'number', 'label' => __( 'Payment plan price per person (£)', 'jaiye-journeys' ) ],
+                        'full_price'     => [
                             'type'  => 'number',
-                            'label' => __( 'Deposit per person (£)', 'jaiye-journeys' ),
-                            'desc'  => __( 'Leave blank to take full payment only.', 'jaiye-journeys' ),
+                            'label' => __( 'Pay-in-full price per person (£)', 'jaiye-journeys' ),
+                            'desc'  => __( 'The discounted price for paying everything at booking. Blank means no discount.', 'jaiye-journeys' ),
                         ],
-                        'max_guests'  => [
+                        'price_usd'      => [ 'type' => 'number', 'label' => __( 'Payment plan price per person ($)', 'jaiye-journeys' ) ],
+                        'full_price_usd' => [ 'type' => 'number', 'label' => __( 'Pay-in-full price per person ($)', 'jaiye-journeys' ) ],
+                        'max_guests'     => [
                             'type'    => 'select',
                             'label'   => __( 'Travellers per booking', 'jaiye-journeys' ),
                             'default' => '2',
@@ -280,7 +301,7 @@ function jj_trip_schema() {
                                 '4' => __( 'Up to 4', 'jaiye-journeys' ),
                             ],
                         ],
-                        'sold_out'    => [ 'type' => 'checkbox', 'label' => __( 'Sold out', 'jaiye-journeys' ) ],
+                        'sold_out'       => [ 'type' => 'checkbox', 'label' => __( 'Sold out', 'jaiye-journeys' ) ],
                     ],
                 ],
             ],
@@ -1075,6 +1096,10 @@ function jj_trip_sanitise_value( $value, $type ) {
 
         case 'checkbox':
             return $value ? '1' : '';
+
+        case 'date':
+            $date = DateTimeImmutable::createFromFormat( '!Y-m-d', trim( (string) $value ), wp_timezone() );
+            return $date ? $date->format( 'Y-m-d' ) : '';
 
         case 'datetime':
             // datetime-local submits 2026-11-01T10:00; stored with a space so
