@@ -577,13 +577,126 @@ function jj_trip_admin_column_content( $column, $post_id ) {
         return;
     }
 
+    // data-jj-status carries the saved value (not the live one, which a
+    // "Go on sale at" time may have moved on) for Quick Edit to preselect.
     printf(
-        '<span class="jj-trip-live jj-trip-live--%s">%s</span>',
+        '<span class="jj-trip-live jj-trip-live--%s" data-jj-status="%s">%s</span>',
         esc_attr( jj_trip_status( $post_id ) ),
+        esc_attr( jj_trip_field( 'status', $post_id, 'open' ) ),
         esc_html( jj_trip_status_summary( $post_id ) )
     );
 }
 add_action( 'manage_trip_posts_custom_column', 'jj_trip_admin_column_content', 10, 2 );
+
+
+/**
+ * Sales Status in Quick Edit and Bulk Edit on the Trips list.
+ *
+ * Both rows live inside the same list form, so they use different field
+ * names and the save handler only reads the one for the action actually
+ * submitted — otherwise a bulk edit would also send the hidden Quick Edit
+ * select and overwrite every ticked trip with it.
+ *
+ * @param string $column    Column key.
+ * @param string $post_type Post type.
+ */
+function jj_trip_inline_edit_box( $column, $post_type ) {
+    if ( 'jj_sales_status' !== $column || 'trip' !== $post_type ) {
+        return;
+    }
+
+    $bulk    = ( 'bulk_edit_custom_box' === current_filter() );
+    $fields  = jj_trip_all_fields();
+    $options = $fields['status']['options'];
+
+    if ( $bulk ) {
+        $options = [ '' => __( '— No change —', 'jaiye-journeys' ) ] + $options;
+    }
+
+    wp_nonce_field( 'jj_trip_inline_status', 'jj_trip_inline_status_nonce' );
+    ?>
+    <fieldset class="inline-edit-col-right">
+      <div class="inline-edit-col">
+        <label class="inline-edit-status">
+          <span class="title"><?php esc_html_e( 'Sales Status', 'jaiye-journeys' ); ?></span>
+          <select name="<?php echo esc_attr( $bulk ? 'jj_trip_bulk_status' : 'jj_trip_quick_status' ); ?>">
+            <?php foreach ( $options as $value => $label ) : ?>
+              <option value="<?php echo esc_attr( $value ); ?>"><?php echo esc_html( $label ); ?></option>
+            <?php endforeach; ?>
+          </select>
+        </label>
+      </div>
+    </fieldset>
+    <?php
+}
+add_action( 'quick_edit_custom_box', 'jj_trip_inline_edit_box', 10, 2 );
+add_action( 'bulk_edit_custom_box', 'jj_trip_inline_edit_box', 10, 2 );
+
+
+/**
+ * Save Sales Status from Quick Edit or Bulk Edit. Touches nothing else.
+ *
+ * @param int $post_id Post ID.
+ */
+function jj_trip_save_inline_status( $post_id ) {
+    if ( wp_is_post_revision( $post_id ) || ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) ) {
+        return;
+    }
+    if ( ! isset( $_REQUEST['jj_trip_inline_status_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_REQUEST['jj_trip_inline_status_nonce'] ) ), 'jj_trip_inline_status' ) ) {
+        return;
+    }
+    if ( ! current_user_can( 'edit_post', $post_id ) ) {
+        return;
+    }
+
+    if ( isset( $_REQUEST['bulk_edit'] ) ) {
+        $key = 'jj_trip_bulk_status';
+    } elseif ( isset( $_POST['action'] ) && 'inline-save' === $_POST['action'] ) {
+        $key = 'jj_trip_quick_status';
+    } else {
+        return;
+    }
+
+    $value  = isset( $_REQUEST[ $key ] ) ? sanitize_key( wp_unslash( $_REQUEST[ $key ] ) ) : '';
+    $fields = jj_trip_all_fields();
+
+    // Blank is Bulk Edit's "No change"; anything not a real option is ignored.
+    if ( '' === $value || ! isset( $fields['status']['options'][ $value ] ) ) {
+        return;
+    }
+
+    update_post_meta( $post_id, JJ_TRIP_META_PREFIX . 'status', $value );
+}
+add_action( 'save_post_trip', 'jj_trip_save_inline_status' );
+
+
+/**
+ * Preselect the trip's saved status when Quick Edit opens.
+ *
+ * @param string $hook Current admin page.
+ */
+function jj_trip_inline_edit_script( $hook ) {
+    $screen = get_current_screen();
+    if ( 'edit.php' !== $hook || ! $screen || 'trip' !== $screen->post_type ) {
+        return;
+    }
+
+    wp_add_inline_script(
+        'inline-edit-post',
+        "jQuery( function ( $ ) {
+            if ( typeof inlineEditPost === 'undefined' ) { return; }
+            var coreEdit = inlineEditPost.edit;
+            inlineEditPost.edit = function ( id ) {
+                coreEdit.apply( this, arguments );
+                var postId = typeof id === 'object' ? parseInt( this.getId( id ), 10 ) : parseInt( id, 10 );
+                if ( ! postId ) { return; }
+                var status = $( '#post-' + postId ).find( '.jj-trip-live' ).data( 'jjStatus' );
+                $( '#edit-' + postId ).find( 'select[name=\"jj_trip_quick_status\"]' ).val( status || 'open' );
+            };
+        } );"
+    );
+}
+add_action( 'admin_enqueue_scripts', 'jj_trip_inline_edit_script' );
 
 
 /**
