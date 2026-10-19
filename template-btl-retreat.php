@@ -2,7 +2,7 @@
 /*
  * Template Name: BTL Retreat
  *
- * Used for every Between the Lines chapter page (Marrakech, Sintra, and
+ * Used for every Between the Lines chapter page (Marrakesh, Sintra, and
  * future chapters). Content is hard-coded per trip — duplicate this file
  * (or a page using it) for each new chapter and edit the blocks marked
  * "EDIT PER TRIP". See HANDOVER.md for the wider theme conventions this
@@ -29,7 +29,7 @@ get_header();
 
       <!-- EDIT PER TRIP: eyebrow, title, intro line -->
       <p class="btlr-eyebrow"><?php esc_html_e( 'Between the Lines', 'jaiye-journeys' ); ?></p>
-      <h1 class="btlr-hero__title"><?php esc_html_e( 'Chapter One: Marrakech', 'jaiye-journeys' ); ?></h1>
+      <h1 class="btlr-hero__title"><?php esc_html_e( 'Chapter One: Marrakesh', 'jaiye-journeys' ); ?></h1>
       <div class="btlr-hero__copy">
         <p><?php esc_html_e( 'Six days in a private riad near Bab Aylane, built around one loud city and a door that shuts it out completely.', 'jaiye-journeys' ); ?></p>
       </div>
@@ -59,7 +59,7 @@ get_header();
         <div class="btlr-glance__facts">
           <div class="btlr-glance__item">
             <p><?php esc_html_e( 'Location', 'jaiye-journeys' ); ?></p>
-            <p><?php esc_html_e( 'Marrakech', 'jaiye-journeys' ); ?></p>
+            <p><?php esc_html_e( 'Marrakesh', 'jaiye-journeys' ); ?></p>
           </div>
           <div class="btlr-glance__item">
             <p><?php esc_html_e( 'Accommodation', 'jaiye-journeys' ); ?></p>
@@ -112,14 +112,14 @@ get_header();
       <!-- EDIT PER TRIP: producer's note copy, literary/editorial voice -->
       <section id="producers-note" class="btlr-section">
         <h2><?php esc_html_e( "The Producer's Note", 'jaiye-journeys' ); ?></h2>
-        <p><?php esc_html_e( "For this first chapter, I've designed Marrakech around a single contrast: the loudest city I know, and a door that shuts it out completely.", 'jaiye-journeys' ); ?></p>
+        <p><?php esc_html_e( "For this first chapter, I've designed Marrakesh around a single contrast: the loudest city I know, and a door that shuts it out completely.", 'jaiye-journeys' ); ?></p>
         <p><?php esc_html_e( "Palazzo Montefiore sits in the medina near Bab Aylane, behind walls that hold a private hammam, a sun terrace, and a rooftop looking out over the rooftops of the old city. You will not hear the souks from inside. That's not an accident, it's the entire point of a riad.", 'jaiye-journeys' ); ?></p>
         <p><?php esc_html_e( "Most of the week stays close in, restful, and unhurried. One day leaves the city behind entirely for the Agafay, a landscape that looks more like the moon than a desert. This isn't a highlights tour. It's what I would do myself, given a week here and nowhere else to be.", 'jaiye-journeys' ); ?></p>
       </section>
 
       <!-- EDIT PER TRIP: image break photo + caption -->
       <div class="btlr-image-break btlr-tone-forest">
-        <span class="btlr-image-break__caption"><?php esc_html_e( 'Palazzo Montefiore, Marrakech', 'jaiye-journeys' ); ?></span>
+        <span class="btlr-image-break__caption"><?php esc_html_e( 'Palazzo Montefiore, Marrakesh', 'jaiye-journeys' ); ?></span>
       </div>
 
       <!-- ============================================================
@@ -158,7 +158,7 @@ get_header();
       <!-- EDIT PER TRIP -->
       <section id="location" class="btlr-section">
         <h2><?php esc_html_e( 'The Location', 'jaiye-journeys' ); ?></h2>
-        <p><?php esc_html_e( 'Marrakech holds two cities at once: the medina, dense and alive with the souks, and the quiet interior of a riad built to shut all of it out. Palazzo Montefiore sits within walking distance of Bab Aylane, twelve rooms arranged around a courtyard, with an in-house hammam and a rooftop that catches the evening light over the old city.', 'jaiye-journeys' ); ?></p>
+        <p><?php esc_html_e( 'Marrakesh holds two cities at once: the medina, dense and alive with the souks, and the quiet interior of a riad built to shut all of it out. Palazzo Montefiore sits within walking distance of Bab Aylane, twelve rooms arranged around a courtyard, with an in-house hammam and a rooftop that catches the evening light over the old city.', 'jaiye-journeys' ); ?></p>
         <p><?php esc_html_e( 'Beyond the riad, the Agafay desert sits under wide open sky less than an hour away, a landscape that feels like nowhere else on the itinerary.', 'jaiye-journeys' ); ?></p>
       </section>
 
@@ -180,7 +180,7 @@ get_header();
             class="btlr-host__photo"
             loading="lazy"
           >
-          <p><?php esc_html_e( "Marrakech is the city Steph knows best of anywhere she's travelled. She's on-site for the full retreat, not dropping in for the welcome dinner and leaving the rest to a local team. Every choice this week comes from somewhere she's actually stood.", 'jaiye-journeys' ); ?></p>
+          <p><?php esc_html_e( "Marrakesh is the city Steph knows best of anywhere she's travelled. She's on-site for the full retreat, not dropping in for the welcome dinner and leaving the rest to a local team. Every choice this week comes from somewhere she's actually stood.", 'jaiye-journeys' ); ?></p>
         </div>
       </section>
 

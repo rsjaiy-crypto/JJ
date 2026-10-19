@@ -640,6 +640,14 @@
   width: 100%;
 }
 
+.trip-booking__waitlist {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
 .trip-booking__sold-out {
   margin: 0;
   font-family: var(--font-body);
@@ -1533,6 +1541,76 @@
   display: none;
 }
 
+/* Contents list behind the mobile bar's "Contents" button */
+.trip-toc {
+  position: static;
+  flex-shrink: 0;
+}
+
+.trip-toc__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding-inline: var(--space-3);
+  border: 1px solid rgba(245, 233, 219, 0.35);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-cream);
+  cursor: pointer;
+  list-style: none;
+}
+
+.trip-toc__toggle::-webkit-details-marker {
+  display: none;
+}
+
+.trip-toc__toggle::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-top: 1px solid currentColor;
+  border-left: 1px solid currentColor;
+  transform: translateY(2px) rotate(45deg);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.trip-toc[open] .trip-toc__toggle::after {
+  transform: translateY(-2px) rotate(225deg);
+}
+
+.trip-toc__panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-5);
+  background-color: var(--color-cream);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -8px 24px color-mix(in srgb, var(--color-deep-green) 18%, transparent);
+}
+
+.trip-toc__link {
+  display: block;
+  padding: var(--space-3) 0;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-forest);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.trip-toc__list li:last-child .trip-toc__link {
+  border-bottom: 0;
+}
+
 @media (max-width: 1024px) {
   .trip-mobile-bar {
     position: fixed;
@@ -1719,17 +1797,6 @@
   text-align: center;
   font-family: var(--font-body);
   font-size: var(--text-sm);
-}
-
-/* Meters sit between the facts and the CTA instead of in the welcome column */
-.trip-soon .trip-meters {
-  margin: 0 0 var(--space-10);
-}
-
-/* Closing "other journeys" link after the shared itinerary sections, which
-   already carry their own bottom padding */
-.trip-soon--end {
-  padding-top: 0;
 }
 
 @media (max-width: 700px) {

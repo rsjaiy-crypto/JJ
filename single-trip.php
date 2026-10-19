@@ -38,11 +38,25 @@ while ( have_posts() ) :
     $brand    = jj_trip_field( 'brand', $trip_id, 'jj-edit' );
     $is_btl   = ( 'btl' === $brand );
 
-    // Not-yet-bookable trips (Coming soon, Waitlist) get the condensed page
-    // instead: no prices, no booking card. Waitlist adds the itinerary.
-    if ( jj_trip_is_presale( $trip_id ) ) {
+    $status   = jj_trip_status( $trip_id );
+    $waitlist = ( 'coming-soon' === $status );
+
+    // Coming soon gets the short "Get on The List" page. So does a Waitlist
+    // trip with no Day by Day yet until the one-off status review on the
+    // Trips screen is done, so nothing changed for those before the owner
+    // chose which trips move to Coming soon.
+    if ( 'announced' === $status || ( $waitlist && ! $days && ! get_option( JJ_TRIP_PRESALE_REVIEW ) ) ) {
         require get_template_directory() . '/inc/trip-coming-soon.php';
         continue;
+    }
+
+    // Waitlist is this full page with nothing about price or booking: no
+    // price, booking buttons, payment terms or departure availability.
+    // Every "Book" becomes "Get on The List". Prices go to The List first.
+    $waitlist_url = $waitlist ? jj_trip_waitlist_url( $trip_id ) : '';
+    if ( $waitlist ) {
+        $booking_url = '';
+        $price_from  = '';
     }
 
     // Sold out keeps the full page (it still sells the next departure) but
@@ -75,17 +89,20 @@ while ( have_posts() ) :
     </div>
 
     <div class="container trip-hero__inner">
-      <?php if ( $is_btl || $sold_out ) : ?>
+      <?php
+      $eyebrow = [];
+      if ( $is_btl ) {
+          $eyebrow[] = __( 'Between the Lines', 'jaiye-journeys' );
+      }
+      if ( $waitlist ) {
+          $eyebrow[] = __( 'Waitlist Open', 'jaiye-journeys' );
+      } elseif ( $sold_out ) {
+          $eyebrow[] = __( 'Sold Out', 'jaiye-journeys' );
+      }
+      ?>
+      <?php if ( $eyebrow ) : ?>
         <p class="trip-hero__eyebrow">
-          <?php
-          if ( $is_btl && $sold_out ) {
-              esc_html_e( 'Between the Lines · Sold Out', 'jaiye-journeys' );
-          } elseif ( $is_btl ) {
-              esc_html_e( 'Between the Lines', 'jaiye-journeys' );
-          } else {
-              esc_html_e( 'Sold Out', 'jaiye-journeys' );
-          }
-          ?>
+          <?php echo esc_html( implode( ' · ', $eyebrow ) ); ?>
         </p>
       <?php endif; ?>
       <h1 class="trip-hero__title"><?php echo esc_html( jj_trip_volume_title( $trip_id ) ); ?></h1>
@@ -98,24 +115,51 @@ while ( have_posts() ) :
 
 
   <!-- ============================================================
-       2. STICKY ANCHOR SUB-NAV
+       2. TABLE OF CONTENTS
+       Sticky bar on desktop; on phones the same list opens from the
+       Contents button in the bottom bar. One entry per section that
+       actually renders, in page order.
        ============================================================ -->
+  <?php
+  $has_inclusions = $included
+      || jj_trip_field( 'not_included', $trip_id )
+      || jj_trip_field( 'route_map', $trip_id )
+      || jj_trip_field( 'route_copy', $trip_id );
+
+  $toc = [ 'welcome' => __( 'Overview', 'jaiye-journeys' ) ];
+  if ( $departures ) {
+      $toc['book'] = $is_btl ? __( 'Chapters', 'jaiye-journeys' ) : __( 'Dates', 'jaiye-journeys' );
+  }
+  if ( $has_inclusions ) {
+      $toc['inclusions'] = __( "What's Included", 'jaiye-journeys' );
+  }
+  if ( $days ) {
+      $toc['day-by-day'] = __( 'Day by Day', 'jaiye-journeys' );
+  }
+  if ( $notes ) {
+      $toc['trip-notes'] = __( 'Trip Notes', 'jaiye-journeys' );
+  }
+  if ( $reviews ) {
+      $toc['reviews'] = __( 'Reviews', 'jaiye-journeys' );
+  }
+  if ( $faqs ) {
+      $toc['faq'] = __( 'FAQs', 'jaiye-journeys' );
+  }
+  $toc['enquire'] = __( 'Enquire', 'jaiye-journeys' );
+  ?>
   <nav class="trip-subnav" id="trip-subnav" aria-label="<?php esc_attr_e( 'Trip sections', 'jaiye-journeys' ); ?>">
     <div class="container trip-subnav__inner">
       <ul class="trip-subnav__list" role="list">
-        <?php if ( $days ) : ?>
-          <li><a href="#day-by-day" class="trip-subnav__link"><?php esc_html_e( 'Day by Day', 'jaiye-journeys' ); ?></a></li>
-        <?php endif; ?>
-        <?php if ( $notes ) : ?>
-          <li><a href="#trip-notes" class="trip-subnav__link"><?php esc_html_e( 'Trip Notes', 'jaiye-journeys' ); ?></a></li>
-        <?php endif; ?>
-        <?php if ( $reviews ) : ?>
-          <li><a href="#reviews" class="trip-subnav__link"><?php esc_html_e( 'Reviews', 'jaiye-journeys' ); ?></a></li>
-        <?php endif; ?>
-        <li><a href="#enquire" class="trip-subnav__link"><?php esc_html_e( 'Enquire', 'jaiye-journeys' ); ?></a></li>
+        <?php foreach ( $toc as $toc_id => $toc_label ) : ?>
+          <li><a href="#<?php echo esc_attr( $toc_id ); ?>" class="trip-subnav__link"><?php echo esc_html( $toc_label ); ?></a></li>
+        <?php endforeach; ?>
       </ul>
 
-      <?php if ( $booking_url ) : ?>
+      <?php if ( $waitlist ) : ?>
+        <a href="<?php echo esc_url( $waitlist_url ); ?>" class="btn btn--accent btn--sm trip-subnav__cta" target="_blank" rel="noopener">
+          <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
+        </a>
+      <?php elseif ( $booking_url ) : ?>
         <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent btn--sm trip-subnav__cta" target="_blank" rel="noopener">
           <?php esc_html_e( 'Book Now', 'jaiye-journeys' ); ?>
         </a>
@@ -239,7 +283,7 @@ while ( have_posts() ) :
 
           <?php if ( $departures && $is_btl ) : ?>
             <!--
-              BTL: each departure is its own Chapter — Marrakech is the
+              BTL: each departure is its own Chapter — Marrakesh is the
               Volume, every cohort that travels there is the next chapter of
               it. Auto-numbered by row order, not grouped by year, so adding
               a departure in wp-admin is all it takes for "Chapter 4" to exist.
@@ -282,14 +326,14 @@ while ( have_posts() ) :
                       echo esc_html( $dep_text );
                       ?>
                     </span>
-                    <?php if ( ! empty( $departure['availability'] ) ) : ?>
+                    <?php if ( ! $waitlist && ! empty( $departure['availability'] ) ) : ?>
                       <span class="trip-departure__status trip-departure__status--<?php echo esc_attr( ! empty( $departure['status'] ) ? $departure['status'] : 'available' ); ?>">
                         <?php echo esc_html( $departure['availability'] ); ?>
                       </span>
                     <?php endif; ?>
                   </li>
                 </ul>
-                <?php if ( ! $sold_out && ! empty( $departure['book_url'] ) ) : ?>
+                <?php if ( ! $sold_out && ! $waitlist && ! empty( $departure['book_url'] ) ) : ?>
                   <a href="<?php echo esc_url( $departure['book_url'] ); ?>" class="btn btn--accent trip-booking__chapter-cta" target="_blank" rel="noopener">
                     <?php
                     printf(
@@ -339,7 +383,7 @@ while ( have_posts() ) :
                   <?php foreach ( $by_year[ $year ] as $departure ) : ?>
                     <li class="trip-departure">
                       <span class="trip-departure__dates"><?php echo esc_html( isset( $departure['dates'] ) ? $departure['dates'] : '' ); ?></span>
-                      <?php if ( ! empty( $departure['availability'] ) ) : ?>
+                      <?php if ( ! $waitlist && ! empty( $departure['availability'] ) ) : ?>
                         <span class="trip-departure__status trip-departure__status--<?php echo esc_attr( ! empty( $departure['status'] ) ? $departure['status'] : 'available' ); ?>">
                           <?php echo esc_html( $departure['availability'] ); ?>
                         </span>
@@ -351,6 +395,14 @@ while ( have_posts() ) :
             <?php endforeach; ?>
           <?php endif; ?>
 
+          <?php if ( $waitlist ) : ?>
+            <div class="trip-booking__actions">
+              <p class="trip-booking__waitlist"><?php esc_html_e( 'Prices and first access go to The List before anyone else. No deposit, no commitment.', 'jaiye-journeys' ); ?></p>
+              <a href="<?php echo esc_url( $waitlist_url ); ?>" class="btn btn--accent" target="_blank" rel="noopener">
+                <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
+              </a>
+            </div>
+          <?php else : ?>
           <div class="trip-booking__actions">
             <?php if ( $sold_out ) : ?>
               <p class="trip-booking__sold-out"><?php esc_html_e( 'This trip is sold out. Enquire to hear about the next departure.', 'jaiye-journeys' ); ?></p>
@@ -367,6 +419,7 @@ while ( have_posts() ) :
           <?php $terms = jj_trip_field( 'payment_terms', $trip_id ); ?>
           <?php if ( $terms ) : ?>
             <p class="trip-booking__terms"><?php echo esc_html( $terms ); ?></p>
+          <?php endif; ?>
           <?php endif; ?>
         </div>
       </aside>
@@ -449,14 +502,21 @@ while ( have_posts() ) :
     <div class="container trip-cta__inner js-reveal">
       <h2 class="trip-cta__title">
         <?php
-        echo esc_html(
-            $sold_out
-                ? __( 'Want a place on the next one?', 'jaiye-journeys' )
-                : __( 'Ready to secure your place?', 'jaiye-journeys' )
-        );
+        if ( $waitlist ) {
+            esc_html_e( 'Be first to know', 'jaiye-journeys' );
+        } elseif ( $sold_out ) {
+            esc_html_e( 'Want a place on the next one?', 'jaiye-journeys' );
+        } else {
+            esc_html_e( 'Ready to secure your place?', 'jaiye-journeys' );
+        }
         ?>
       </h2>
       <div class="trip-cta__actions">
+        <?php if ( $waitlist ) : ?>
+          <a href="<?php echo esc_url( $waitlist_url ); ?>" class="btn btn--accent" target="_blank" rel="noopener">
+            <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
+          </a>
+        <?php endif; ?>
         <?php if ( $booking_url ) : ?>
           <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent" target="_blank" rel="noopener">
             <?php esc_html_e( 'Book Now', 'jaiye-journeys' ); ?>
@@ -615,15 +675,29 @@ while ( have_posts() ) :
   </section>
 
 
-  <!-- Mobile sticky booking bar (hidden on desktop) -->
+  <!-- Mobile sticky booking bar (hidden on desktop), with the contents list -->
   <div class="trip-mobile-bar" id="trip-mobile-bar">
+    <details class="trip-toc js-toc">
+      <summary class="trip-toc__toggle"><?php esc_html_e( 'Contents', 'jaiye-journeys' ); ?></summary>
+      <nav class="trip-toc__panel" aria-label="<?php esc_attr_e( 'Trip sections', 'jaiye-journeys' ); ?>">
+        <ul class="trip-toc__list" role="list">
+          <?php foreach ( $toc as $toc_id => $toc_label ) : ?>
+            <li><a href="#<?php echo esc_attr( $toc_id ); ?>" class="trip-toc__link"><?php echo esc_html( $toc_label ); ?></a></li>
+          <?php endforeach; ?>
+        </ul>
+      </nav>
+    </details>
     <div class="trip-mobile-bar__price">
       <?php if ( $price_from ) : ?>
         <span class="trip-mobile-bar__label"><?php esc_html_e( 'From', 'jaiye-journeys' ); ?></span>
         <span class="trip-mobile-bar__value">&pound;<?php echo esc_html( number_format_i18n( (int) $price_from ) ); ?></span>
       <?php endif; ?>
     </div>
-    <?php if ( $booking_url ) : ?>
+    <?php if ( $waitlist ) : ?>
+      <a href="<?php echo esc_url( $waitlist_url ); ?>" class="btn btn--accent btn--sm" target="_blank" rel="noopener">
+        <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
+      </a>
+    <?php elseif ( $booking_url ) : ?>
       <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent btn--sm" target="_blank" rel="noopener">
         <?php esc_html_e( 'Book Now', 'jaiye-journeys' ); ?>
       </a>

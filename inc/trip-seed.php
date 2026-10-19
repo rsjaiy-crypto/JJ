@@ -92,7 +92,7 @@ function jj_trip_seed_page() {
 
         <h2><?php esc_html_e( 'Apply Vibe Tags', 'jaiye-journeys' ); ?></h2>
         <p>
-            <?php esc_html_e( 'Updates only the Vibe Tags field on Marrakech, Sintra, Tuscany, Peru and Bali to the current assignments below — everything else on those trips is left exactly as it is. Safe to run more than once.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Updates only the Vibe Tags field on Marrakesh, Sintra, Tuscany, Peru and Bali to the current assignments below — everything else on those trips is left exactly as it is. Safe to run more than once.', 'jaiye-journeys' ); ?>
         </p>
         <ul style="margin:0 0 12px; list-style:disc; padding-left:20px;">
             <?php foreach ( jj_trip_vibe_tag_assignments() as $slug => $keys ) : ?>
@@ -606,13 +606,13 @@ function jj_trip_seed_definitions() {
             ],
         ],
 
-        /* ── Marrakech: the BTL chapter sample ────────────────────── */
+        /* ── Marrakesh: the BTL chapter sample ────────────────────── */
         'btl-marrakech' => [
-            'title' => 'Chapter One: Marrakech',
+            'title' => 'Chapter One: Marrakesh',
             'hero'  => 'btl-hero.jpg',
             'meta'  => [
                 'brand'           => 'btl',
-                'destination'     => 'Marrakech',
+                'destination'     => 'Marrakesh',
                 'region'          => 'africa',
                 'vibe_tags'       => 'sensory,main-character,slow',
                 'intro_statement' => 'Six days in a private riad near Bab Aylane, built around one loud city and a door that shuts it out completely.',
@@ -627,7 +627,7 @@ function jj_trip_seed_definitions() {
                 'duration'     => '5 Nights, 6 Days',
                 'price_from'   => '2850',
                 'group_size'   => 'Twelve rooms, whole-riad buyout',
-                'welcome_copy' => "Marrakech holds two cities at once: the medina, dense and alive with the souks, and the quiet interior of a riad built to shut all of it out.\n\nPalazzo Montefiore sits within walking distance of Bab Aylane — twelve rooms around a courtyard, an in-house hammam, and a rooftop that catches the evening light over the old city. You will not hear the souks from inside. That is not an accident; it is the entire point of a riad.\n\nMost of the week stays close in, restful and unhurried. One day leaves the city behind entirely for the Agafay, a landscape that looks more like the moon than a desert.",
+                'welcome_copy' => "Marrakesh holds two cities at once: the medina, dense and alive with the souks, and the quiet interior of a riad built to shut all of it out.\n\nPalazzo Montefiore sits within walking distance of Bab Aylane — twelve rooms around a courtyard, an in-house hammam, and a rooftop that catches the evening light over the old city. You will not hear the souks from inside. That is not an accident; it is the entire point of a riad.\n\nMost of the week stays close in, restful and unhurried. One day leaves the city behind entirely for the Agafay, a landscape that looks more like the moon than a desert.",
 
                 // Weighted toward rest: this chapter sits in the margins.
                 'meter_pace'       => '30',
@@ -743,7 +743,7 @@ function jj_trip_seed_definitions() {
                 'trip_notes' => [
                     [
                         'title'    => 'Arrivals & Departures',
-                        'body'     => "Fly into Marrakech Menara (RAK). Arrivals from 1pm on day one; departures any time on day six. The riad sits inside the medina near Bab Aylane, so the final approach is on foot — we meet you and handle the bags.",
+                        'body'     => "Fly into Marrakesh Menara (RAK). Arrivals from 1pm on day one; departures any time on day six. The riad sits inside the medina near Bab Aylane, so the final approach is on foot — we meet you and handle the bags.",
                         'icon'     => 'plane',
                         'featured' => '1',
                     ],
@@ -767,7 +767,7 @@ function jj_trip_seed_definitions() {
                     ],
                     [
                         'title'    => 'Weather',
-                        'body'     => 'March in Marrakech runs 20–24°C by day and cools sharply after dark. The Agafay evening is genuinely cold — bring a proper layer.',
+                        'body'     => 'March in Marrakesh runs 20–24°C by day and cools sharply after dark. The Agafay evening is genuinely cold — bring a proper layer.',
                         'icon'     => 'sun',
                         'featured' => '',
                     ],

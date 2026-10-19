@@ -2,18 +2,13 @@
 /**
  * Condensed "coming soon" trip page.
  *
- * Rendered instead of the full template while a trip isn't on sale yet. Its
- * job is the waitlist signup, so it never shows anything about price or
- * booking: no booking card, payment terms, departure availability, Book or
- * Enquire buttons. Prices go to The List first.
+ * Rendered instead of the full template when a trip is Coming soon (stored
+ * as 'announced'). Deliberately short: a thin page with empty itinerary,
+ * pricing and review sections reads as unfinished and converts worse than no
+ * page at all. This one has a single job — capture the waitlist signup.
+ * Waitlist trips get the full page instead, minus prices and booking.
  *
- * Coming soon ('announced') stops at the hero, facts and "Get on The List" —
- * for trips whose itinerary isn't written yet. Waitlist ('coming-soon') adds
- * the meters, inclusions, Day by Day, trip notes and FAQs, from the same
- * inc/trip-sections/ files the full page uses.
- *
- * Expects $trip_id, $brand, $is_btl, $days, $notes, $faqs and $included
- * from single-trip.php.
+ * Expects $trip_id, $brand, $is_btl from single-trip.php.
  *
  * @package jaiye-journeys
  */
@@ -27,29 +22,8 @@ $cs_copy        = jj_trip_field( 'welcome_copy', $trip_id );
 $cs_duration    = jj_trip_field( 'duration', $trip_id );
 $cs_collage     = jj_trip_gallery( 'collage_images', $trip_id );
 $cs_departures  = jj_trip_rows( 'departures', $trip_id );
-$carousel       = jj_trip_gallery( 'carousel_images', $trip_id ); // Inclusions side-image fallback.
-// Waitlist (not Coming soon) gets the itinerary sections. Until the one-off
-// status review on the Trips screen is done, a Waitlist trip with no Day by
-// Day yet keeps the short page, so shipping this changes nothing visible
-// before the owner has chosen which trips move to Coming soon.
-$cs_teaser = ( 'coming-soon' === jj_trip_status( $trip_id ) )
-    && ( get_option( JJ_TRIP_PRESALE_REVIEW ) || $days );
 
-// Booking URL stays in the chain for trips set up before the Waitlist link
-// field existed; new trips should keep the checkout link there instead.
-$cs_waitlist = jj_trip_field( 'waitlist_url', $trip_id );
-if ( ! $cs_waitlist ) {
-    $cs_waitlist = jj_trip_field( 'booking_url', $trip_id );
-}
-if ( ! $cs_waitlist ) {
-    $cs_waitlist = jj_trip_field( 'enquiry_embed', $trip_id );
-}
-if ( ! $cs_waitlist ) {
-    $cs_waitlist = jj_trip_field( 'enquiry_url', $trip_id );
-}
-if ( ! $cs_waitlist ) {
-    $cs_waitlist = home_url( '/contact/' );
-}
+$cs_waitlist = jj_trip_waitlist_url( $trip_id );
 
 // Rough window: first departure's dates, else its year.
 $cs_window = '';
@@ -132,12 +106,6 @@ if ( ! empty( $cs_departures[0] ) ) {
         </div>
       </dl>
 
-      <?php
-      if ( $cs_teaser ) {
-          require get_template_directory() . '/inc/trip-sections/meters.php';
-      }
-      ?>
-
       <div class="trip-soon__cta js-reveal">
         <h2 class="trip-soon__cta-title"><?php esc_html_e( 'Be first to know', 'jaiye-journeys' ); ?></h2>
         <p class="trip-soon__cta-copy">
@@ -165,20 +133,6 @@ if ( ! empty( $cs_departures[0] ) ) {
       </div>
     <?php endif; ?>
 
-    <?php if ( $cs_teaser ) : ?>
-  </section>
-
-      <?php
-      // Full-width itinerary sections sit between the signup block and the
-      // closing link; Coming soon keeps the original single section.
-      require get_template_directory() . '/inc/trip-sections/inclusions.php';
-      require get_template_directory() . '/inc/trip-sections/days.php';
-      require get_template_directory() . '/inc/trip-sections/notes.php';
-      require get_template_directory() . '/inc/trip-sections/faq.php';
-      ?>
-
-  <section class="trip-soon trip-soon--end">
-    <?php endif; ?>
     <div class="container container--narrow">
       <p class="trip-soon__back">
         <a href="<?php echo esc_url( home_url( '/our-journeys/' ) ); ?>">

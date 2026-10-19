@@ -904,10 +904,6 @@ get_header();
           $btl_intro      = jj_trip_field( 'intro_statement', $btl_id );
           $btl_departures = jj_trip_rows( 'departures', $btl_id );
           $btl_pill       = $btl_pills[ jj_trip_status( $btl_id ) ];
-          $btl_when       = '';
-          if ( ! empty( $btl_departures[0] ) ) {
-              $btl_when = trim( ( isset( $btl_departures[0]['dates'] ) ? $btl_departures[0]['dates'] : '' ) . ' ' . ( isset( $btl_departures[0]['year'] ) ? $btl_departures[0]['year'] : '' ) );
-          }
           ?>
           <li>
             <article class="btl-pipeline-card">
@@ -919,9 +915,26 @@ get_header();
                   <?php echo esc_html( $btl_name ? $btl_name : get_the_title( $btl_id ) ); ?>
                 </a>
               </h3>
-              <?php if ( $btl_when ) : ?>
-                <p class="btl-pipeline-card__date"><?php echo esc_html( $btl_when ); ?></p>
-              <?php endif; ?>
+              <?php
+              // Each departure is a chapter of the volume, numbered in the
+              // same row order as the Chapter tabs on the trip page.
+              foreach ( $btl_departures as $btl_i => $btl_departure ) :
+                  $btl_when = trim( ( isset( $btl_departure['dates'] ) ? $btl_departure['dates'] : '' ) . ' ' . ( isset( $btl_departure['year'] ) ? $btl_departure['year'] : '' ) );
+                  if ( ! $btl_when ) {
+                      continue;
+                  }
+                  ?>
+                <p class="btl-pipeline-card__date">
+                  <?php
+                  printf(
+                      /* translators: 1: chapter number, 2: dates */
+                      esc_html__( 'Chapter %1$d · %2$s', 'jaiye-journeys' ),
+                      (int) ( $btl_i + 1 ),
+                      esc_html( $btl_when )
+                  );
+                  ?>
+                </p>
+              <?php endforeach; ?>
               <?php if ( $btl_intro ) : ?>
                 <p class="btl-pipeline-card__desc"><?php echo esc_html( $btl_intro ); ?></p>
               <?php endif; ?>

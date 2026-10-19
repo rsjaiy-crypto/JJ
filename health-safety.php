@@ -32,7 +32,7 @@ get_header();
             <?php
             printf(
                 /* translators: %s: link to the Terms & Conditions page */
-                esc_html__( 'This document sets out our approach to health, safety, and personal risk on Jaiye Journeys and Between the Lines trips. It forms part of your booking agreement alongside our %s, and exists because trips vary widely, a reading retreat in Marrakech and a group trip with a yacht day carry different considerations, and guests deserve to know exactly what to expect before they travel.', 'jaiye-journeys' ),
+                esc_html__( 'This document sets out our approach to health, safety, and personal risk on Jaiye Journeys and Between the Lines trips. It forms part of your booking agreement alongside our %s, and exists because trips vary widely, a reading retreat in Marrakesh and a group trip with a yacht day carry different considerations, and guests deserve to know exactly what to expect before they travel.', 'jaiye-journeys' ),
                 '<a href="' . esc_url( home_url( '/terms/' ) ) . '">' . esc_html__( 'Terms & Conditions', 'jaiye-journeys' ) . '</a>'
             );
             ?>

@@ -347,144 +347,54 @@ get_header();
       </header>
 
       <ul class="fp-trips__grid" role="list">
-
-        <li>
-          <article class="trip-card">
-            <div class="trip-card__media">
-              <img
-                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-morocco.jpg' ); ?>"
-                alt="<?php esc_attr_e( 'Streets of the Marrakesh medina, Morocco', 'jaiye-journeys' ); ?>"
-                class="trip-card__img"
-                loading="lazy"
-              >
-            </div>
-            <div class="trip-card__body">
-              <p class="trip-card__type">
-                <span class="overline"><?php esc_html_e( 'Between the Lines', 'jaiye-journeys' ); ?></span>
-              </p>
-              <h3 class="trip-card__title">
-                <?php esc_html_e( 'Volume: Marrakesh, Scents and Sounds', 'jaiye-journeys' ); ?>
-              </h3>
-              <p class="trip-card__destination">
-                <?php esc_html_e( 'Marrakesh, Morocco', 'jaiye-journeys' ); ?>
-              </p>
-              <p class="trip-card__dates">
-                <time datetime="2027-03"><?php esc_html_e( 'March 2027', 'jaiye-journeys' ); ?></time>
-              </p>
-              <a
-                href="<?php echo esc_url( home_url( '/trips/btl-marrakech/' ) ); ?>"
-                class="btn btn--secondary btn--sm trip-card__cta"
-              >
-                <?php esc_html_e( 'Find Out More', 'jaiye-journeys' ); ?>
-              </a>
-            </div>
-          </article>
-        </li>
-
-        <li>
-          <article class="trip-card">
-            <div class="trip-card__media">
-              <img
-                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-bali.jpg' ); ?>"
-                alt="<?php esc_attr_e( 'Turquoise waters and tropical coastline of Bali, Indonesia', 'jaiye-journeys' ); ?>"
-                class="trip-card__img"
-                loading="lazy"
-              >
-            </div>
-            <div class="trip-card__body">
-              <p class="trip-card__type">
-                <span class="overline"><?php esc_html_e( 'Group Trip', 'jaiye-journeys' ); ?></span>
-              </p>
-              <h3 class="trip-card__title">
-                <?php esc_html_e( 'The Islands Edit', 'jaiye-journeys' ); ?>
-              </h3>
-              <?php
-              // Static mode: this promo isn't CPT-driven like the trip pages,
-              // so the tag keys are set right here — but the copy behind them
-              // still comes from the one shared definitions file.
-              jj_render_vibe_tags( [ 'contrast', 'wild', 'community' ], 'fp-islands', false );
-              ?>
-              <p class="trip-card__destination">
-                <?php esc_html_e( 'Indonesia', 'jaiye-journeys' ); ?>
-              </p>
-              <p class="trip-card__dates">
-                <time datetime="2027-05"><?php esc_html_e( 'May 2027', 'jaiye-journeys' ); ?></time>
-              </p>
-              <a
-                href="<?php echo esc_url( home_url( '/trips/jj-bali/' ) ); ?>"
-                class="btn btn--secondary btn--sm trip-card__cta"
-              >
-                <?php esc_html_e( 'Find Out More', 'jaiye-journeys' ); ?>
-              </a>
-            </div>
-          </article>
-        </li>
-
-        <li>
-          <article class="trip-card">
-            <div class="trip-card__media">
-              <img
-                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-peru.jpg' ); ?>"
-                alt="<?php esc_attr_e( 'Traveller in a woven Peruvian poncho beside a llama', 'jaiye-journeys' ); ?>"
-                class="trip-card__img"
-                loading="lazy"
-              >
-            </div>
-            <div class="trip-card__body">
-              <p class="trip-card__type">
-                <span class="overline"><?php esc_html_e( 'Group Trip', 'jaiye-journeys' ); ?></span>
-              </p>
-              <h3 class="trip-card__title">
-                <?php esc_html_e( "The Director's Edit", 'jaiye-journeys' ); ?>
-              </h3>
-              <p class="trip-card__destination">
-                <?php esc_html_e( 'Peru', 'jaiye-journeys' ); ?>
-              </p>
-              <p class="trip-card__dates">
-                <time datetime="2027-09"><?php esc_html_e( 'September 2027', 'jaiye-journeys' ); ?></time>
-              </p>
-              <a
-                href="<?php echo esc_url( home_url( '/trips/jj-peru/' ) ); ?>"
-                class="btn btn--secondary btn--sm trip-card__cta"
-              >
-                <?php esc_html_e( 'Find Out More', 'jaiye-journeys' ); ?>
-              </a>
-            </div>
-          </article>
-        </li>
-
-        <li>
-          <article class="trip-card">
-            <div class="trip-card__media">
-              <img
-                src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-sintra.jpg' ); ?>"
-                alt="<?php esc_attr_e( 'Gothic palace above terraced gardens in Sintra, Portugal', 'jaiye-journeys' ); ?>"
-                class="trip-card__img"
-                loading="lazy"
-              >
-            </div>
-            <div class="trip-card__body">
-              <p class="trip-card__type">
-                <span class="overline"><?php esc_html_e( 'Between the Lines', 'jaiye-journeys' ); ?></span>
-              </p>
-              <h3 class="trip-card__title">
-                <?php esc_html_e( 'Volume: Sintra', 'jaiye-journeys' ); ?>
-              </h3>
-              <p class="trip-card__destination">
-                <?php esc_html_e( 'Sintra, Portugal', 'jaiye-journeys' ); ?>
-              </p>
-              <p class="trip-card__dates">
-                <time datetime="2027-10"><?php esc_html_e( 'October 2027', 'jaiye-journeys' ); ?></time>
-              </p>
-              <a
-                href="<?php echo esc_url( home_url( '/trips/sintra-mist-manuscripts/' ) ); ?>"
-                class="btn btn--secondary btn--sm trip-card__cta"
-              >
-                <?php esc_html_e( 'Find Out More', 'jaiye-journeys' ); ?>
-              </a>
-            </div>
-          </article>
-        </li>
+        <?php
+        // Built from the trips themselves (ticked "Show on homepage"), so the
+        // title, dates and tags always match the trip page.
+        foreach ( jj_homepage_trip_ids() as $fp_trip_id ) :
+            $fp_btl   = ( 'btl' === jj_trip_field( 'brand', $fp_trip_id, 'jj-edit' ) );
+            $fp_title = jj_trip_volume_title( $fp_trip_id );
+            $fp_name  = $fp_btl ? jj_trip_field( 'volume_name', $fp_trip_id ) : '';
+            $fp_dest  = jj_trip_field( 'destination', $fp_trip_id );
+            $fp_when  = jj_trip_first_departure_label( $fp_trip_id );
+            ?>
+          <li>
+            <article class="trip-card">
+              <?php if ( has_post_thumbnail( $fp_trip_id ) ) : ?>
+                <div class="trip-card__media">
+                  <?php
+                  echo get_the_post_thumbnail( $fp_trip_id, 'medium_large', [
+                      'class'   => 'trip-card__img',
+                      'loading' => 'lazy',
+                  ] );
+                  ?>
+                </div>
+              <?php endif; ?>
+              <div class="trip-card__body">
+                <p class="trip-card__type">
+                  <span class="overline">
+                    <?php echo esc_html( $fp_btl ? __( 'Between the Lines', 'jaiye-journeys' ) : __( 'Group Trip', 'jaiye-journeys' ) ); ?>
+                  </span>
+                </p>
+                <h3 class="trip-card__title">
+                  <?php echo esc_html( $fp_name ? $fp_title . ', ' . $fp_name : $fp_title ); ?>
+                </h3>
+                <?php jj_render_trip_vibe_tags( $fp_trip_id, false ); ?>
+                <?php if ( $fp_dest ) : ?>
+                  <p class="trip-card__destination"><?php echo esc_html( $fp_dest ); ?></p>
+                <?php endif; ?>
+                <?php if ( $fp_when ) : ?>
+                  <p class="trip-card__dates"><?php echo esc_html( $fp_when ); ?></p>
+                <?php endif; ?>
+                <a
+                  href="<?php echo esc_url( get_permalink( $fp_trip_id ) ); ?>"
+                  class="btn btn--secondary btn--sm trip-card__cta"
+                >
+                  <?php esc_html_e( 'Find Out More', 'jaiye-journeys' ); ?>
+                </a>
+              </div>
+            </article>
+          </li>
+        <?php endforeach; ?>
 
       </ul><!-- /.fp-trips__grid -->
 

@@ -519,6 +519,27 @@
 		} );
 	}
 
+	/* ── 11b. Mobile contents list ───────────────────────────────── */
+
+	// Close the list once a section is picked (the smooth-scroll handler
+	// above does the scrolling), and when tapping anywhere outside it.
+	function initToc() {
+		var toc = document.querySelector( '.js-toc' );
+		if ( ! toc ) return;
+
+		toc.addEventListener( 'click', function ( e ) {
+			if ( e.target.closest( '.trip-toc__link' ) ) {
+				toc.open = false;
+			}
+		} );
+
+		document.addEventListener( 'click', function ( e ) {
+			if ( toc.open && ! toc.contains( e.target ) ) {
+				toc.open = false;
+			}
+		} );
+	}
+
 	/* ── 12. Mobile booking bar ──────────────────────────────────── */
 
 	function initMobileBar() {
@@ -558,6 +579,7 @@
 		initVibeTags();
 		initNoteStack();
 		initMobileBar();
+		initToc();
 
 		window.addEventListener( 'resize', syncStickyOffset, { passive: true } );
 

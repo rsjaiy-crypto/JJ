@@ -71,7 +71,7 @@ function jj_trip_schema() {
                 'status'         => [
                     'type'    => 'select',
                     'label'   => __( 'Status', 'jaiye-journeys' ),
-                    'desc'    => __( 'Coming soon shows only the hero, dates and "Get on The List". Waitlist adds the itinerary, inclusions, trip notes and FAQs, still with no prices or booking. Sold out keeps the full page but removes every Book button.', 'jaiye-journeys' ),
+                    'desc'    => __( 'Coming soon shows only the hero, dates and "Get on The List". Waitlist shows the full trip page with no prices, payment terms or booking — every Book button becomes "Get on The List". Sold out keeps the full page but removes every Book button.', 'jaiye-journeys' ),
                     'default' => 'open',
                     // Keys are what's stored. 'coming-soon' predates the
                     // split and every trip saved before it means Waitlist by
@@ -93,6 +93,11 @@ function jj_trip_schema() {
                     'type'  => 'datetime',
                     'label' => __( 'Sold out from', 'jaiye-journeys' ),
                     'desc'  => __( 'Optional. The trip shows as Sold out from this moment.', 'jaiye-journeys' ),
+                ],
+                'on_homepage'    => [
+                    'type'  => 'checkbox',
+                    'label' => __( 'Show on homepage', 'jaiye-journeys' ),
+                    'desc'  => __( 'Adds this trip to "Upcoming Trips" on the homepage, in date order.', 'jaiye-journeys' ),
                 ],
                 'waitlist_url'   => [
                     'type'  => 'url',
@@ -121,15 +126,10 @@ function jj_trip_schema() {
                     'label' => __( 'Destination', 'jaiye-journeys' ),
                     'desc'  => __( 'Used in the "Welcome to …" heading. e.g. Peru', 'jaiye-journeys' ),
                 ],
-                'volume_number'   => [
-                    'type'  => 'number',
-                    'label' => __( 'Volume number (Between the Lines only)', 'jaiye-journeys' ),
-                    'desc'  => __( 'Gives "Volume 1: Marrakesh". Leave blank to number Between the Lines trips in the order they were published.', 'jaiye-journeys' ),
-                ],
                 'volume_name'     => [
                     'type'  => 'text',
                     'label' => __( 'Volume name (Between the Lines only)', 'jaiye-journeys' ),
-                    'desc'  => __( 'e.g. Scents and Sounds. The title on the chapter cards on the Between the Lines page.', 'jaiye-journeys' ),
+                    'desc'  => __( 'e.g. Scents and Sounds. A volume is the residency; each departure is one of its chapters. Volume numbers follow the first chapter\'s date.', 'jaiye-journeys' ),
                 ],
                 'region'          => [
                     'type'    => 'select',
@@ -608,9 +608,10 @@ function jj_trip_volume_title( $post_id = null ) {
 /**
  * Published Between the Lines trips, in volume order.
  *
- * Volume order is publish order, so a new volume always lands at the end and
- * the existing numbers never shift. An explicit Volume number on a trip
- * overrides its position.
+ * A volume is a residency (a destination); its chapters are the individual
+ * retreat weeks (the departures). Volumes are numbered by their first
+ * chapter's date, so a new volume slots in by date. Trips with no dated
+ * departure go last, oldest-published first.
  *
  * @return int[] Post IDs.
  */
@@ -631,9 +632,10 @@ function jj_btl_trip_ids() {
         'meta_value'     => 'btl',                          // phpcs:ignore WordPress.DB.SlowDBQuery
     ] );
 
-    $position = array_flip( $ids );
-    usort( $ids, function ( $a, $b ) use ( $position ) {
-        return jj_trip_volume_number( $a, $position ) - jj_trip_volume_number( $b, $position );
+    $published = array_flip( $ids );
+    usort( $ids, function ( $a, $b ) use ( $published ) {
+        $by_date = jj_trip_first_departure_ts( $a ) <=> jj_trip_first_departure_ts( $b );
+        return $by_date ? $by_date : $published[ $a ] - $published[ $b ];
     } );
 
     return $ids;
@@ -641,26 +643,105 @@ function jj_btl_trip_ids() {
 
 
 /**
- * A Between the Lines trip's volume number.
+ * Published trips ticked "Show on homepage", soonest departure first.
  *
- * @param int|null $post_id  Post ID.
- * @param array    $position Publish-order positions, passed while
- *                           jj_btl_trip_ids() is still building its list.
+ * @return int[] Post IDs.
+ */
+function jj_homepage_trip_ids() {
+    $ids = get_posts( [
+        'post_type'      => 'trip',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1,
+        'orderby'        => 'date',
+        'order'          => 'ASC',
+        'fields'         => 'ids',
+        'meta_key'       => JJ_TRIP_META_PREFIX . 'on_homepage', // phpcs:ignore WordPress.DB.SlowDBQuery -- a handful of trips.
+        'meta_value'     => '1',                                  // phpcs:ignore WordPress.DB.SlowDBQuery
+    ] );
+
+    usort( $ids, function ( $a, $b ) {
+        return jj_trip_first_departure_ts( $a ) <=> jj_trip_first_departure_ts( $b );
+    } );
+
+    return $ids;
+}
+
+
+/**
+ * The earliest departure as display text, e.g. "18 – 23 March 2027".
+ *
+ * @param int $post_id Post ID.
+ * @return string Empty when there are no departures.
+ */
+function jj_trip_first_departure_label( $post_id ) {
+    $first = null;
+    foreach ( jj_trip_rows( 'departures', $post_id ) as $departure ) {
+        if ( null === $first || jj_trip_departure_ts( $departure ) < jj_trip_departure_ts( $first ) ) {
+            $first = $departure;
+        }
+    }
+
+    if ( ! $first ) {
+        return '';
+    }
+
+    return trim( ( isset( $first['dates'] ) ? $first['dates'] : '' ) . ' ' . ( isset( $first['year'] ) ? $first['year'] : '' ) );
+}
+
+
+/**
+ * A Between the Lines trip's volume number (its place in volume order).
+ *
+ * @param int|null $post_id Post ID.
  * @return int 0 when the trip isn't a published BTL trip.
  */
-function jj_trip_volume_number( $post_id = null, $position = null ) {
+function jj_trip_volume_number( $post_id = null ) {
     $post_id  = $post_id ? $post_id : get_the_ID();
-    $explicit = absint( jj_trip_field( 'volume_number', $post_id ) );
+    $position = array_search( (int) $post_id, jj_btl_trip_ids(), true );
 
-    if ( $explicit ) {
-        return $explicit;
+    return false === $position ? 0 : $position + 1;
+}
+
+
+/**
+ * Start date of a departure row, read from its free-text Dates field.
+ *
+ * Takes the first day number and the first month name, so "18 – 23 March"
+ * and "28 March – 2 April" both read as the start date. Unreadable dates
+ * fall back to 1 January of the row's year.
+ *
+ * @param array $departure Departure row.
+ * @return int Unix timestamp, or PHP_INT_MAX when there's no year.
+ */
+function jj_trip_departure_ts( $departure ) {
+    $year = isset( $departure['year'] ) ? (int) $departure['year'] : 0;
+    if ( ! $year ) {
+        return PHP_INT_MAX;
     }
 
-    if ( null === $position ) {
-        $position = array_flip( jj_btl_trip_ids() );
+    $dates = isset( $departure['dates'] ) ? (string) $departure['dates'] : '';
+    $month = 1;
+    if ( preg_match( '/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/i', $dates, $m ) ) {
+        $month = (int) gmdate( 'n', strtotime( '1 ' . $m[1] . ' 2000' ) );
     }
+    $day = preg_match( '/\d{1,2}/', $dates, $d ) ? (int) $d[0] : 1;
 
-    return isset( $position[ $post_id ] ) ? $position[ $post_id ] + 1 : 0;
+    return gmmktime( 0, 0, 0, $month, max( 1, min( 31, $day ) ), $year );
+}
+
+
+/**
+ * Earliest departure start for a trip.
+ *
+ * @param int $post_id Post ID.
+ * @return int Unix timestamp, or PHP_INT_MAX when nothing is dated.
+ */
+function jj_trip_first_departure_ts( $post_id ) {
+    $first = PHP_INT_MAX;
+    foreach ( jj_trip_rows( 'departures', $post_id ) as $departure ) {
+        $first = min( $first, jj_trip_departure_ts( $departure ) );
+    }
+    return $first;
 }
 
 
@@ -826,6 +907,26 @@ function jj_trip_status_label( $status ) {
  */
 function jj_trip_is_presale( $post_id = null ) {
     return in_array( jj_trip_status( $post_id ), [ 'announced', 'coming-soon' ], true );
+}
+
+
+/**
+ * Where "Get on The List" points.
+ *
+ * Booking URL stays in the chain for trips set up before the Waitlist link
+ * field existed; new trips should keep the checkout link there instead.
+ *
+ * @param int|null $post_id Post ID.
+ * @return string
+ */
+function jj_trip_waitlist_url( $post_id = null ) {
+    foreach ( [ 'waitlist_url', 'booking_url', 'enquiry_embed', 'enquiry_url' ] as $key ) {
+        $url = jj_trip_field( $key, $post_id );
+        if ( $url ) {
+            return $url;
+        }
+    }
+    return home_url( '/contact/' );
 }
 
 

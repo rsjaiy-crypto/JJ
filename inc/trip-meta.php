@@ -664,7 +664,7 @@ function jj_trip_presale_review_notice() {
         <input type="hidden" name="action" value="jj_trip_presale_review">
         <?php wp_nonce_field( 'jj_trip_presale_review' ); ?>
         <p><strong><?php esc_html_e( 'New status: Coming soon', 'jaiye-journeys' ); ?></strong></p>
-        <p><?php esc_html_e( 'Waitlist pages now show the itinerary, inclusions, trip notes and FAQs. These Waitlist trips have no Day by Day itinerary yet. Tick the ones to move to Coming soon (the short page they show today). Unticked trips stay on Waitlist.', 'jaiye-journeys' ); ?></p>
+        <p><?php esc_html_e( 'Waitlist pages now show the full trip page, without prices or booking. These Waitlist trips have no Day by Day itinerary yet. Tick the ones to move to Coming soon (the short page they show today). Unticked trips stay on Waitlist.', 'jaiye-journeys' ); ?></p>
         <ul>
           <?php foreach ( $candidates as $trip ) : ?>
             <?php $keep = ( false !== stripos( $trip->post_name . ' ' . $trip->post_title, 'marrake' ) ); ?>

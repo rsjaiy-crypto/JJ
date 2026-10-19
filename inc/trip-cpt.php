@@ -203,3 +203,25 @@ function jj_btl_seed_volume_names() {
     update_option( 'jj_btl_volume_names_seeded', current_time( 'mysql' ), false );
 }
 add_action( 'init', 'jj_btl_seed_volume_names', 20 );
+
+
+/**
+ * Tick "Show on homepage" once for the four trips the homepage showed when
+ * its cards were hard-coded, so switching to trip-driven cards keeps the
+ * same line-up. After this it's entirely the checkbox.
+ */
+function jj_seed_homepage_trips() {
+    if ( get_option( 'jj_homepage_trips_seeded' ) ) {
+        return;
+    }
+
+    foreach ( [ 'btl-marrakech', 'jj-bali', 'jj-peru', 'sintra-mist-manuscripts' ] as $slug ) {
+        $trip = get_page_by_path( $slug, OBJECT, 'trip' );
+        if ( $trip ) {
+            update_post_meta( $trip->ID, JJ_TRIP_META_PREFIX . 'on_homepage', '1' );
+        }
+    }
+
+    update_option( 'jj_homepage_trips_seeded', current_time( 'mysql' ), false );
+}
+add_action( 'init', 'jj_seed_homepage_trips', 20 );
