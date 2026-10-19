@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  * Bump this whenever the CPT slug, rewrite args or archive settings change.
  * It drives the rewrite flush below — see jj_trip_maybe_flush_rewrites().
  */
-define( 'JJ_TRIP_REWRITE_VERSION', '1.0.0' );
+define( 'JJ_TRIP_REWRITE_VERSION', '1.1.0' );
 
 
 /**
@@ -92,6 +92,13 @@ add_action( 'init', 'jj_trip_maybe_flush_rewrites', 99 );
  * templates keep working if the theme is ever restructured into subfolders.
  */
 function jj_trip_template_hierarchy( $template ) {
+    if ( jj_is_trip_booking_page() ) {
+        $found = locate_template( [ 'single-trip-book.php' ] );
+        if ( $found ) {
+            return $found;
+        }
+    }
+
     if ( is_singular( 'trip' ) ) {
         $found = locate_template( [ 'single-trip.php' ] );
         if ( $found ) {

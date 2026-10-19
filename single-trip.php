@@ -62,6 +62,15 @@ while ( have_posts() ) :
     if ( $sold_out ) {
         $booking_url = '';
     }
+
+    // Trips with Rooms book through their own booking page, in the same tab;
+    // the rest keep the Book Now URL, which opens in a new one.
+    $booking_page = ! $waitlist && ! $sold_out && jj_trip_booking_ready( $trip_id );
+    $book_target  = ' target="_blank" rel="noopener"';
+    if ( $booking_page ) {
+        $booking_url = jj_trip_booking_page_url( $trip_id );
+        $book_target = '';
+    }
     ?>
 
 <main id="main-content" class="trip trip--<?php echo esc_attr( $brand ); ?>">
@@ -157,7 +166,7 @@ while ( have_posts() ) :
           <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
         </a>
       <?php elseif ( $booking_url ) : ?>
-        <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent btn--sm trip-subnav__cta" target="_blank" rel="noopener">
+        <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent btn--sm trip-subnav__cta"<?php echo $book_target; // phpcs:ignore WordPress.Security.EscapeOutput -- fixed string. ?>>
           <?php esc_html_e( 'Book Now', 'jaiye-journeys' ); ?>
         </a>
       <?php endif; ?>
@@ -330,8 +339,16 @@ while ( have_posts() ) :
                     <?php endif; ?>
                   </li>
                 </ul>
-                <?php if ( ! $sold_out && ! $waitlist && ! empty( $departure['book_url'] ) ) : ?>
-                  <a href="<?php echo esc_url( $departure['book_url'] ); ?>" class="btn btn--accent trip-booking__chapter-cta" target="_blank" rel="noopener">
+                <?php
+                $chapter_url = '';
+                if ( $booking_page ) {
+                    $chapter_url = ( isset( $departure['status'] ) && 'sold-out' === $departure['status'] ) ? '' : jj_trip_booking_page_url( $trip_id, $i );
+                } elseif ( ! $sold_out && ! $waitlist && ! empty( $departure['book_url'] ) ) {
+                    $chapter_url = $departure['book_url'];
+                }
+                ?>
+                <?php if ( $chapter_url ) : ?>
+                  <a href="<?php echo esc_url( $chapter_url ); ?>" class="btn btn--accent trip-booking__chapter-cta"<?php echo $book_target; // phpcs:ignore WordPress.Security.EscapeOutput -- fixed string. ?>>
                     <?php
                     printf(
                         /* translators: %d: chapter number */
@@ -404,7 +421,7 @@ while ( have_posts() ) :
             <?php if ( $sold_out ) : ?>
               <p class="trip-booking__sold-out"><?php esc_html_e( 'This trip is sold out. Enquire to hear about the next departure.', 'jaiye-journeys' ); ?></p>
             <?php elseif ( $booking_url ) : ?>
-              <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent" target="_blank" rel="noopener">
+              <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent"<?php echo $book_target; // phpcs:ignore WordPress.Security.EscapeOutput -- fixed string. ?>>
                 <?php esc_html_e( 'Book Now', 'jaiye-journeys' ); ?>
               </a>
             <?php endif; ?>
@@ -515,7 +532,7 @@ while ( have_posts() ) :
           </a>
         <?php endif; ?>
         <?php if ( $booking_url ) : ?>
-          <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent" target="_blank" rel="noopener">
+          <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent"<?php echo $book_target; // phpcs:ignore WordPress.Security.EscapeOutput -- fixed string. ?>>
             <?php esc_html_e( 'Book Now', 'jaiye-journeys' ); ?>
           </a>
         <?php endif; ?>
@@ -709,7 +726,7 @@ while ( have_posts() ) :
         <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
       </a>
     <?php elseif ( $booking_url ) : ?>
-      <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent btn--sm" target="_blank" rel="noopener">
+      <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent btn--sm"<?php echo $book_target; // phpcs:ignore WordPress.Security.EscapeOutput -- fixed string. ?>>
         <?php esc_html_e( 'Book Now', 'jaiye-journeys' ); ?>
       </a>
     <?php else : ?>

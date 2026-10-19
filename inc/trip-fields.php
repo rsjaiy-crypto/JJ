@@ -254,6 +254,35 @@ function jj_trip_schema() {
                         'book_url'     => [ 'type' => 'url', 'label' => __( 'Book URL (optional)', 'jaiye-journeys' ) ],
                     ],
                 ],
+                'rooms'          => [
+                    'type'      => 'repeater',
+                    'label'     => __( 'Rooms (booking page)', 'jaiye-journeys' ),
+                    'desc'      => __( 'Add rooms to switch on the booking page, where guests pick their dates, room and number of travellers, then pay on Stripe. Prices are per person, in whole pounds. Needs the Stripe key in Trips → Booking Settings.', 'jaiye-journeys' ),
+                    'row_label' => __( 'Room', 'jaiye-journeys' ),
+                    'subfields' => [
+                        'name'        => [ 'type' => 'text', 'label' => __( 'Room name', 'jaiye-journeys' ), 'placeholder' => 'Private double' ],
+                        'description' => [ 'type' => 'textarea', 'label' => __( 'Short description', 'jaiye-journeys' ), 'rows' => 3 ],
+                        'image'       => [ 'type' => 'image', 'label' => __( 'Photo', 'jaiye-journeys' ) ],
+                        'price'       => [ 'type' => 'number', 'label' => __( 'Price per person (£)', 'jaiye-journeys' ) ],
+                        'deposit'     => [
+                            'type'  => 'number',
+                            'label' => __( 'Deposit per person (£)', 'jaiye-journeys' ),
+                            'desc'  => __( 'Leave blank to take full payment only.', 'jaiye-journeys' ),
+                        ],
+                        'max_guests'  => [
+                            'type'    => 'select',
+                            'label'   => __( 'Travellers per booking', 'jaiye-journeys' ),
+                            'default' => '2',
+                            'options' => [
+                                '1' => __( 'Up to 1', 'jaiye-journeys' ),
+                                '2' => __( 'Up to 2', 'jaiye-journeys' ),
+                                '3' => __( 'Up to 3', 'jaiye-journeys' ),
+                                '4' => __( 'Up to 4', 'jaiye-journeys' ),
+                            ],
+                        ],
+                        'sold_out'    => [ 'type' => 'checkbox', 'label' => __( 'Sold out', 'jaiye-journeys' ) ],
+                    ],
+                ],
             ],
         ],
 

@@ -62,6 +62,24 @@ historical reasons. Don't rename them, because saved trips depend on them.
   text are fine.
 - Status can be changed per trip, or in Quick Edit / Bulk Edit on the Trips list.
 
+### Booking page
+
+`/trips/<slug>/book/` (`single-trip-book.php`, `inc/trip-booking.php`,
+`css/booking.css`, `js/booking.js`). Guests pick a departure, a room (the
+trip's **Rooms** repeater), travellers and deposit or full payment, and the
+site creates a Stripe Checkout Session and redirects to it.
+
+- Switched on per trip by adding Rooms, once a Stripe key is saved in
+  Trips → Booking Settings (stored in the `jj_stripe_secret_key` option, or a
+  `JJ_STRIPE_SECRET_KEY` constant in wp-config.php). **Never put the key in
+  this repo; it's public.** Without both, Book buttons keep the old Book Now URL.
+- Only reachable while the trip is On sale (editors can preview it).
+- Amounts are always computed on the server from the trip's fields; the form
+  only sends indexes. Stripe metadata carries trip, departure, room,
+  travellers and deposit/full.
+- Stripe returns guests to the same URL with `?session_id=`, which shows the
+  confirmation after checking the session is paid.
+
 ### Cards and listings
 
 - Homepage "Upcoming Trips" = trips ticked **Show on homepage**, soonest first.

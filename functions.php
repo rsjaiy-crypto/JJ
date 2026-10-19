@@ -19,6 +19,7 @@ require_once get_template_directory() . '/inc/vibe-tags.php';
 require_once get_template_directory() . '/inc/trip-fields.php';
 require_once get_template_directory() . '/inc/trip-cpt.php';
 require_once get_template_directory() . '/inc/trip-meta.php';
+require_once get_template_directory() . '/inc/trip-booking.php';
 require_once get_template_directory() . '/inc/trip-seed.php';
 
 
@@ -144,6 +145,24 @@ function jaiye_enqueue_assets() {
             get_template_directory_uri() . '/js/trip.js',
             [],
             filemtime( get_template_directory() . '/js/trip.js' ),
+            true
+        );
+    }
+
+    // Trip booking page (/trips/<slug>/book/), on top of the trip assets.
+    if ( jj_is_trip_booking_page() ) {
+        wp_enqueue_style(
+            'jaiye-booking',
+            get_template_directory_uri() . '/css/booking.css',
+            [ 'jaiye-trip' ],
+            filemtime( get_template_directory() . '/css/booking.css' )
+        );
+
+        wp_enqueue_script(
+            'jaiye-booking',
+            get_template_directory_uri() . '/js/booking.js',
+            [],
+            filemtime( get_template_directory() . '/js/booking.js' ),
             true
         );
     }
