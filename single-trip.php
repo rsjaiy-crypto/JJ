@@ -300,6 +300,7 @@ while ( have_posts() ) :
             $multi_chapter = count( $departures ) > 1;
             $chapter_ctas  = 0;
             $single_url    = '';
+            $sold_chapters = 0;
             ?>
             <?php if ( $multi_chapter ) : ?>
               <div class="trip-booking__tabs" role="tablist" aria-label="<?php esc_attr_e( 'Chapter', 'jaiye-journeys' ); ?>">
@@ -355,6 +356,8 @@ while ( have_posts() ) :
                 }
                 ?>
                 <?php
+                $chapter_sold   = ! $waitlist && isset( $departure['status'] ) && 'sold-out' === $departure['status'];
+                $sold_chapters += $chapter_sold ? 1 : 0;
                 if ( ! $multi_chapter ) {
                     $single_url  = $chapter_url;
                     $chapter_url = '';
@@ -362,6 +365,17 @@ while ( have_posts() ) :
                     $chapter_ctas++;
                 }
                 ?>
+                <?php if ( $chapter_sold ) : ?>
+                  <p class="trip-booking__chapter-sold-out">
+                    <?php
+                    printf(
+                        /* translators: %d: chapter number */
+                        esc_html__( 'Chapter %d · Sold out', 'jaiye-journeys' ),
+                        (int) ( $i + 1 )
+                    );
+                    ?>
+                  </p>
+                <?php endif; ?>
                 <?php if ( $chapter_url ) : ?>
                   <a href="<?php echo esc_url( $chapter_url ); ?>" class="btn btn--accent trip-booking__chapter-cta"<?php echo $book_target; // phpcs:ignore WordPress.Security.EscapeOutput -- fixed string. ?>>
                     <?php
@@ -433,11 +447,12 @@ while ( have_posts() ) :
             </div>
           <?php else : ?>
           <?php
-          // BTL chapter buttons replace Book Now; a single chapter's own
-          // Book URL stands in when the trip has no Book Now URL.
+          // BTL chapter buttons replace Book Now, and there's none when every
+          // chapter is sold out. A single chapter's own Book URL stands in
+          // when the trip has no Book Now URL.
           $card_book_url = $booking_url;
           if ( $departures && $is_btl ) {
-              if ( $chapter_ctas ) {
+              if ( $chapter_ctas || count( $departures ) === $sold_chapters ) {
                   $card_book_url = '';
               } elseif ( ! $card_book_url && ! $multi_chapter ) {
                   $card_book_url = $single_url;

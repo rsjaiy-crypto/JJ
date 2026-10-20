@@ -585,6 +585,25 @@
   margin-top: var(--space-4);
 }
 
+/* A sold-out chapter, in place of its Book button: same shape, deep green
+   so it stands apart from the coral Book buttons. */
+.trip-booking__chapter-sold-out {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-deep-green);
+  color: var(--color-cream);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
 .trip-departure {
   display: flex;
   align-items: center;
