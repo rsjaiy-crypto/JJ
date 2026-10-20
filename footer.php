@@ -11,15 +11,15 @@
       <!-- Email signup (no Klaviyo site script: posts straight to Klaviyo's client API, so it works whether or not optional cookies are accepted) -->
       <div class="site-footer__signup" id="footer-signup">
         <div class="site-footer__signup-copy">
-          <p class="site-footer__signup-title"><?php esc_html_e( '10% off your first group trip', 'jaiye-journeys' ); ?></p>
-          <p class="site-footer__signup-text"><?php esc_html_e( 'Join The List for new chapters, first access and your welcome code.', 'jaiye-journeys' ); ?></p>
+          <p class="site-footer__signup-title"><?php esc_html_e( 'Your next trip starts here.', 'jaiye-journeys' ); ?></p>
+          <p class="site-footer__signup-text"><?php esc_html_e( 'Join The List for travel inspiration, new trip launches and 10% off your first group trip or retreat chapter.', 'jaiye-journeys' ); ?></p>
         </div>
         <div class="site-footer__signup-form-wrap">
           <form class="site-footer__signup-form" id="footer-signup-form" novalidate>
             <label class="sr-only" for="footer-signup-email"><?php esc_html_e( 'Email address', 'jaiye-journeys' ); ?></label>
             <input type="email" id="footer-signup-email" name="email" placeholder="<?php esc_attr_e( 'Your email address', 'jaiye-journeys' ); ?>" autocomplete="email" required>
             <input type="text" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true" class="site-footer__signup-hp">
-            <button type="submit"><?php esc_html_e( 'Join', 'jaiye-journeys' ); ?></button>
+            <button type="submit"><?php esc_html_e( 'Count me in', 'jaiye-journeys' ); ?></button>
             <p class="site-footer__signup-consent">
               <?php esc_html_e( 'By joining, you agree to receive marketing emails from Jaiye Journeys. Unsubscribe any time.', 'jaiye-journeys' ); ?>
               <a href="<?php echo esc_url( home_url( '/privacy-policy/' ) ); ?>"><?php esc_html_e( 'Privacy Policy', 'jaiye-journeys' ); ?></a>
@@ -27,12 +27,12 @@
             <p class="site-footer__signup-error" id="footer-signup-error" role="alert" hidden></p>
           </form>
           <div class="site-footer__signup-done" id="footer-signup-done" role="status" hidden>
-            <p class="site-footer__signup-done-title"><?php esc_html_e( 'Welcome to The List.', 'jaiye-journeys' ); ?></p>
-            <p><?php esc_html_e( 'Your code is', 'jaiye-journeys' ); ?> <strong class="site-footer__signup-code">JAIYEJAIYE10</strong></p>
+            <p class="site-footer__signup-done-title"><?php esc_html_e( 'Almost there.', 'jaiye-journeys' ); ?></p>
+            <p><?php esc_html_e( 'Check your inbox and confirm your email to join The List.', 'jaiye-journeys' ); ?></p>
           </div>
           <details class="site-footer__signup-terms">
             <summary><?php esc_html_e( 'Offer terms', 'jaiye-journeys' ); ?></summary>
-            <p><?php esc_html_e( '10% off your first eligible group trip or retreat chapter. Cruises and package holidays are not included. One use per person, and it cannot be combined with other offers.', 'jaiye-journeys' ); ?></p>
+            <p><?php esc_html_e( '10% off your first eligible group trip or retreat chapter. Cruises and package holidays are not included. It cannot be combined with other offers.', 'jaiye-journeys' ); ?></p>
           </details>
         </div>
       </div><!-- /.site-footer__signup -->
@@ -442,6 +442,7 @@
 }
 .site-footer__signup-form button:hover { background: var(--color-cream); border-color: var(--color-cream); }
 .site-footer__signup-form button[disabled] { opacity: 0.6; cursor: wait; }
+.site-footer__signup [hidden] { display: none !important; }
 .site-footer__signup-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 .site-footer__signup-consent,
 .site-footer__signup-error {
@@ -459,7 +460,9 @@
   color: var(--color-cream);
   margin-bottom: var(--space-2);
 }
-.site-footer__signup-done { font-size: var(--text-sm); color: var(--color-sage); }
+.site-footer__signup-done { color: var(--color-sage); }
+.site-footer__signup-done p { font-size: var(--text-sm); font-weight: var(--fw-light); }
+.site-footer__signup-done .site-footer__signup-done-title { font-size: var(--text-lg); font-weight: var(--fw-regular); }
 .site-footer__signup-code {
   font-family: var(--font-body);
   font-weight: var(--fw-semibold);
@@ -468,7 +471,7 @@
 }
 .site-footer__signup-terms { margin-top: var(--space-3); font-size: var(--text-xs); color: var(--color-sage); }
 .site-footer__signup-terms summary { cursor: pointer; width: fit-content; text-decoration: underline; }
-.site-footer__signup-terms p { margin-top: var(--space-2); max-width: 52ch; line-height: 1.5; }
+.site-footer__signup-terms p { margin-top: var(--space-2); max-width: 52ch; line-height: 1.5; font-size: var(--text-xs); font-weight: var(--fw-light); }
 @media (min-width: 768px) {
   .site-footer__signup { flex-direction: row; justify-content: space-between; align-items: flex-start; gap: var(--space-12); }
   .site-footer__signup-form-wrap { width: min(100%, 460px); }
