@@ -235,7 +235,9 @@
 
 .trip-subnav {
   position: sticky;
-  top: 0;
+  /* Park just under the fixed site header (measured by js/trip.js), not
+     behind it at the very top of the screen. */
+  top: var(--trip-header-bottom, 0px);
   z-index: calc(var(--z-nav) - 1);
   background-color: var(--color-deep-green);
   border-bottom: 1px solid rgba(245, 233, 219, 0.12);
@@ -250,6 +252,7 @@
 }
 
 .trip-subnav__list {
+  position: relative; /* So js/trip.js can slide the current link into view */
   display: flex;
   align-items: center;
   gap: var(--space-6);
@@ -291,10 +294,22 @@
 }
 
 @media (max-width: 767px) {
-  /* The sub-nav competes with the mobile booking bar for thumb space,
-     so it scrolls away rather than sticking. */
-  .trip-subnav {
-    position: static;
+  /* Phones: a slim strip that follows you down the page. Swipe it
+     sideways; it fades at the right edge to show there's more. Booking
+     stays in the bottom bar, so the strip carries links only. */
+  .trip-subnav__inner {
+    min-height: 44px;
+  }
+
+  .trip-subnav__list {
+    gap: var(--space-5);
+    padding-right: var(--space-8);
+    -webkit-mask-image: linear-gradient(to right, #000 85%, transparent);
+    mask-image: linear-gradient(to right, #000 85%, transparent);
+  }
+
+  .trip-subnav__link {
+    padding-block: var(--space-3);
   }
 
   .trip-subnav__cta {
@@ -1570,8 +1585,10 @@
   display: none;
 }
 
-/* Contents list behind the mobile bar's "Contents" button */
+/* Contents list behind the mobile bar's "Contents" button. Hidden now
+   that the section strip follows you down the page on every screen. */
 .trip-toc {
+  display: none;
   position: static;
   flex-shrink: 0;
 }

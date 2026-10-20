@@ -22,8 +22,8 @@
 
 		var h = header ? header.getBoundingClientRect().height : 0;
 
-		// The sub-nav only sticks at >= 768px; below that it scrolls away.
-		if ( subnav && window.innerWidth >= 768 ) {
+		// The sub-nav sticks under the header on every screen size.
+		if ( subnav ) {
 			h += subnav.getBoundingClientRect().height;
 		}
 
@@ -41,8 +41,13 @@
 	 * its top edge stuck out from underneath the header.
 	 */
 	function syncStickyOffset() {
-		var value = headerOffset() + 24; // + breathing room below the chrome
+		var header = document.getElementById( 'site-header' );
+		var value  = headerOffset() + 24; // + breathing room below the chrome
 		document.documentElement.style.setProperty( '--trip-sticky-offset', value + 'px' );
+
+		// Where the fixed header ends, so the sub-nav sticks just below it.
+		var bottom = header ? Math.max( 0, header.getBoundingClientRect().bottom ) : 0;
+		document.documentElement.style.setProperty( '--trip-header-bottom', bottom + 'px' );
 	}
 
 	/* ── 1. Reveal on scroll ─────────────────────────────────────── */
@@ -158,6 +163,22 @@
 
 	/* ── 5. Sub-nav current-section highlighting ─────────────────── */
 
+	/* On a narrow screen the sub-nav scrolls sideways: keep the current
+	   section's link in view, without moving the page itself. */
+	function revealLink( link ) {
+		var list = link.closest( '.trip-subnav__list' );
+		if ( ! list || list.scrollWidth <= list.clientWidth ) return;
+
+		var left  = link.offsetLeft;
+		var right = left + link.offsetWidth;
+		if ( left >= list.scrollLeft && right <= list.scrollLeft + list.clientWidth * 0.85 ) return;
+
+		list.scrollTo( {
+			left: Math.max( 0, left - 16 ),
+			behavior: prefersReduced() ? 'auto' : 'smooth'
+		} );
+	}
+
 	function initScrollSpy() {
 		var links = document.querySelectorAll( '.trip-subnav__link' );
 		if ( ! links.length || ! ( 'IntersectionObserver' in window ) ) return;
@@ -188,6 +209,7 @@
 						l.classList.remove( 'is-current' );
 					} );
 					link.classList.add( 'is-current' );
+					revealLink( link );
 				}
 			} );
 		}, {
