@@ -27,8 +27,8 @@
             <p class="site-footer__signup-error" id="footer-signup-error" role="alert" hidden></p>
           </form>
           <div class="site-footer__signup-done" id="footer-signup-done" role="status" hidden>
-            <p class="site-footer__signup-done-title"><?php esc_html_e( 'Almost there.', 'jaiye-journeys' ); ?></p>
-            <p><?php esc_html_e( 'Check your inbox and confirm your email to join The List.', 'jaiye-journeys' ); ?></p>
+            <p class="site-footer__signup-done-title"><?php esc_html_e( 'You’re on the list.', 'jaiye-journeys' ); ?></p>
+            <p><?php esc_html_e( 'Thank you for joining The List.', 'jaiye-journeys' ); ?></p>
           </div>
           <details class="site-footer__signup-terms">
             <summary><?php esc_html_e( 'Offer terms', 'jaiye-journeys' ); ?></summary>
