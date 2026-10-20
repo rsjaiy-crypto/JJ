@@ -294,7 +294,14 @@ while ( have_posts() ) :
               it. Auto-numbered by row order, not grouped by year, so adding
               a departure in wp-admin is all it takes for "Chapter 4" to exist.
             -->
-            <?php if ( count( $departures ) > 1 ) : ?>
+            <?php
+            // One chapter: the card's Book Now is enough. Several: each
+            // chapter gets its own "Book Chapter N" and Book Now is dropped.
+            $multi_chapter = count( $departures ) > 1;
+            $chapter_ctas  = 0;
+            $single_url    = '';
+            ?>
+            <?php if ( $multi_chapter ) : ?>
               <div class="trip-booking__tabs" role="tablist" aria-label="<?php esc_attr_e( 'Chapter', 'jaiye-journeys' ); ?>">
                 <?php foreach ( $departures as $i => $departure ) : ?>
                   <button type="button"
@@ -345,6 +352,14 @@ while ( have_posts() ) :
                     $chapter_url = ( isset( $departure['status'] ) && 'sold-out' === $departure['status'] ) ? '' : jj_trip_booking_page_url( $trip_id, $i );
                 } elseif ( ! $sold_out && ! $waitlist && ! empty( $departure['book_url'] ) ) {
                     $chapter_url = $departure['book_url'];
+                }
+                ?>
+                <?php
+                if ( ! $multi_chapter ) {
+                    $single_url  = $chapter_url;
+                    $chapter_url = '';
+                } elseif ( $chapter_url ) {
+                    $chapter_ctas++;
                 }
                 ?>
                 <?php if ( $chapter_url ) : ?>
@@ -417,11 +432,23 @@ while ( have_posts() ) :
               </a>
             </div>
           <?php else : ?>
+          <?php
+          // BTL chapter buttons replace Book Now; a single chapter's own
+          // Book URL stands in when the trip has no Book Now URL.
+          $card_book_url = $booking_url;
+          if ( $departures && $is_btl ) {
+              if ( $chapter_ctas ) {
+                  $card_book_url = '';
+              } elseif ( ! $card_book_url && ! $multi_chapter ) {
+                  $card_book_url = $single_url;
+              }
+          }
+          ?>
           <div class="trip-booking__actions">
             <?php if ( $sold_out ) : ?>
               <p class="trip-booking__sold-out"><?php esc_html_e( 'This trip is sold out. Enquire to hear about the next departure.', 'jaiye-journeys' ); ?></p>
-            <?php elseif ( $booking_url ) : ?>
-              <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent"<?php echo $book_target; // phpcs:ignore WordPress.Security.EscapeOutput -- fixed string. ?>>
+            <?php elseif ( $card_book_url ) : ?>
+              <a href="<?php echo esc_url( $card_book_url ); ?>" class="btn btn--accent"<?php echo $book_target; // phpcs:ignore WordPress.Security.EscapeOutput -- fixed string. ?>>
                 <?php esc_html_e( 'Book Now', 'jaiye-journeys' ); ?>
               </a>
             <?php endif; ?>
