@@ -100,6 +100,11 @@
 	var currency = form.getAttribute( 'data-currency' ) || 'gbp';
 	var autoFull = false;
 
+	/* Discount code: what Stripe said about it, and the message to show. */
+	var codeBox   = form.querySelector( '.js-booking-code' );
+	var discount  = null;
+	var codeState = { text: '', cls: '' };
+
 	/* Minor units (pence/cents) to "£2,950" or "£816.67". */
 	function money( minor ) {
 		var whole = minor % 100 === 0;
@@ -206,13 +211,25 @@
 		var payment = checked( 'payment' );
 		var onPlan  = payments.length && ( ! payment || 'plan' === payment.value );
 
+		// A code comes off the plan balance, so the deposit stays the same.
+		// Matches jj_booking_discount_amount().
+		var off = 0;
+		if ( onPlan && discount ) {
+			off = discount.percent ? Math.round( planTotal * discount.percent / 100 ) : discount.amount;
+			off = Math.max( 0, Math.min( off, planTotal - deposit - dates.length ) );
+			payments = split( planTotal - deposit - off, dates.length );
+		}
+		showCode( onPlan );
+
 		var departure = checked( 'departure' );
 		if ( departure ) {
 			setText( 'departure', departure.getAttribute( 'data-label' ) );
 		}
 		setText( 'room', room.getAttribute( 'data-name' ) );
 		setText( 'guests', String( guests ) );
-		setText( 'total', money( onPlan ? planTotal : fullTotal ) );
+		setText( 'total', money( onPlan ? planTotal - off : fullTotal ) );
+		setText( 'discount', off ? '−' + money( off ) : '' ).parentNode.hidden = ! off;
+		setText( 'discountlabel', off ? 'Discount (' + discount.code + ')' : 'Discount' );
 		setText( 'due', money( onPlan ? deposit : fullTotal ) );
 
 		var list = form.querySelector( '[data-summary="plan"]' );
@@ -249,6 +266,77 @@
 		} );
 	}
 
+	/* The code box: on for the payment plan, with Stripe's answer below it. */
+	function showCode( onPlan ) {
+		if ( ! codeBox ) {
+			return;
+		}
+		var input   = codeBox.querySelector( 'input' );
+		var message = codeBox.querySelector( '.js-booking-code-message' );
+		var state   = onPlan && codeState.text ? codeState : { text: 'Discount codes apply to the payment plan.', cls: '' };
+		input.disabled = ! onPlan;
+		codeBox.querySelector( '.js-booking-code-apply' ).disabled = ! onPlan;
+		message.textContent = state.text;
+		message.className = 'booking-code__message js-booking-code-message' + ( state.cls ? ' ' + state.cls : '' );
+	}
+
+	/* Ask the site (which asks Stripe) about the code typed. */
+	function applyCode() {
+		var input = codeBox.querySelector( 'input' );
+		var code  = input.value.trim();
+		discount  = null;
+		if ( ! code ) {
+			codeState = { text: '', cls: '' };
+			update();
+			return;
+		}
+
+		var url = codeBox.getAttribute( 'data-endpoint' ) +
+			( codeBox.getAttribute( 'data-endpoint' ).indexOf( '?' ) === -1 ? '?' : '&' ) +
+			'trip=' + encodeURIComponent( codeBox.getAttribute( 'data-trip' ) ) +
+			'&currency=' + encodeURIComponent( currency ) +
+			'&code=' + encodeURIComponent( code );
+		codeState = { text: 'Checking your code…', cls: '' };
+		update();
+
+		window.fetch( url, { credentials: 'same-origin' } )
+			.then( function ( response ) {
+				return response.json().then( function ( data ) {
+					return { ok: response.ok, data: data };
+				} );
+			} )
+			.then( function ( result ) {
+				if ( result.ok && result.data.code ) {
+					discount = result.data;
+					input.value = discount.code;
+					codeState = { text: discount.code + ': ' + discount.label + ' your payment plan.', cls: 'is-ok' };
+				} else {
+					codeState = { text: result.data.message || 'Sorry, that code isn’t recognised.', cls: 'is-error' };
+				}
+			} )
+			.catch( function () {
+				codeState = { text: 'We couldn’t check that code just now. Please try again.', cls: 'is-error' };
+			} )
+			.then( update );
+	}
+
+	if ( codeBox ) {
+		codeBox.querySelector( '.js-booking-code-apply' ).addEventListener( 'click', applyCode );
+		codeBox.querySelector( 'input' ).addEventListener( 'keydown', function ( e ) {
+			if ( 'Enter' === e.key ) {
+				e.preventDefault(); // Apply the code rather than submit the booking.
+				applyCode();
+			}
+		} );
+		codeBox.querySelector( 'input' ).addEventListener( 'input', function ( e ) {
+			if ( discount && e.target.value.trim().toUpperCase() !== discount.code ) {
+				discount  = null;
+				codeState = { text: '', cls: '' };
+				update();
+			}
+		} );
+	}
+
 	form.addEventListener( 'change', function ( e ) {
 		if ( 'payment' === e.target.name ) {
 			autoFull = false;
@@ -263,7 +351,11 @@
 		}
 		e.preventDefault();
 		currency = link.getAttribute( 'data-currency' );
-		update();
+		if ( discount ) {
+			applyCode(); // A £ amount off doesn't carry over to $.
+		} else {
+			update();
+		}
 	} );
 
 	update();

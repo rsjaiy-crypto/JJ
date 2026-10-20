@@ -50,6 +50,7 @@ while ( have_posts() ) :
         'guests'    => __( 'Please choose how many travellers. Each room shows how many it takes.', 'jaiye-journeys' ),
         'terms'     => __( 'Please confirm you’ve read the booking terms.', 'jaiye-journeys' ),
         'stripe'    => __( 'We couldn’t open the secure payment page just now. Please try again, or enquire and we’ll help.', 'jaiye-journeys' ),
+        'code'      => __( 'That discount code can’t be used. Check it, or remove it to continue without one.', 'jaiye-journeys' ),
     ];
 
     // Preselect the chapter a guest clicked "Book" on, else the first open one.
@@ -184,6 +185,13 @@ while ( have_posts() ) :
               <?php endif; ?>
               <div><dt><?php esc_html_e( 'Room', 'jaiye-journeys' ); ?></dt><dd><?php echo esc_html( $meta['room'] ); ?></dd></div>
               <div><dt><?php esc_html_e( 'Travellers', 'jaiye-journeys' ); ?></dt><dd><?php echo esc_html( $meta['travellers'] ); ?></dd></div>
+              <?php if ( ! empty( $meta['code'] ) ) : ?>
+                <div>
+                  <dt><?php esc_html_e( 'Discount', 'jaiye-journeys' ); ?></dt>
+                  <?php /* translators: 1: amount, 2: code */ ?>
+                  <dd><?php echo esc_html( sprintf( __( '%1$s off with %2$s', 'jaiye-journeys' ), jj_booking_money( $meta['discount'], $cur ), $meta['code'] ) ); ?></dd>
+                </div>
+              <?php endif; ?>
               <div>
                 <dt><?php echo esc_html( $is_plan ? __( 'Deposit paid', 'jaiye-journeys' ) : __( 'Paid in full', 'jaiye-journeys' ) ); ?></dt>
                 <dd><?php echo esc_html( jj_booking_money( $session['amount_total'], $cur ) ); ?></dd>
@@ -388,6 +396,10 @@ while ( have_posts() ) :
             </dl>
 
             <div class="booking-summary__totals">
+              <div class="booking-summary__row booking-summary__row--discount" data-summary="discountrow" hidden>
+                <span data-summary="discountlabel"><?php esc_html_e( 'Discount', 'jaiye-journeys' ); ?></span>
+                <span data-summary="discount"></span>
+              </div>
               <div class="booking-summary__row">
                 <span><?php esc_html_e( 'Journey total', 'jaiye-journeys' ); ?></span>
                 <span data-summary="total"><?php echo esc_html( $first ? jj_booking_money( $first['total'], $currency ) : '' ); ?></span>
@@ -407,6 +419,20 @@ while ( have_posts() ) :
                 <?php esc_html_e( 'Your card is saved securely with Stripe and charged automatically on these dates.', 'jaiye-journeys' ); ?>
               </p>
             </div>
+
+            <?php if ( $first_plan ) : ?>
+              <div class="booking-code js-booking-code"
+                   data-endpoint="<?php echo esc_url( rest_url( 'jj/v1/discount' ) ); ?>"
+                   data-trip="<?php echo (int) $trip_id; ?>">
+                <label class="booking-code__label" for="jj-discount-code"><?php esc_html_e( 'Discount code', 'jaiye-journeys' ); ?></label>
+                <div class="booking-code__field">
+                  <input type="text" id="jj-discount-code" name="discount_code" class="booking-code__input"
+                         maxlength="64" autocomplete="off" autocapitalize="characters" spellcheck="false">
+                  <button type="button" class="booking-code__apply js-booking-code-apply"><?php esc_html_e( 'Apply', 'jaiye-journeys' ); ?></button>
+                </div>
+                <p class="booking-code__message js-booking-code-message" role="status" aria-live="polite"><?php esc_html_e( 'Discount codes apply to the payment plan.', 'jaiye-journeys' ); ?></p>
+              </div>
+            <?php endif; ?>
 
             <?php if ( $terms_note ) : ?>
               <p class="booking-summary__terms"><?php echo esc_html( $terms_note ); ?></p>

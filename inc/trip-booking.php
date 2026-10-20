@@ -227,9 +227,12 @@ function jj_trip_departure_label( $post_id, $index, $departure ) {
  * @param int    $guests   Travellers.
  * @param string $currency gbp|usd.
  * @param string $payment  plan|full.
- * @return array|null today, total (minor units), plan [[ts, minor], …]; null if unavailable.
+ * @param array  $discount Optional, from jj_booking_discount(). Payment plan
+ *                         only: it comes off the balance, so the deposit stays
+ *                         the same and every later payment is smaller.
+ * @return array|null today, total, discount (minor units), plan [[ts, minor], …]; null if unavailable.
  */
-function jj_booking_quote( $post_id, $room, $guests, $currency, $payment ) {
+function jj_booking_quote( $post_id, $room, $guests, $currency, $payment, $discount = null ) {
     $prices = $room['prices'][ $currency ];
     if ( $prices['plan'] <= 0 ) {
         return null;
@@ -239,23 +242,189 @@ function jj_booking_quote( $post_id, $room, $guests, $currency, $payment ) {
         $dates   = jj_trip_plan_dates( $post_id );
         $deposit = jj_trip_deposit( $post_id, $currency ) * 100 * $guests;
         $total   = $prices['plan'] * 100 * $guests;
-        $split   = jj_booking_split( $total - $deposit, count( $dates ) );
+        $off     = jj_booking_discount_amount( $discount, $total, $total - $deposit - count( $dates ) );
+        $split   = jj_booking_split( $total - $deposit - $off, count( $dates ) );
         if ( ! $split || $deposit <= 0 ) {
             return null; // No dates ahead, or no deposit: pay in full only.
         }
         return [
-            'today' => $deposit,
-            'total' => $total,
-            'plan'  => array_map( null, $dates, $split ),
+            'today'    => $deposit,
+            'total'    => $total - $off,
+            'discount' => $off,
+            'plan'     => array_map( null, $dates, $split ),
         ];
     }
 
     $total = $prices['full'] * 100 * $guests;
     return [
-        'today' => $total,
-        'total' => $total,
-        'plan'  => [],
+        'today'    => $total,
+        'total'    => $total,
+        'discount' => 0,
+        'plan'     => [],
     ];
+}
+
+
+/* ── Discount codes ────────────────────────────────────────────────── */
+
+/**
+ * How much a discount takes off a payment plan total.
+ *
+ * @param array|null $discount From jj_booking_discount().
+ * @param int        $total    Plan total, minor units.
+ * @param int        $most     The most it may take off: the balance less a
+ *                             penny per payment, so the plan still runs.
+ * @return int Minor units.
+ */
+function jj_booking_discount_amount( $discount, $total, $most ) {
+    if ( ! $discount ) {
+        return 0;
+    }
+    $off = $discount['percent'] ? (int) round( $total * $discount['percent'] / 100 ) : (int) $discount['amount'];
+    return max( 0, min( $off, $most ) );
+}
+
+/**
+ * Check a discount code made in Stripe (Product catalogue → Coupons): either
+ * a promotion code guests type, or a coupon's own ID. Codes are for payment
+ * plans only, since the pay-in-full price is already lower.
+ *
+ * The discount is built into the amounts the site charges rather than
+ * attached in Stripe, so Stripe doesn't count redemptions. The site counts
+ * its own bookings with the code against any redemption limit instead.
+ *
+ * @param string $code     As typed.
+ * @param string $currency gbp|usd.
+ * @return array|WP_Error code, percent, amount (minor units), label.
+ */
+function jj_booking_discount( $code, $currency ) {
+    $code    = strtoupper( preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $code ) );
+    $invalid = new WP_Error( 'jj_code', __( 'Sorry, that code isn’t recognised.', 'jaiye-journeys' ) );
+    if ( '' === $code || strlen( $code ) > 64 ) {
+        return $invalid;
+    }
+
+    // A minute's cache keeps repeat checks of the same code off Stripe.
+    $cache = 'jj_code_' . jj_stripe_mode() . '_' . md5( $code );
+    $found = get_transient( $cache );
+    if ( false === $found ) {
+        $found = jj_booking_discount_lookup( $code );
+        if ( is_wp_error( $found ) ) {
+            error_log( 'Jaiye booking: discount code lookup failed: ' . $found->get_error_message() ); // phpcs:ignore
+            return new WP_Error( 'jj_code', __( 'We couldn’t check that code just now. Please try again.', 'jaiye-journeys' ) );
+        }
+        set_transient( $cache, $found, MINUTE_IN_SECONDS );
+    }
+    if ( ! $found ) {
+        return $invalid;
+    }
+
+    $coupon = $found['coupon'];
+    $promo  = $found['promo'];
+    if ( empty( $coupon['valid'] ) || ( ! empty( $promo['expires_at'] ) && $promo['expires_at'] < time() ) ) {
+        return new WP_Error( 'jj_code', __( 'Sorry, that code has expired.', 'jaiye-journeys' ) );
+    }
+
+    $limits = array_filter( [
+        isset( $promo['max_redemptions'] ) ? (int) $promo['max_redemptions'] : 0,
+        isset( $coupon['max_redemptions'] ) ? (int) $coupon['max_redemptions'] : 0,
+    ] );
+    if ( $limits && jj_booking_discount_uses( $code ) >= min( $limits ) ) {
+        return new WP_Error( 'jj_code', __( 'Sorry, that code has been fully used.', 'jaiye-journeys' ) );
+    }
+
+    $symbols = jj_booking_currencies();
+    if ( ! empty( $coupon['percent_off'] ) ) {
+        $percent = (float) $coupon['percent_off'];
+        return [
+            'code'    => $code,
+            'percent' => $percent,
+            'amount'  => 0,
+            /* translators: %s: percentage */
+            'label'   => sprintf( __( '%s%% off', 'jaiye-journeys' ), rtrim( rtrim( number_format( $percent, 2 ), '0' ), '.' ) ),
+        ];
+    }
+
+    $amount = 0;
+    if ( ! empty( $coupon['currency_options'][ $currency ]['amount_off'] ) ) {
+        $amount = (int) $coupon['currency_options'][ $currency ]['amount_off'];
+    } elseif ( ! empty( $coupon['amount_off'] ) && isset( $coupon['currency'] ) && $coupon['currency'] === $currency ) {
+        $amount = (int) $coupon['amount_off'];
+    }
+    if ( $amount <= 0 ) {
+        return new WP_Error( 'jj_code', sprintf(
+            /* translators: %s: currency symbol */
+            __( 'Sorry, that code can’t be used when paying in %s.', 'jaiye-journeys' ),
+            $symbols[ $currency ]
+        ) );
+    }
+    return [
+        'code'    => $code,
+        'percent' => 0,
+        'amount'  => $amount,
+        /* translators: %s: amount */
+        'label'   => sprintf( __( '%s off', 'jaiye-journeys' ), jj_booking_money( $amount, $currency ) ),
+    ];
+}
+
+/**
+ * Find a code in Stripe: an active promotion code first, then a coupon ID.
+ *
+ * @param string $code Upper case.
+ * @return array|WP_Error coupon and promo fields, [] if there's no such code.
+ */
+function jj_booking_discount_lookup( $code ) {
+    $list = jj_stripe_request( 'GET', 'promotion_codes', [ 'code' => $code, 'active' => 'true', 'limit' => 1 ] );
+    if ( is_wp_error( $list ) ) {
+        return $list;
+    }
+
+    $promo = ! empty( $list['data'][0] ) ? $list['data'][0] : null;
+    if ( $promo ) {
+        // Newer API versions put the coupon under "promotion".
+        $coupon = isset( $promo['coupon'] ) ? $promo['coupon'] : ( isset( $promo['promotion']['coupon'] ) ? $promo['promotion']['coupon'] : null );
+        if ( is_string( $coupon ) ) {
+            $coupon = jj_stripe_request( 'GET', 'coupons/' . rawurlencode( $coupon ) );
+            if ( is_wp_error( $coupon ) ) {
+                return $coupon;
+            }
+        }
+        if ( ! is_array( $coupon ) ) {
+            return [];
+        }
+    } else {
+        // Not a promotion code: try it as a coupon ID. Stripe answers an
+        // unknown ID with an error, which here just means "no such code".
+        $coupon = jj_stripe_request( 'GET', 'coupons/' . rawurlencode( $code ) );
+        if ( is_wp_error( $coupon ) ) {
+            return [];
+        }
+        $promo = [];
+    }
+
+    return [
+        'coupon' => array_intersect_key( $coupon, array_flip( [ 'valid', 'percent_off', 'amount_off', 'currency', 'currency_options', 'max_redemptions' ] ) ),
+        'promo'  => array_intersect_key( $promo, array_flip( [ 'expires_at', 'max_redemptions' ] ) ),
+    ];
+}
+
+/**
+ * Bookings that used a code, in the current Stripe mode.
+ *
+ * @param string $code Upper case.
+ * @return int
+ */
+function jj_booking_discount_uses( $code ) {
+    return count( get_posts( [
+        'post_type'      => 'jj_booking',
+        'post_status'    => [ 'publish', 'private', 'draft', 'pending' ],
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery
+            [ 'key' => '_jj_bk_code', 'value' => $code ],
+            [ 'key' => '_jj_bk_mode', 'value' => jj_stripe_mode() ],
+        ],
+    ] ) );
 }
 
 
@@ -559,6 +728,7 @@ function jj_trip_start_checkout( $trip_id ) {
     $payment  = isset( $_POST['payment'] ) && 'full' === $_POST['payment'] ? 'full' : 'plan';
     $currency = isset( $_POST['currency'] ) ? sanitize_key( wp_unslash( $_POST['currency'] ) ) : 'gbp';
     $terms    = ! empty( $_POST['terms'] );
+    $code     = isset( $_POST['discount_code'] ) ? sanitize_text_field( wp_unslash( $_POST['discount_code'] ) ) : '';
     // phpcs:enable
 
     $rooms      = jj_trip_rooms( $trip_id );
@@ -581,7 +751,16 @@ function jj_trip_start_checkout( $trip_id ) {
         $fail( 'terms' );
     }
 
-    $quote = jj_booking_quote( $trip_id, $room, $guests, $currency, $payment );
+    // Discount codes are for the payment plan only.
+    $discount = null;
+    if ( '' !== trim( $code ) && 'plan' === $payment ) {
+        $discount = jj_booking_discount( $code, $currency );
+        if ( is_wp_error( $discount ) ) {
+            $fail( 'code' );
+        }
+    }
+
+    $quote = jj_booking_quote( $trip_id, $room, $guests, $currency, $payment, $discount );
     if ( ! $quote && 'plan' === $payment ) {
         // The last plan date passed while they were choosing: pay in full.
         $payment = 'full';
@@ -606,6 +785,10 @@ function jj_trip_start_checkout( $trip_id ) {
         'total'      => $quote['total'],
         'plan'       => jj_booking_pack_plan( $quote['plan'] ),
     ];
+    if ( $quote['discount'] ) {
+        $metadata['code']     = $discount['code'];
+        $metadata['discount'] = $quote['discount'];
+    }
 
     $line_name = $title . ' — ' . $room['name'];
     $line_desc = array_filter( [
@@ -757,7 +940,8 @@ function jj_booking_notify( $subject, $lines ) {
         $to = get_option( 'admin_email' );
     }
     $mode = 'test' === jj_stripe_mode() ? '[TEST] ' : '';
-    wp_mail( $to, $mode . $subject, implode( "\n", $lines ) );
+    // Optional lines are passed as null; '' keeps a blank line.
+    wp_mail( $to, $mode . $subject, implode( "\n", array_filter( $lines, 'is_string' ) ) );
 }
 
 function jj_booking_dashboard_url( $booking_id ) {
@@ -808,6 +992,8 @@ function jj_booking_record_checkout( $session ) {
             'currency'   => $meta['currency'],
             'total'      => (int) $meta['total'],
             'plan'       => $meta['plan'],
+            'code'       => isset( $meta['code'] ) ? $meta['code'] : '',
+            'discount'   => isset( $meta['discount'] ) ? (int) $meta['discount'] : 0,
             'paid'       => (int) $session['amount_total'],
             'payments'   => 0,
             'customer'   => isset( $session['customer'] ) ? $session['customer'] : '',
@@ -826,6 +1012,7 @@ function jj_booking_record_checkout( $session ) {
                 'Dates: ' . $meta['departure'],
                 'Room: ' . $meta['room'] . ' · Travellers: ' . $meta['travellers'],
                 'Paid today: ' . jj_booking_money( $session['amount_total'], $currency ),
+                ! empty( $meta['code'] ) ? sprintf( 'Discount code: %s, %s off', $meta['code'], jj_booking_money( $meta['discount'], $currency ) ) : null,
                 'plan' === $meta['payment']
                     ? 'Payment plan: ' . jj_booking_plan_sentence( jj_booking_unpack_plan( $meta['plan'] ), $currency )
                     : 'Paid in full.',
@@ -1024,6 +1211,51 @@ function jj_booking_rest_routes() {
     ] );
 }
 add_action( 'rest_api_init', 'jj_booking_rest_routes' );
+
+function jj_booking_discount_route() {
+    register_rest_route( 'jj/v1', '/discount', [
+        'methods'             => 'GET',
+        'callback'            => 'jj_booking_discount_check',
+        'permission_callback' => '__return_true', // Public: the booking page checks codes as guests type them.
+        'args'                => [
+            'trip'     => [ 'required' => true, 'type' => 'integer' ],
+            'code'     => [ 'required' => true, 'type' => 'string' ],
+            'currency' => [ 'required' => true, 'type' => 'string' ],
+        ],
+    ] );
+}
+add_action( 'rest_api_init', 'jj_booking_discount_route' );
+
+/**
+ * The booking page's "Apply" button. The discount is checked again when
+ * the guest pays, so this only drives what the page shows.
+ *
+ * @param WP_REST_Request $request Request.
+ * @return WP_REST_Response
+ */
+function jj_booking_discount_check( $request ) {
+    // A guest typing a code makes a handful of checks; stop anyone guessing.
+    $ip    = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+    $limit = 'jj_code_tries_' . md5( $ip );
+    $tries = (int) get_transient( $limit );
+    if ( $tries >= 20 ) {
+        return new WP_REST_Response( [ 'message' => __( 'Too many tries. Please wait a few minutes and try again.', 'jaiye-journeys' ) ], 429 );
+    }
+    set_transient( $limit, $tries + 1, 10 * MINUTE_IN_SECONDS );
+
+    $trip_id  = (int) $request['trip'];
+    $currency = sanitize_key( $request['currency'] );
+    if ( 'trip' !== get_post_type( $trip_id ) || ! jj_trip_booking_ready( $trip_id )
+        || ! in_array( $currency, jj_trip_booking_currencies( $trip_id ), true ) ) {
+        return new WP_REST_Response( [ 'message' => __( 'Sorry, that code isn’t recognised.', 'jaiye-journeys' ) ], 400 );
+    }
+
+    $discount = jj_booking_discount( $request['code'], $currency );
+    if ( is_wp_error( $discount ) ) {
+        return new WP_REST_Response( [ 'message' => $discount->get_error_message() ], 400 );
+    }
+    return new WP_REST_Response( $discount, 200 );
+}
 
 /**
  * Check the Stripe-Signature header (HMAC-SHA256 of "timestamp.payload").
@@ -1232,8 +1464,15 @@ function jj_booking_details_box( $post ) {
         __( 'Room', 'jaiye-journeys' )       => jj_booking_get( $id, 'room' ),
         __( 'Travellers', 'jaiye-journeys' ) => jj_booking_get( $id, 'travellers' ),
         __( 'Total', 'jaiye-journeys' )      => $currency ? jj_booking_money( jj_booking_get( $id, 'total' ), $currency ) : '',
+        __( 'Discount', 'jaiye-journeys' )   => jj_booking_get( $id, 'code' ) && $currency
+            /* translators: 1: amount, 2: code */
+            ? sprintf( __( '%1$s off with %2$s', 'jaiye-journeys' ), jj_booking_money( jj_booking_get( $id, 'discount' ), $currency ), jj_booking_get( $id, 'code' ) )
+            : '',
         __( 'Paid so far', 'jaiye-journeys' ) => $currency ? jj_booking_money( jj_booking_get( $id, 'paid' ), $currency ) : '',
     ];
+    if ( '' === $rows[ __( 'Discount', 'jaiye-journeys' ) ] ) {
+        unset( $rows[ __( 'Discount', 'jaiye-journeys' ) ] );
+    }
     echo '<table class="widefat striped"><tbody>';
     foreach ( $rows as $label => $value ) {
         printf( '<tr><th style="width:12em">%s</th><td>%s</td></tr>', esc_html( $label ), esc_html( $value ) );

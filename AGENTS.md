@@ -94,6 +94,15 @@ or **pay in full** (the room's discounted pay-in-full price).
   are all set. Test mode offers a "Quick test schedule" (payments 5 min apart).
 - Amounts are always computed on the server from the trip's fields; the form
   only sends indexes. `js/booking.js` mirrors `jj_booking_quote()`.
+- Discount codes: the owner makes them in Stripe (Product catalogue →
+  Coupons, as a promotion code or a coupon ID). **Payment plan only**: the
+  code comes off the balance, so the deposit stays the same and every later
+  payment is smaller. The booking page checks codes via
+  `/wp-json/jj/v1/discount` and checkout checks again. Stripe doesn't count
+  redemptions (the discount is built into our amounts), so
+  `jj_booking_discount_uses()` counts bookings with the code against any
+  redemption limit. A live restricted key needs Coupons and Promotion codes:
+  Read.
 
 ### Cards and listings
 
