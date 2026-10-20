@@ -164,8 +164,8 @@ while ( have_posts() ) :
               echo esc_html(
                   $name
                       /* translators: %s: guest's first name */
-                      ? sprintf( __( 'You’re all booked, %s', 'jaiye-journeys' ), $name )
-                      : __( 'You’re all booked', 'jaiye-journeys' )
+                      ? sprintf( __( 'You’re all booked, %s!', 'jaiye-journeys' ), $name )
+                      : __( 'You’re all booked!', 'jaiye-journeys' )
               );
               ?>
             </h2>
