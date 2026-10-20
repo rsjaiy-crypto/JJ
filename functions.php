@@ -111,6 +111,17 @@ function jaiye_enqueue_assets() {
         true
     );
 
+    // Homepage services: accordion on phones.
+    if ( is_front_page() ) {
+        wp_enqueue_script(
+            'jaiye-services',
+            get_template_directory_uri() . '/js/services.js',
+            [],
+            filemtime( get_template_directory() . '/js/services.js' ),
+            true
+        );
+    }
+
     // Journeys hub: filter/sort UI.
     if ( is_page_template( 'our-journeys.php' ) ) {
         wp_enqueue_style(

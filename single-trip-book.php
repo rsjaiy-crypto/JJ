@@ -159,13 +159,13 @@ while ( have_posts() ) :
             $email    = isset( $session['customer_details']['email'] ) ? $session['customer_details']['email'] : '';
             ?>
             <p class="booking-done__eyebrow"><?php esc_html_e( 'Payment received', 'jaiye-journeys' ); ?></p>
-            <h2 class="booking-done__title">
+            <h2 class="booking-done__title js-booking-celebrate">
               <?php
               echo esc_html(
                   $name
                       /* translators: %s: guest's first name */
-                      ? sprintf( __( 'You’re booked, %s', 'jaiye-journeys' ), $name )
-                      : __( 'You’re booked', 'jaiye-journeys' )
+                      ? sprintf( __( 'You’re all booked, %s', 'jaiye-journeys' ), $name )
+                      : __( 'You’re all booked', 'jaiye-journeys' )
               );
               ?>
             </h2>
