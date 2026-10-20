@@ -28,7 +28,7 @@
           </form>
           <div class="site-footer__signup-done" id="footer-signup-done" role="status" hidden>
             <p class="site-footer__signup-done-title"><?php esc_html_e( 'You’re on the list.', 'jaiye-journeys' ); ?></p>
-            <p><?php esc_html_e( 'Thank you for joining The List.', 'jaiye-journeys' ); ?></p>
+            <p><?php esc_html_e( 'Thanks, we’ll see you inside.', 'jaiye-journeys' ); ?></p>
           </div>
           <details class="site-footer__signup-terms">
             <summary><?php esc_html_e( 'Offer terms', 'jaiye-journeys' ); ?></summary>
