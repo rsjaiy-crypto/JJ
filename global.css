@@ -956,32 +956,30 @@ textarea::placeholder {
   color: var(--color-cream);
 }
 
-/* Horizontal scroll carousel on mobile */
+/* Stacked list on mobile, so every service is on screen */
 .fp-services__grid {
-  display: flex;
+  display: grid;
   gap: 0;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  margin-inline: calc(var(--container-pad) * -1);
-  padding-inline: var(--container-pad);
-  padding-bottom: var(--space-2);
-}
-
-.fp-services__grid::-webkit-scrollbar {
-  display: none;
 }
 
 /* Service tile */
 .fp-service-tile {
-  flex: 0 0 min(78vw, 280px);
-  scroll-snap-align: start;
   display: flex;
   flex-direction: column;
   padding: 0 24px 32px 24px;
   background-color: transparent;
   border-top: none;
+}
+
+/* Phones: a fine sage rule between stacked services */
+@media (max-width: 767px) {
+  .fp-service-tile {
+    padding: var(--space-6) 0;
+  }
+
+  .fp-service-tile + .fp-service-tile {
+    border-top: 1px solid color-mix(in srgb, var(--color-sage) 25%, transparent);
+  }
 }
 
 .fp-service-tile__icon {
@@ -1137,8 +1135,11 @@ textarea::placeholder {
   }
 }
 
-.fp-service-tile--no-badge .fp-service-tile__title {
-  padding-top: 50px;
+/* On phones the tiles stack, so only line up the titles from tablet up. */
+@media (min-width: 768px) {
+  .fp-service-tile--no-badge .fp-service-tile__title {
+    padding-top: 50px;
+  }
 }
 
 /* 3-column grid on tablet */

@@ -5,6 +5,88 @@
  * plan only where it applies. The maths matches jj_booking_quote() in
  * inc/trip-booking.php, which re-checks everything on the server anyway.
  */
+
+/* Confirmation: one burst of confetti in the brand colours. */
+( function () {
+	'use strict';
+
+	if ( ! document.querySelector( '.js-booking-celebrate' ) ||
+		window.matchMedia( '(prefers-reduced-motion: reduce)' ).matches ) {
+		return;
+	}
+
+	var root    = getComputedStyle( document.documentElement );
+	var colours = [ '--color-salmon', '--color-sage', '--color-forest', '--color-cream' ].map( function ( name ) {
+		return root.getPropertyValue( name ).trim();
+	} ).filter( Boolean );
+
+	var canvas = document.createElement( 'canvas' );
+	var ctx    = canvas.getContext( '2d' );
+	var ratio  = window.devicePixelRatio || 1;
+	var width  = window.innerWidth;
+	var height = window.innerHeight;
+	var pieces = [];
+	var start  = null;
+
+	canvas.setAttribute( 'aria-hidden', 'true' );
+	canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999';
+	canvas.width  = width * ratio;
+	canvas.height = height * ratio;
+	ctx.scale( ratio, ratio );
+	document.body.appendChild( canvas );
+
+	/* Two bursts, from the lower left and lower right, arcing inwards. */
+	for ( var i = 0; i < 160; i++ ) {
+		var left  = i % 2 === 0;
+		var angle = ( left ? -60 : -120 ) + ( Math.random() * 30 - 15 );
+		var speed = height * ( 0.022 + Math.random() * 0.012 );
+		pieces.push( {
+			x: left ? 0 : width,
+			y: height * 0.85,
+			vx: Math.cos( angle * Math.PI / 180 ) * speed,
+			vy: Math.sin( angle * Math.PI / 180 ) * speed,
+			w: 6 + Math.random() * 6,
+			h: 4 + Math.random() * 4,
+			spin: Math.random() * Math.PI,
+			turn: Math.random() * 0.3 - 0.15,
+			colour: colours[ i % colours.length ] || '#e48168'
+		} );
+	}
+
+	function frame( now ) {
+		if ( start === null ) {
+			start = now;
+		}
+		var elapsed = now - start;
+		ctx.clearRect( 0, 0, width, height );
+		ctx.globalAlpha = elapsed > 3200 ? Math.max( 0, 1 - ( elapsed - 3200 ) / 800 ) : 1;
+
+		pieces.forEach( function ( p ) {
+			p.vy += 0.35;
+			p.vx *= 0.985;
+			p.vy *= 0.985;
+			p.x += p.vx;
+			p.y += p.vy;
+			p.spin += p.turn;
+			ctx.save();
+			ctx.translate( p.x, p.y );
+			ctx.rotate( p.spin );
+			ctx.scale( 1, Math.cos( p.spin * 2 ) );
+			ctx.fillStyle = p.colour;
+			ctx.fillRect( -p.w / 2, -p.h / 2, p.w, p.h );
+			ctx.restore();
+		} );
+
+		if ( elapsed < 4000 ) {
+			window.requestAnimationFrame( frame );
+		} else {
+			canvas.remove();
+		}
+	}
+
+	window.requestAnimationFrame( frame );
+}() );
+
 ( function () {
 	'use strict';
 
