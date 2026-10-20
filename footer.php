@@ -32,7 +32,7 @@
           </div>
           <details class="site-footer__signup-terms">
             <summary><?php esc_html_e( 'Offer terms', 'jaiye-journeys' ); ?></summary>
-            <p><?php esc_html_e( '10% off your first eligible group trip or retreat chapter. Cruises and package holidays are not included. It cannot be combined with other offers.', 'jaiye-journeys' ); ?></p>
+            <p><?php esc_html_e( '10% off your first eligible group trip or retreat chapter. Cruises and package holidays are not included. It cannot be combined with other offers, including pay-in-full pricing.', 'jaiye-journeys' ); ?></p>
           </details>
         </div>
       </div><!-- /.site-footer__signup -->
