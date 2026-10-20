@@ -158,26 +158,15 @@ while ( have_posts() ) :
             $name     = isset( $session['customer_details']['name'] ) ? strtok( (string) $session['customer_details']['name'], ' ' ) : '';
             $email    = isset( $session['customer_details']['email'] ) ? $session['customer_details']['email'] : '';
             ?>
-            <?php
-            // Hand-drawn coral underline beneath the guest's name.
-            $underline = '<svg class="booking-done__underline" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true" focusable="false">'
-                . '<defs><filter id="jj-pencil"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="3"/></filter></defs>'
-                . '<path pathLength="1" d="M6 13 C 70 8, 160 5, 294 7"/>'
-                . '<path pathLength="1" d="M40 19 C 110 14, 190 12, 262 14"/>'
-                . '</svg>';
-            ?>
             <p class="booking-done__eyebrow"><?php esc_html_e( 'Payment received', 'jaiye-journeys' ); ?></p>
             <h2 class="booking-done__title js-booking-celebrate">
               <?php
-              if ( $name ) {
-                  printf(
+              echo esc_html(
+                  $name
                       /* translators: %s: guest's first name */
-                      esc_html__( 'You’re all booked, %s', 'jaiye-journeys' ),
-                      '<span class="booking-done__name">' . esc_html( $name ) . $underline . '</span>' // phpcs:ignore WordPress.Security.EscapeOutput -- name escaped, SVG is fixed markup.
-                  );
-              } else {
-                  echo esc_html__( 'You’re', 'jaiye-journeys' ) . ' <span class="booking-done__name">' . esc_html__( 'all booked', 'jaiye-journeys' ) . $underline . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput -- SVG is fixed markup.
-              }
+                      ? sprintf( __( 'You’re all booked, %s', 'jaiye-journeys' ), $name )
+                      : __( 'You’re all booked', 'jaiye-journeys' )
+              );
               ?>
             </h2>
             <?php if ( $email ) : ?>

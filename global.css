@@ -971,6 +971,16 @@ textarea::placeholder {
   border-top: none;
 }
 
+.fp-service-tile__title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Only the phone accordion shows the "Find out more" link */
+.fp-service-tile__more {
+  display: none;
+}
+
 /* Phones: a fine sage rule between stacked services */
 @media (max-width: 767px) {
   .fp-service-tile {
@@ -979,6 +989,98 @@ textarea::placeholder {
 
   .fp-service-tile + .fp-service-tile {
     border-top: 1px solid color-mix(in srgb, var(--color-sage) 25%, transparent);
+  }
+}
+
+/* Phones with JS: an accordion (js/services.js adds .is-accordion).
+   Tapping a title opens its description and a "Find out more" link. */
+.fp-services__grid.is-accordion .fp-service-tile {
+  padding: 0;
+}
+
+.fp-services__grid.is-accordion .fp-service-popular {
+  margin: var(--space-6) 0 0;
+}
+
+.fp-services__grid.is-accordion .fp-service-tile__title {
+  position: relative;
+  padding: var(--space-5) var(--space-10) var(--space-5) 0;
+}
+
+.fp-service-tile__toggle {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-salmon);
+  cursor: pointer;
+}
+
+/* Plus sign that turns into a minus when open */
+.fp-service-tile__toggle::before,
+.fp-service-tile__toggle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  width: 16px;
+  height: 1.5px;
+  background-color: currentColor;
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+.fp-service-tile__toggle::after {
+  transform: rotate(90deg);
+}
+
+.fp-service-tile__toggle[aria-expanded="true"]::after {
+  transform: rotate(0deg);
+}
+
+.fp-service-tile__toggle:focus-visible {
+  outline: 2px solid var(--color-salmon);
+  outline-offset: 2px;
+}
+
+.fp-services__grid.is-accordion .fp-service-tile__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition: grid-template-rows var(--duration-slow) var(--ease-out),
+              visibility 0s linear var(--duration-slow);
+}
+
+.fp-services__grid.is-accordion .is-open .fp-service-tile__panel {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition: grid-template-rows var(--duration-slow) var(--ease-out);
+}
+
+.fp-services__grid.is-accordion .fp-service-tile__panel-inner {
+  overflow: hidden;
+}
+
+.fp-services__grid.is-accordion .fp-service-tile__desc {
+  margin-top: 0;
+}
+
+.fp-services__grid.is-accordion .fp-service-tile__more {
+  display: inline-block;
+  margin: var(--space-3) 0 var(--space-6);
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-salmon);
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fp-services__grid.is-accordion .fp-service-tile__panel,
+  .fp-service-tile__toggle::before,
+  .fp-service-tile__toggle::after {
+    transition: none;
   }
 }
 

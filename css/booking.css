@@ -484,57 +484,6 @@
   color: var(--color-deep-green);
 }
 
-.booking-done__title.js-booking-celebrate {
-  margin-bottom: var(--space-8);
-}
-
-/* The guest's name, with a coral pencil line drawn beneath it. */
-.booking-done__name {
-  position: relative;
-  display: inline-block;
-  white-space: nowrap;
-}
-
-.booking-done__underline {
-  position: absolute;
-  left: -6%;
-  bottom: -0.4em;
-  width: 112%;
-  height: 0.5em;
-  overflow: visible;
-  pointer-events: none;
-}
-
-.booking-done__underline path {
-  fill: none;
-  stroke: var(--color-salmon);
-  stroke-width: 6.5;
-  stroke-linecap: round;
-  filter: url(#jj-pencil);
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: booking-draw 0.7s ease-out 0.4s forwards;
-}
-
-.booking-done__underline path + path {
-  stroke-width: 4;
-  opacity: 0.85;
-  animation-delay: 0.85s;
-}
-
-@keyframes booking-draw {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .booking-done__underline path {
-    animation: none;
-    stroke-dashoffset: 0;
-  }
-}
-
 .booking-done__copy {
   max-width: 48ch;
   margin: 0 auto var(--space-8);

@@ -119,8 +119,8 @@ get_header();
 
   <!-- ============================================================
        3. SERVICES STRIP
-       Horizontal scroll on mobile (CSS scroll-snap).
-       5-column grid on desktop.
+       Accordion on mobile (js/services.js).
+       3-column grid on tablet, 5-column on desktop.
        ============================================================ -->
   <section
     class="fp-services"
@@ -137,55 +137,67 @@ get_header();
         </h2>
       </header>
 
-      <ul class="fp-services__grid" role="list">
+      <?php
+      // On phones these become an accordion (js/services.js): the title
+      // opens the description, with a link through to the service.
+      $services = [
+          [
+              'title'   => __( 'The Ticketing Desk', 'jaiye-journeys' ),
+              'url'     => 'https://tally.so/r/eq6rp0',
+              'new_tab' => true,
+              'desc'    => __( 'Flights, transfers, and logistics, sourced and booked for you.', 'jaiye-journeys' ),
+              'popular' => true,
+          ],
+          [
+              'title' => __( 'The Hotel Edit', 'jaiye-journeys' ),
+              'url'   => '/contact/',
+              'desc'  => __( 'Handpicked stays that match your style, budget, and travel story.', 'jaiye-journeys' ),
+          ],
+          [
+              'title' => __( 'The Signature Itinerary', 'jaiye-journeys' ),
+              'url'   => '/contact/',
+              'desc'  => __( 'A fully crafted day-by-day journey, designed entirely around you.', 'jaiye-journeys' ),
+          ],
+          [
+              'title' => __( 'Private Groups & Celebrations', 'jaiye-journeys' ),
+              'url'   => home_url( '/private-groups-celebrations/' ),
+              'desc'  => __( 'Milestone moments curated for groups: birthdays, honeymoons, and corporate retreats.', 'jaiye-journeys' ),
+          ],
+          [
+              'title' => __( 'The Business Desk', 'jaiye-journeys' ),
+              'url'   => home_url( '/business-desk/' ),
+              'desc'  => __( 'Dedicated travel management for growing teams: one point of contact, VIP perks, and every logistics headache handled.', 'jaiye-journeys' ),
+          ],
+      ];
+      ?>
+      <ul class="fp-services__grid js-services" role="list">
 
-        <li class="fp-service-tile">
-			<span class="fp-service-popular">Popular</span>
-          <h3 class="fp-service-tile__title">
-<a href="https://tally.so/r/eq6rp0" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;"><?php esc_html_e( 'The Ticketing Desk', 'jaiye-journeys' ); ?></a>          </h3>
-          <p class="fp-service-tile__desc">
-            <?php esc_html_e( 'Flights, transfers, and logistics, sourced and booked for you.', 'jaiye-journeys' ); ?>
-          </p>
-          <span class="fp-service-tile__arrow" aria-hidden="true">→</span>
-        </li>
-
-        <li class="fp-service-tile fp-service-tile--no-badge">
-          <h3 class="fp-service-tile__title">
-            <a href="/contact/" target="_self" style="color: inherit; text-decoration: none;">The Hotel Edit</a>
-          </h3>
-          <p class="fp-service-tile__desc">
-            <?php esc_html_e( 'Handpicked stays that match your style, budget, and travel story.', 'jaiye-journeys' ); ?>
-          </p>
-          <span class="fp-service-tile__arrow" aria-hidden="true">→</span>
-        </li>
-
-        <li class="fp-service-tile fp-service-tile--no-badge">
-          <h3 class="fp-service-tile__title">
-<a href="/contact/" target="_self" style="color: inherit; text-decoration: none;">The Signature Itinerary</a>          </h3>
-          <p class="fp-service-tile__desc">
-            <?php esc_html_e( 'A fully crafted day-by-day journey, designed entirely around you.', 'jaiye-journeys' ); ?>
-          </p>
-          <span class="fp-service-tile__arrow" aria-hidden="true">→</span>
-        </li>
-
-        <li class="fp-service-tile fp-service-tile--no-badge">
-          <h3 class="fp-service-tile__title">
-<a href="<?php echo esc_url( home_url( '/private-groups-celebrations/' ) ); ?>" target="_self" style="color: inherit; text-decoration: none;">Private Groups & Celebrations</a>          </h3>
-          <p class="fp-service-tile__desc">
-            <?php esc_html_e( 'Milestone moments curated for groups: birthdays, honeymoons, and corporate retreats.', 'jaiye-journeys' ); ?>
-          </p>
-          <span class="fp-service-tile__arrow" aria-hidden="true">→</span>
-        </li>
-
-        <li class="fp-service-tile fp-service-tile--no-badge">
-          <h3 class="fp-service-tile__title">
-            <a href="<?php echo esc_url( home_url( '/business-desk/' ) ); ?>" target="_self" style="color: inherit; text-decoration: none;">The Business Desk</a>
-          </h3>
-          <p class="fp-service-tile__desc">
-            <?php esc_html_e( 'Dedicated travel management for growing teams: one point of contact, VIP perks, and every logistics headache handled.', 'jaiye-journeys' ); ?>
-          </p>
-          <span class="fp-service-tile__arrow" aria-hidden="true">→</span>
-        </li>
+        <?php foreach ( $services as $i => $service ) : ?>
+          <?php
+          $popular  = ! empty( $service['popular'] );
+          $new_tab  = ! empty( $service['new_tab'] );
+          $panel_id = 'fp-service-' . ( $i + 1 );
+          ?>
+          <li class="fp-service-tile<?php echo $popular ? '' : ' fp-service-tile--no-badge'; ?>">
+            <?php if ( $popular ) : ?>
+              <span class="fp-service-popular"><?php esc_html_e( 'Popular', 'jaiye-journeys' ); ?></span>
+            <?php endif; ?>
+            <h3 class="fp-service-tile__title">
+              <a href="<?php echo esc_url( $service['url'] ); ?>"<?php echo $new_tab ? ' target="_blank" rel="noopener"' : ''; ?>><?php echo esc_html( $service['title'] ); ?></a>
+              <button type="button" class="fp-service-tile__toggle" aria-expanded="false" aria-controls="<?php echo esc_attr( $panel_id ); ?>" hidden>
+                <span class="sr-only"><?php echo esc_html( $service['title'] ); ?></span>
+              </button>
+            </h3>
+            <div class="fp-service-tile__panel" id="<?php echo esc_attr( $panel_id ); ?>">
+              <div class="fp-service-tile__panel-inner">
+                <p class="fp-service-tile__desc"><?php echo esc_html( $service['desc'] ); ?></p>
+                <a class="fp-service-tile__more" href="<?php echo esc_url( $service['url'] ); ?>"<?php echo $new_tab ? ' target="_blank" rel="noopener"' : ''; ?>>
+                  <?php esc_html_e( 'Find out more', 'jaiye-journeys' ); ?> <span aria-hidden="true">&rarr;</span>
+                </a>
+              </div>
+            </div>
+          </li>
+        <?php endforeach; ?>
 
       </ul><!-- /.fp-services__grid -->
     </div><!-- /.container -->
