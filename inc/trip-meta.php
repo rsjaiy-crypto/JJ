@@ -236,6 +236,16 @@ function jj_trip_render_field( $name, $field, $value, $id = '' ) {
             );
             break;
 
+        case 'money':
+            printf(
+                '<input type="number" id="%s" name="%s" value="%s" class="widefat" placeholder="%s" min="0" step="0.01" inputmode="decimal">',
+                esc_attr( $id ),
+                esc_attr( $name ),
+                esc_attr( $value ),
+                esc_attr( $ph )
+            );
+            break;
+
         case 'number':
             printf(
                 '<input type="number" id="%s" name="%s" value="%s" class="widefat" placeholder="%s">',

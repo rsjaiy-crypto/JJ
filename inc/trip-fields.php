@@ -181,9 +181,9 @@ function jj_trip_schema() {
                     'options' => jj_trip_duration_options(),
                 ],
                 'price_from'   => [
-                    'type'  => 'number',
+                    'type'  => 'money',
                     'label' => __( 'From price (£)', 'jaiye-journeys' ),
-                    'desc'  => __( 'Digits only — the £ and formatting are added by the template.', 'jaiye-journeys' ),
+                    'desc'  => __( 'Numbers only, pence allowed (e.g. 2550.50). The £ and commas are added for you.', 'jaiye-journeys' ),
                 ],
                 'group_size'   => [
                     'type'  => 'text',
@@ -255,12 +255,12 @@ function jj_trip_schema() {
                     ],
                 ],
                 'deposit_gbp'    => [
-                    'type'    => 'number',
+                    'type'    => 'money',
                     'label'   => __( 'Deposit per person (£)', 'jaiye-journeys' ),
                     'default' => '500',
                 ],
                 'deposit_usd'    => [
-                    'type'    => 'number',
+                    'type'    => 'money',
                     'label'   => __( 'Deposit per person ($)', 'jaiye-journeys' ),
                     'default' => '700',
                 ],
@@ -276,20 +276,20 @@ function jj_trip_schema() {
                 'rooms'          => [
                     'type'      => 'repeater',
                     'label'     => __( 'Rooms (booking page)', 'jaiye-journeys' ),
-                    'desc'      => __( 'Add rooms to switch on the booking page, where guests pick their dates, room and number of travellers, then pay on Stripe. Prices are per person, in whole pounds and dollars. Leave the $ prices blank to sell in pounds only. Needs the Stripe settings in Trips → Booking Settings.', 'jaiye-journeys' ),
+                    'desc'      => __( 'Add rooms to switch on the booking page, where guests pick their dates, room and number of travellers, then pay on Stripe. Prices are per person; pence and cents are fine (e.g. 2550.50). Leave the $ prices blank to sell in pounds only. Needs the Stripe settings in Trips → Booking Settings.', 'jaiye-journeys' ),
                     'row_label' => __( 'Room', 'jaiye-journeys' ),
                     'subfields' => [
                         'name'           => [ 'type' => 'text', 'label' => __( 'Room name', 'jaiye-journeys' ), 'placeholder' => 'Private double' ],
                         'description'    => [ 'type' => 'textarea', 'label' => __( 'Short description', 'jaiye-journeys' ), 'rows' => 3 ],
                         'image'          => [ 'type' => 'image', 'label' => __( 'Photo', 'jaiye-journeys' ) ],
-                        'price'          => [ 'type' => 'number', 'label' => __( 'Payment plan price per person (£)', 'jaiye-journeys' ) ],
+                        'price'          => [ 'type' => 'money', 'label' => __( 'Payment plan price per person (£)', 'jaiye-journeys' ) ],
                         'full_price'     => [
-                            'type'  => 'number',
+                            'type'  => 'money',
                             'label' => __( 'Pay-in-full price per person (£)', 'jaiye-journeys' ),
                             'desc'  => __( 'The discounted price for paying everything at booking. Blank means no discount.', 'jaiye-journeys' ),
                         ],
-                        'price_usd'      => [ 'type' => 'number', 'label' => __( 'Payment plan price per person ($)', 'jaiye-journeys' ) ],
-                        'full_price_usd' => [ 'type' => 'number', 'label' => __( 'Pay-in-full price per person ($)', 'jaiye-journeys' ) ],
+                        'price_usd'      => [ 'type' => 'money', 'label' => __( 'Payment plan price per person ($)', 'jaiye-journeys' ) ],
+                        'full_price_usd' => [ 'type' => 'money', 'label' => __( 'Pay-in-full price per person ($)', 'jaiye-journeys' ) ],
                         'max_guests'     => [
                             'type'    => 'select',
                             'label'   => __( 'Travellers per booking', 'jaiye-journeys' ),
@@ -958,6 +958,44 @@ function jj_trip_public_status( $post_id = null ) {
 
 
 /**
+ * A price as typed in wp-admin, tidied for saving: "£2,550.5" becomes
+ * "2550.50", whole amounts stay whole ("3500"), anything unreadable is "".
+ *
+ * @param mixed $value Raw value.
+ * @return string
+ */
+function jj_money_clean( $value ) {
+    $value = preg_replace( '/[^0-9.]/', '', (string) $value );
+    if ( '' === $value || ! is_numeric( $value ) ) {
+        return '';
+    }
+    $minor = (int) round( (float) $value * 100 );
+    return 0 === $minor % 100 ? (string) intdiv( $minor, 100 ) : number_format( $minor / 100, 2, '.', '' );
+}
+
+/**
+ * A saved price in minor units (pence or cents): "2550.50" is 255050.
+ *
+ * @param mixed $value Saved value.
+ * @return int
+ */
+function jj_money_minor( $value ) {
+    return (int) round( (float) jj_money_clean( $value ) * 100 );
+}
+
+/**
+ * A saved price for display, without the symbol: "2,550.50" or "2,550".
+ *
+ * @param mixed $value Saved value.
+ * @return string
+ */
+function jj_money_display( $value ) {
+    $minor = jj_money_minor( $value );
+    return number_format_i18n( $minor / 100, $minor % 100 ? 2 : 0 );
+}
+
+
+/**
  * Print the small status tag shown on every trip card.
  *
  * Driven by what visitors see (jj_trip_public_status()), so a card can't
@@ -1087,6 +1125,9 @@ function jj_trip_sanitise_value( $value, $type ) {
 
         case 'number':
             return '' === trim( (string) $value ) ? '' : (string) absint( $value );
+
+        case 'money':
+            return jj_money_clean( $value );
 
         case 'meter':
             return (string) max( 0, min( 100, absint( $value ) ) );

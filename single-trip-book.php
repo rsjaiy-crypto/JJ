@@ -94,13 +94,13 @@ while ( have_posts() ) :
         $out = '';
         foreach ( $currencies as $cur ) {
             $p     = $room['prices'][ $cur ];
-            $plan  = jj_booking_money( $p['plan'] * 100, $cur );
+            $plan  = jj_booking_money( $p['plan'], $cur );
             $out  .= '<span class="booking-cur booking-cur--' . esc_attr( $cur ) . '">';
             /* translators: %s: price */
             $out  .= esc_html( sprintf( __( '%s per person', 'jaiye-journeys' ), $plan ) );
             if ( $p['full'] < $p['plan'] ) {
                 /* translators: %s: pay-in-full price */
-                $out .= '<span class="booking-room__deposit">' . esc_html( sprintf( __( 'or %s paid in full', 'jaiye-journeys' ), jj_booking_money( $p['full'] * 100, $cur ) ) ) . '</span>';
+                $out .= '<span class="booking-room__deposit">' . esc_html( sprintf( __( 'or %s paid in full', 'jaiye-journeys' ), jj_booking_money( $p['full'], $cur ) ) ) . '</span>';
             }
             $out .= '</span>';
         }

@@ -81,8 +81,8 @@ function jj_booking_split( $balance, $count ) {
 
 /**
  * A trip's rooms, keyed by row index so links stay stable when a room is
- * marked sold out. Prices are whole units per person, per currency; a
- * missing pay-in-full price means no discount. Rooms without a name or a
+ * marked sold out. Prices are minor units (pence or cents) per person, per
+ * currency; a missing pay-in-full price means no discount. Rooms without a name or a
  * £ plan price are skipped.
  *
  * @param int $post_id Trip ID.
@@ -91,14 +91,14 @@ function jj_booking_split( $balance, $count ) {
 function jj_trip_rooms( $post_id ) {
     $rooms = [];
     foreach ( jj_trip_rows( 'rooms', $post_id ) as $i => $room ) {
-        $gbp = isset( $room['price'] ) ? (int) $room['price'] : 0;
+        $gbp = isset( $room['price'] ) ? jj_money_minor( $room['price'] ) : 0;
         if ( empty( $room['name'] ) || $gbp <= 0 ) {
             continue;
         }
-        $usd = isset( $room['price_usd'] ) ? (int) $room['price_usd'] : 0;
+        $usd = isset( $room['price_usd'] ) ? jj_money_minor( $room['price_usd'] ) : 0;
 
-        $full_gbp = isset( $room['full_price'] ) ? (int) $room['full_price'] : 0;
-        $full_usd = isset( $room['full_price_usd'] ) ? (int) $room['full_price_usd'] : 0;
+        $full_gbp = isset( $room['full_price'] ) ? jj_money_minor( $room['full_price'] ) : 0;
+        $full_usd = isset( $room['full_price_usd'] ) ? jj_money_minor( $room['full_price_usd'] ) : 0;
 
         $rooms[ $i ] = [
             'name'        => $room['name'],
@@ -116,14 +116,14 @@ function jj_trip_rooms( $post_id ) {
 }
 
 /**
- * Deposit per person, whole units.
+ * Deposit per person, minor units (pence or cents).
  *
  * @param int    $post_id  Trip ID.
  * @param string $currency gbp|usd.
  * @return int
  */
 function jj_trip_deposit( $post_id, $currency ) {
-    return (int) jj_trip_field( 'usd' === $currency ? 'deposit_usd' : 'deposit_gbp', $post_id );
+    return jj_money_minor( jj_trip_field( 'usd' === $currency ? 'deposit_usd' : 'deposit_gbp', $post_id ) );
 }
 
 /**
@@ -240,8 +240,8 @@ function jj_booking_quote( $post_id, $room, $guests, $currency, $payment, $disco
 
     if ( 'plan' === $payment ) {
         $dates   = jj_trip_plan_dates( $post_id );
-        $deposit = jj_trip_deposit( $post_id, $currency ) * 100 * $guests;
-        $total   = $prices['plan'] * 100 * $guests;
+        $deposit = jj_trip_deposit( $post_id, $currency ) * $guests;
+        $total   = $prices['plan'] * $guests;
         $off     = jj_booking_discount_amount( $discount, $total, $total - $deposit - count( $dates ) );
         $split   = jj_booking_split( $total - $deposit - $off, count( $dates ) );
         if ( ! $split || $deposit <= 0 ) {
@@ -255,7 +255,7 @@ function jj_booking_quote( $post_id, $room, $guests, $currency, $payment, $disco
         ];
     }
 
-    $total = $prices['full'] * 100 * $guests;
+    $total = $prices['full'] * $guests;
     return [
         'today'    => $total,
         'total'    => $total,

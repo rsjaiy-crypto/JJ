@@ -175,9 +175,10 @@
 				: 'Prices are per person. This room is for one traveller.';
 		}
 
-		var deposit   = num( form, 'data-deposit-' + currency ) * 100 * guests;
-		var planTotal = num( room, 'data-plan-' + currency ) * 100 * guests;
-		var fullTotal = num( room, 'data-full-' + currency ) * 100 * guests;
+		// Prices arrive in minor units (pence or cents).
+		var deposit   = num( form, 'data-deposit-' + currency ) * guests;
+		var planTotal = num( room, 'data-plan-' + currency ) * guests;
+		var fullTotal = num( room, 'data-full-' + currency ) * guests;
 		var payments  = deposit > 0 ? split( planTotal - deposit, dates.length ) : [];
 
 		// Payment plan only where there are dates ahead and a balance to spread.

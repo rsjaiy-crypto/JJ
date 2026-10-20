@@ -246,7 +246,7 @@ while ( have_posts() ) :
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M15 6.5a4 4 0 0 0-6.5 3v3.5a3 3 0 0 1-1.5 2.6h9"/><path d="M7 11h6"/></svg>
               </span>
               <span class="trip-stat__label"><?php esc_html_e( 'From', 'jaiye-journeys' ); ?></span>
-              <span class="trip-stat__value">&pound;<?php echo esc_html( number_format_i18n( (int) $price_from ) ); ?></span>
+              <span class="trip-stat__value">&pound;<?php echo esc_html( jj_money_display( $price_from ) ); ?></span>
               <?php if ( $price_usd ) : ?>
                 <span class="trip-stat__fx">
                   <?php
@@ -760,7 +760,7 @@ while ( have_posts() ) :
     <div class="trip-mobile-bar__price">
       <?php if ( $price_from ) : ?>
         <span class="trip-mobile-bar__label"><?php esc_html_e( 'From', 'jaiye-journeys' ); ?></span>
-        <span class="trip-mobile-bar__value">&pound;<?php echo esc_html( number_format_i18n( (int) $price_from ) ); ?></span>
+        <span class="trip-mobile-bar__value">&pound;<?php echo esc_html( jj_money_display( $price_from ) ); ?></span>
       <?php endif; ?>
     </div>
     <?php if ( $waitlist ) : ?>
