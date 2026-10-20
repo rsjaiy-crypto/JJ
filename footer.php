@@ -8,6 +8,35 @@
 
   <div class="site-footer__main">
     <div class="container">
+      <!-- Email signup (no Klaviyo site script: posts straight to Klaviyo's client API, so it works whether or not optional cookies are accepted) -->
+      <div class="site-footer__signup" id="footer-signup">
+        <div class="site-footer__signup-copy">
+          <p class="site-footer__signup-title"><?php esc_html_e( '10% off your first group trip', 'jaiye-journeys' ); ?></p>
+          <p class="site-footer__signup-text"><?php esc_html_e( 'Join The List for new chapters, first access and your welcome code.', 'jaiye-journeys' ); ?></p>
+        </div>
+        <div class="site-footer__signup-form-wrap">
+          <form class="site-footer__signup-form" id="footer-signup-form" novalidate>
+            <label class="sr-only" for="footer-signup-email"><?php esc_html_e( 'Email address', 'jaiye-journeys' ); ?></label>
+            <input type="email" id="footer-signup-email" name="email" placeholder="<?php esc_attr_e( 'Your email address', 'jaiye-journeys' ); ?>" autocomplete="email" required>
+            <input type="text" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true" class="site-footer__signup-hp">
+            <button type="submit"><?php esc_html_e( 'Join', 'jaiye-journeys' ); ?></button>
+            <p class="site-footer__signup-consent">
+              <?php esc_html_e( 'By joining, you agree to receive marketing emails from Jaiye Journeys. Unsubscribe any time.', 'jaiye-journeys' ); ?>
+              <a href="<?php echo esc_url( home_url( '/privacy-policy/' ) ); ?>"><?php esc_html_e( 'Privacy Policy', 'jaiye-journeys' ); ?></a>
+            </p>
+            <p class="site-footer__signup-error" id="footer-signup-error" role="alert" hidden></p>
+          </form>
+          <div class="site-footer__signup-done" id="footer-signup-done" role="status" hidden>
+            <p class="site-footer__signup-done-title"><?php esc_html_e( 'Welcome to The List.', 'jaiye-journeys' ); ?></p>
+            <p><?php esc_html_e( 'Your code is', 'jaiye-journeys' ); ?> <strong class="site-footer__signup-code">JAIYEJAIYE10</strong></p>
+          </div>
+          <details class="site-footer__signup-terms">
+            <summary><?php esc_html_e( 'Offer terms', 'jaiye-journeys' ); ?></summary>
+            <p><?php esc_html_e( '10% off your first eligible group trip or retreat chapter. Cruises and package holidays are not included. One use per person, and it cannot be combined with other offers.', 'jaiye-journeys' ); ?></p>
+          </details>
+        </div>
+      </div><!-- /.site-footer__signup -->
+
       <div class="site-footer__grid">
 
         <!-- Column 1: Brand + navigation links --------------->
@@ -359,6 +388,92 @@
   color: var(--color-salmon);
 }
 
+/* Email signup band */
+.site-footer__signup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding-bottom: var(--space-10);
+  margin-bottom: var(--space-12);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-sage) 30%, transparent);
+}
+.site-footer__signup-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  line-height: 1.15;
+  color: var(--color-cream);
+  margin-bottom: var(--space-2);
+}
+.site-footer__signup-text {
+  font-size: var(--text-sm);
+  font-weight: var(--fw-light);
+  color: var(--color-sage);
+  max-width: 40ch;
+}
+.site-footer__signup-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-2);
+}
+.site-footer__signup-form input[type="email"] {
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--color-cream);
+  background: transparent;
+  border: 1px solid var(--color-sage);
+  border-radius: var(--radius-sm);
+}
+.site-footer__signup-form input[type="email"]::placeholder { color: var(--color-sage); }
+.site-footer__signup-form input[type="email"]:focus-visible,
+.site-footer__signup-form button:focus-visible { outline: 2px solid var(--color-salmon); outline-offset: 2px; }
+.site-footer__signup-form button {
+  padding: var(--space-3) var(--space-6);
+  font: inherit;
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-deep-green);
+  background: var(--color-salmon);
+  border: 1px solid var(--color-salmon);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.site-footer__signup-form button:hover { background: var(--color-cream); border-color: var(--color-cream); }
+.site-footer__signup-form button[disabled] { opacity: 0.6; cursor: wait; }
+.site-footer__signup-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.site-footer__signup-consent,
+.site-footer__signup-error {
+  grid-column: 1 / -1;
+  font-size: var(--text-xs);
+  font-weight: var(--fw-light);
+  color: var(--color-sage);
+  line-height: 1.5;
+}
+.site-footer__signup-consent a { color: var(--color-cream); text-decoration: underline; }
+.site-footer__signup-error { color: var(--color-salmon); }
+.site-footer__signup-done-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  color: var(--color-cream);
+  margin-bottom: var(--space-2);
+}
+.site-footer__signup-done { font-size: var(--text-sm); color: var(--color-sage); }
+.site-footer__signup-code {
+  font-family: var(--font-body);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.12em;
+  color: var(--color-salmon);
+}
+.site-footer__signup-terms { margin-top: var(--space-3); font-size: var(--text-xs); color: var(--color-sage); }
+.site-footer__signup-terms summary { cursor: pointer; width: fit-content; text-decoration: underline; }
+.site-footer__signup-terms p { margin-top: var(--space-2); max-width: 52ch; line-height: 1.5; }
+@media (min-width: 768px) {
+  .site-footer__signup { flex-direction: row; justify-content: space-between; align-items: flex-start; gap: var(--space-12); }
+  .site-footer__signup-form-wrap { width: min(100%, 460px); }
+}
+
 /* ---- Desktop (768px+) ------------------------------------------- */
 @media (min-width: 768px) {
 
@@ -484,6 +599,50 @@
   });
 })();
 </script>
+
+<?php if ( defined( 'JAIYE_KLAVIYO_COMPANY_ID' ) && JAIYE_KLAVIYO_COMPANY_ID ) : ?>
+<script>
+/* Footer email signup. Posts to Klaviyo's public client API only.
+   It does not load klaviyo.js and sets no cookies, so it is independent of the cookie banner. */
+(function () {
+  var form = document.getElementById('footer-signup-form');
+  if (!form) return;
+  var done = document.getElementById('footer-signup-done');
+  var err = document.getElementById('footer-signup-error');
+  var btn = form.querySelector('button');
+  var COMPANY = <?php echo wp_json_encode( JAIYE_KLAVIYO_COMPANY_ID ); ?>;
+  var LIST = 'U2vqH2'; // Klaviyo list: "BTL: 10% offer"
+  function fail(msg) { err.textContent = msg; err.hidden = false; btn.disabled = false; }
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    err.hidden = true;
+    var email = form.elements.email.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { return fail('Please enter a valid email address.'); }
+    if (form.elements.company_website.value) { form.hidden = true; done.hidden = false; return; }
+    btn.disabled = true;
+    fetch('https://a.klaviyo.com/client/subscriptions/?company_id=' + encodeURIComponent(COMPANY), {
+      method: 'POST',
+      credentials: 'omit',
+      headers: { 'Content-Type': 'application/json', 'revision': '2024-10-15' },
+      body: JSON.stringify({ data: {
+        type: 'subscription',
+        attributes: {
+          custom_source: 'Website footer signup',
+          profile: { data: { type: 'profile', attributes: {
+            email: email,
+            subscriptions: { email: { marketing: { consent: 'SUBSCRIBED' } } }
+          } } }
+        },
+        relationships: { list: { data: { type: 'list', id: LIST } } }
+      } })
+    }).then(function (r) {
+      if (r.status === 202 || r.ok) { form.hidden = true; done.hidden = false; }
+      else { fail('Something went wrong. Please try again, or email hello@jaiyejourneys.com.'); }
+    }).catch(function () { fail('Something went wrong. Please try again, or email hello@jaiyejourneys.com.'); });
+  });
+})();
+</script>
+<?php endif; ?>
 
 <?php get_template_part( 'cookie-consent' ); ?>
 
