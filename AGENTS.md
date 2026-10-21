@@ -146,7 +146,7 @@ the site header or footer, so no tracking loads there.
 - Our Journeys = all published trips, sorted by first departure date.
 - Between the Lines chapter cards = published retreats (`brand` = `btl`).
 - Trip pages with Rooms show a **Rooms** section (`inc/trip-sections/rooms.php`)
-  after the dates: photo, description, price per person (plan and pay in
+  after What's Included: photo, description, price per person (plan and pay in
   full, £ / $) and availability per chapter (Available, "Only N places left"
   at 3 or fewer, Sold out). No Book button per room; the owner wants guests
   to book through Book Now. Waitlist shows the rooms with no prices or

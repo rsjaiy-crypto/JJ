@@ -139,11 +139,11 @@ while ( have_posts() ) :
   if ( $departures ) {
       $toc['book'] = $is_btl ? __( 'Chapters', 'jaiye-journeys' ) : __( 'Dates', 'jaiye-journeys' );
   }
-  if ( $rooms ) {
-      $toc['rooms'] = __( 'Rooms', 'jaiye-journeys' );
-  }
   if ( $has_inclusions ) {
       $toc['inclusions'] = __( "What's Included", 'jaiye-journeys' );
+  }
+  if ( $rooms ) {
+      $toc['rooms'] = __( 'Rooms', 'jaiye-journeys' );
   }
   if ( $days ) {
       $toc['day-by-day'] = __( 'Day by Day', 'jaiye-journeys' );
@@ -504,12 +504,6 @@ while ( have_posts() ) :
 
 
   <!-- ============================================================
-       5b. ROOMS
-       ============================================================ -->
-  <?php require get_template_directory() . '/inc/trip-sections/rooms.php'; ?>
-
-
-  <!-- ============================================================
        6. CAROUSEL + INCLUSIONS ACCORDIONS
        ============================================================ -->
   <?php $carousel = jj_trip_gallery( 'carousel_images', $trip_id ); ?>
@@ -537,6 +531,12 @@ while ( have_posts() ) :
   <?php endif; ?>
 
   <?php require get_template_directory() . '/inc/trip-sections/inclusions.php'; ?>
+
+
+  <!-- ============================================================
+       6b. ROOMS
+       ============================================================ -->
+  <?php require get_template_directory() . '/inc/trip-sections/rooms.php'; ?>
 
 
   <!-- ============================================================
