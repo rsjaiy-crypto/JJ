@@ -441,6 +441,15 @@
   height: 20px;
 }
 
+.trip-stat__glyph {
+  display: grid;
+}
+
+/* £ / $ pairs: js/trip.js shows the visitor's one. */
+.js-cur[hidden] {
+  display: none !important;
+}
+
 .trip-stat__label {
   font-family: var(--font-body);
   font-size: var(--text-xs);

@@ -584,6 +584,42 @@
 		observer.observe( hero );
 	}
 
+	/* ── £ or $ for the From price ───────────────────────────────── */
+
+	// US time zones. The browser's time zone is instant and needs no lookup;
+	// ?currency= (as on the booking page) overrides it.
+	var US_ZONES = /^(America\/(New_York|Detroit|Chicago|Denver|Phoenix|Boise|Los_Angeles|Anchorage|Juneau|Sitka|Yakutat|Nome|Metlakatla|Adak|Menominee|Indiana\/.+|Kentucky\/.+|North_Dakota\/.+)|Pacific\/Honolulu|US\/.+)$/;
+
+	function visitorCurrency() {
+		var asked = /[?&]currency=(gbp|usd)\b/.exec( window.location.search );
+		if ( asked ) return asked[1];
+
+		var zone = '';
+		try {
+			zone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+		} catch ( e ) {}
+		return US_ZONES.test( zone ) ? 'usd' : 'gbp';
+	}
+
+	function initCurrency() {
+		var pairs = document.querySelectorAll( '.js-cur' );
+		if ( ! pairs.length ) return; // No $ From price: the £ one stays.
+
+		var currency = visitorCurrency();
+		Array.prototype.forEach.call( pairs, function ( el ) {
+			el.hidden = ! el.classList.contains( 'js-cur--' + currency );
+		} );
+
+		// Open the booking page in the currency they've just seen.
+		Array.prototype.forEach.call( document.querySelectorAll( 'a[href*="/book/"]' ), function ( link ) {
+			try {
+				var url = new URL( link.href, window.location.href );
+				url.searchParams.set( 'currency', currency );
+				link.href = url.toString();
+			} catch ( e ) {}
+		} );
+	}
+
 	/* ── Init ────────────────────────────────────────────────────── */
 
 	function init() {
@@ -602,6 +638,7 @@
 		initNoteStack();
 		initMobileBar();
 		initToc();
+		initCurrency();
 
 		window.addEventListener( 'resize', syncStickyOffset, { passive: true } );
 

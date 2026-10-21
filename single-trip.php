@@ -32,7 +32,8 @@ while ( have_posts() ) :
     $notes      = jj_trip_rows( 'trip_notes', $trip_id );
     $included   = jj_trip_rows( 'included_groups', $trip_id );
 
-    $price_from = jj_trip_field( 'price_from', $trip_id );
+    $price_from     = jj_trip_field( 'price_from', $trip_id );
+    $price_from_usd = $price_from ? jj_trip_field( 'price_from_usd', $trip_id ) : '';
 
     // Brand switch: 'btl' gets the literary treatment (named days, BTL eyebrow).
     $brand    = jj_trip_field( 'brand', $trip_id, 'jj-edit' );
@@ -52,8 +53,9 @@ while ( have_posts() ) :
     // Every "Book" becomes "Get on The List". Prices go to The List first.
     $waitlist_url = $waitlist ? jj_trip_waitlist_url( $trip_id ) : '';
     if ( $waitlist ) {
-        $booking_url = '';
-        $price_from  = '';
+        $booking_url    = '';
+        $price_from     = '';
+        $price_from_usd = '';
     }
 
     // Sold out keeps the full page (it still sells the next departure) but
@@ -240,13 +242,25 @@ while ( have_posts() ) :
           <?php endif; ?>
 
           <?php if ( $price_from ) : ?>
-            <?php $price_usd = jj_fx_format_usd_estimate( $price_from ); ?>
+            <?php
+            // With a $ From price, US visitors see that instead (js/trip.js
+            // swaps the js-cur pairs); without one, the £ price gets an
+            // approximate $ note underneath.
+            $price_usd = $price_from_usd ? '' : jj_fx_format_usd_estimate( $price_from );
+            $cur_gbp   = $price_from_usd ? ' js-cur js-cur--gbp' : '';
+            ?>
             <li class="trip-stat<?php echo $price_usd ? ' trip-stat--price' : ''; ?>">
               <span class="trip-stat__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M15 6.5a4 4 0 0 0-6.5 3v3.5a3 3 0 0 1-1.5 2.6h9"/><path d="M7 11h6"/></svg>
+                <span class="trip-stat__glyph<?php echo esc_attr( $cur_gbp ); ?>"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M15 6.5a4 4 0 0 0-6.5 3v3.5a3 3 0 0 1-1.5 2.6h9"/><path d="M7 11h6"/></svg></span>
+                <?php if ( $price_from_usd ) : ?>
+                  <span class="trip-stat__glyph js-cur js-cur--usd" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 3.5v17"/><path d="M16 7.5c-.6-1.4-2.1-2.3-4-2.3-2.3 0-4 1.2-4 3s1.6 2.5 4 3c2.4.5 4 1.3 4 3.2s-1.7 3.2-4 3.2c-2 0-3.6-1-4.2-2.6"/></svg></span>
+                <?php endif; ?>
               </span>
               <span class="trip-stat__label"><?php esc_html_e( 'From', 'jaiye-journeys' ); ?></span>
-              <span class="trip-stat__value">&pound;<?php echo esc_html( jj_money_display( $price_from ) ); ?></span>
+              <span class="trip-stat__value<?php echo esc_attr( $cur_gbp ); ?>">&pound;<?php echo esc_html( jj_money_display( $price_from ) ); ?></span>
+              <?php if ( $price_from_usd ) : ?>
+                <span class="trip-stat__value js-cur js-cur--usd" hidden>$<?php echo esc_html( jj_money_display( $price_from_usd ) ); ?></span>
+              <?php endif; ?>
               <?php if ( $price_usd ) : ?>
                 <span class="trip-stat__fx">
                   <?php
@@ -760,7 +774,10 @@ while ( have_posts() ) :
     <div class="trip-mobile-bar__price">
       <?php if ( $price_from ) : ?>
         <span class="trip-mobile-bar__label"><?php esc_html_e( 'From', 'jaiye-journeys' ); ?></span>
-        <span class="trip-mobile-bar__value">&pound;<?php echo esc_html( jj_money_display( $price_from ) ); ?></span>
+        <span class="trip-mobile-bar__value<?php echo $price_from_usd ? ' js-cur js-cur--gbp' : ''; ?>">&pound;<?php echo esc_html( jj_money_display( $price_from ) ); ?></span>
+        <?php if ( $price_from_usd ) : ?>
+          <span class="trip-mobile-bar__value js-cur js-cur--usd" hidden>$<?php echo esc_html( jj_money_display( $price_from_usd ) ); ?></span>
+        <?php endif; ?>
       <?php endif; ?>
     </div>
     <?php if ( $waitlist ) : ?>

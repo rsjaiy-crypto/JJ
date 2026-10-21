@@ -211,6 +211,11 @@ current when something here changes.
   section. The phone bottom bar's Contents list is hidden as redundant.
 - Homepage services: an accordion on phones (`js/services.js`); tablet and
   desktop unchanged.
+- Trip page **From price in $** for US visitors: optional `price_from_usd`
+  field. `js/trip.js` picks £ or $ from the browser's time zone (US zones →
+  $; `?currency=` overrides) and adds `currency=` to the page's booking links
+  so the booking page matches. With no $ From price, the £ price shows with
+  an approximate $ note, as before. Hidden on Waitlist like every price.
 
 ### Working with the owner
 

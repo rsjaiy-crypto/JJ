@@ -185,6 +185,11 @@ function jj_trip_schema() {
                     'label' => __( 'From price (£)', 'jaiye-journeys' ),
                     'desc'  => __( 'Numbers only, pence allowed (e.g. 2550.50). The £ and commas are added for you.', 'jaiye-journeys' ),
                 ],
+                'price_from_usd' => [
+                    'type'  => 'money',
+                    'label' => __( 'From price ($)', 'jaiye-journeys' ),
+                    'desc'  => __( 'Shown instead of the £ price to visitors in the US. Leave blank to show the £ price with an approximate $ conversion.', 'jaiye-journeys' ),
+                ],
                 'group_size'   => [
                     'type'  => 'text',
                     'label' => __( 'Group size', 'jaiye-journeys' ),
