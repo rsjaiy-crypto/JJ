@@ -713,7 +713,7 @@ while ( have_posts() ) :
           <?php
           printf(
               /* translators: %s: destination name */
-              esc_html__( 'Send us your questions about %s and we will come back to you personally — no automated reply, no pressure.', 'jaiye-journeys' ),
+              esc_html__( 'Send us your questions about %s and we will come back to you personally. No automated reply, no pressure.', 'jaiye-journeys' ),
               esc_html( $destination ? $destination : get_the_title() )
           );
           ?>

@@ -123,7 +123,7 @@ function jj_trip_render_field( $name, $field, $value, $id = '' ) {
                 printf(
                     '<option value="%s" selected>%s</option>',
                     esc_attr( $value ),
-                    esc_html( sprintf( /* translators: %s: the stored value */ __( '%s (previously saved — pick a current option to update)', 'jaiye-journeys' ), $value ) )
+                    esc_html( sprintf( /* translators: %s: the stored value */ __( '%s (previously saved; pick a current option to update)', 'jaiye-journeys' ), $value ) )
                 );
             }
 
@@ -535,7 +535,7 @@ function jj_trip_status_summary( $post_id ) {
         $next = sprintf( __( 'Sold out from %s', 'jaiye-journeys' ), wp_date( $format, $close->getTimestamp() ) );
     }
 
-    return $next ? jj_trip_status_label( $status ) . ' — ' . $next : jj_trip_status_label( $status );
+    return $next ? jj_trip_status_label( $status ) . ' · ' . $next : jj_trip_status_label( $status );
 }
 
 
@@ -629,7 +629,7 @@ function jj_trip_inline_edit_box( $column, $post_type ) {
     $options = $fields['status']['options'];
 
     if ( $bulk ) {
-        $options = [ '' => __( '— No change —', 'jaiye-journeys' ) ] + $options;
+        $options = [ '' => __( 'No change', 'jaiye-journeys' ) ] + $options;
     }
 
     wp_nonce_field( 'jj_trip_inline_status', 'jj_trip_inline_status_nonce' );

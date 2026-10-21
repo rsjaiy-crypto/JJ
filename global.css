@@ -3462,9 +3462,14 @@ textarea::placeholder {
 
 .pgc-included__list li:first-child { padding-top: 0; }
 
+/* A small coral dot as the bullet */
 .pgc-included__list li::before {
-  content: '—';
-  color: var(--color-salmon);
+  content: '';
+  width: 6px;
+  height: 6px;
+  margin-top: 0.65em;
+  border-radius: 50%;
+  background-color: var(--color-salmon);
   flex-shrink: 0;
 }
 

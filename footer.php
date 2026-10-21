@@ -13,7 +13,7 @@
         <!-- Column 1: Brand + navigation links --------------->
         <div class="site-footer__brand">
           <div class="site-footer__logo">
-            <a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home" class="site-footer__logo-link" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?> — <?php esc_attr_e( 'Return to homepage', 'jaiye-journeys' ); ?>">
+            <a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home" class="site-footer__logo-link" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>, <?php esc_attr_e( 'return to homepage', 'jaiye-journeys' ); ?>">
               <img
                 src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/logo-white.png' ); ?>"
                 alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>"

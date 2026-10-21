@@ -593,7 +593,7 @@ get_header();
        ============================================================ -->
   <section
     class="btl-hero"
-    aria-label="<?php esc_attr_e( 'Between the Lines — luxury literary residency', 'jaiye-journeys' ); ?>"
+    aria-label="<?php esc_attr_e( 'Between the Lines, a luxury literary residency', 'jaiye-journeys' ); ?>"
   >
     <div class="btl-hero__media" aria-hidden="true">
       <img
@@ -812,7 +812,7 @@ get_header();
        ============================================================ -->
   <section
     class="btl-tan"
-    aria-label="<?php esc_attr_e( 'The Author\'s Note — BTL virtual literary lounge', 'jaiye-journeys' ); ?>"
+    aria-label="<?php esc_attr_e( 'The Author\'s Note, the Between the Lines virtual literary lounge', 'jaiye-journeys' ); ?>"
   >
     <div class="container">
       <div class="btl-tan__inner">

@@ -150,7 +150,7 @@ get_header();
 
           <blockquote class="bd-why__quote">
             <p><?php esc_html_e( 'Steph helped me navigate almost everything a traveller considers a nightmare, including a stolen passport in a foreign country where we didn\'t speak the language. We needed an emergency visa and an emergency passport, sorted within 24 to 36 hours.', 'jaiye-journeys' ); ?></p>
-            <cite>— Ron S.</cite>
+            <cite>Ron S.</cite>
           </blockquote>
         </div>
 

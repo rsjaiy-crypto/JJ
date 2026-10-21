@@ -790,7 +790,7 @@ function jj_trip_start_checkout( $trip_id ) {
         $metadata['discount'] = $quote['discount'];
     }
 
-    $line_name = $title . ' — ' . $room['name'];
+    $line_name = $title . ' · ' . $room['name'];
     $line_desc = array_filter( [
         $dep_label,
         $is_plan ? __( 'Deposit per person', 'jaiye-journeys' ) : __( 'Paid in full, per person', 'jaiye-journeys' ),
@@ -818,7 +818,7 @@ function jj_trip_start_checkout( $trip_id ) {
         ],
         'metadata'                   => $metadata,
         'payment_intent_data'        => [
-            'description' => $line_name . ( $dep_label ? ' — ' . $dep_label : '' ),
+            'description' => $line_name . ( $dep_label ? ' · ' . $dep_label : '' ),
             'metadata'    => $metadata,
         ],
         // {CHECKOUT_SESSION_ID} is filled in by Stripe, so it's appended raw.
@@ -1159,7 +1159,7 @@ function jj_booking_product( $trip_id, $title ) {
     }
 
     $created = jj_stripe_request( 'POST', 'products', [
-        'name'     => $title . ' — payment plan',
+        'name'     => $title . ' · payment plan',
         'metadata' => [ 'trip_id' => $trip_id ],
     ], 'jj-product-' . jj_stripe_mode() . '-' . $trip_id );
     if ( is_wp_error( $created ) ) {

@@ -92,7 +92,7 @@ function jj_trip_seed_page() {
 
         <h2><?php esc_html_e( 'Apply Vibe Tags', 'jaiye-journeys' ); ?></h2>
         <p>
-            <?php esc_html_e( 'Updates only the Vibe Tags field on Marrakesh, Sintra, Tuscany, Peru and Bali to the current assignments below — everything else on those trips is left exactly as it is. Safe to run more than once.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Updates only the Vibe Tags field on Marrakesh, Sintra, Tuscany, Peru and Bali to the current assignments below. Everything else on those trips is left exactly as it is. Safe to run more than once.', 'jaiye-journeys' ); ?>
         </p>
         <ul style="margin:0 0 12px; list-style:disc; padding-left:20px;">
             <?php foreach ( jj_trip_vibe_tag_assignments() as $slug => $keys ) : ?>
@@ -220,7 +220,7 @@ function jj_trip_run_seed() {
         if ( $existing ) {
             $results[] = sprintf(
                 /* translators: %s: trip slug */
-                __( 'Skipped "%s" — a trip with that slug already exists.', 'jaiye-journeys' ),
+                __( 'Skipped "%s": a trip with that slug already exists.', 'jaiye-journeys' ),
                 $slug
             );
             continue;
@@ -312,7 +312,7 @@ function jj_trip_apply_vibe_tags() {
         if ( ! $trip ) {
             $results[] = sprintf(
                 /* translators: %s: trip slug */
-                __( 'Skipped "%s" — no trip with that slug exists yet. Run "Seed trips now" first, or create it in wp-admin.', 'jaiye-journeys' ),
+                __( 'Skipped "%s": no trip with that slug exists yet. Run "Seed trips now" first, or create it in wp-admin.', 'jaiye-journeys' ),
                 $slug
             );
             continue;
@@ -322,7 +322,7 @@ function jj_trip_apply_vibe_tags() {
 
         $results[] = sprintf(
             /* translators: 1: trip title, 2: comma-separated tag labels */
-            __( 'Updated "%1$s" — %2$s', 'jaiye-journeys' ),
+            __( 'Updated "%1$s": %2$s', 'jaiye-journeys' ),
             get_the_title( $trip->ID ),
             implode( ', ', array_map( 'jj_vibe_tag_label', $keys ) )
         );
@@ -353,7 +353,7 @@ function jj_trip_seed_definitions() {
                 'destination'     => 'Peru',
                 'region'          => 'south-america',
                 'vibe_tags'       => 'contrast,bucket-list,foodie',
-                'intro_statement' => 'Nine days across the Sacred Valley and Machu Picchu, run the way we would actually do it — no queue, no filler, no group-trip drama.',
+                'intro_statement' => 'Nine days across the Sacred Valley and Machu Picchu, run the way we would actually do it: no queue, no filler, no group-trip drama.',
                 'collage_images'  => jj_trip_seed_gallery( [
                     'trip-peru.jpg',
                     'travel-terrace.jpg',
@@ -550,19 +550,19 @@ function jj_trip_seed_definitions() {
                         'name'     => 'Placeholder reviewer one',
                         'location' => 'Sample review',
                         'rating'   => '5',
-                        'body'     => 'Placeholder review copy for layout purposes — swap this for a real traveller review before publishing.',
+                        'body'     => 'Placeholder review copy for layout purposes. Swap this for a real traveller review before publishing.',
                     ],
                     [
                         'name'     => 'Placeholder reviewer two',
                         'location' => 'Sample review',
                         'rating'   => '5',
-                        'body'     => 'Placeholder review copy for layout purposes — swap this for a real traveller review before publishing.',
+                        'body'     => 'Placeholder review copy for layout purposes. Swap this for a real traveller review before publishing.',
                     ],
                     [
                         'name'     => 'Placeholder reviewer three',
                         'location' => 'Sample review',
                         'rating'   => '4',
-                        'body'     => 'Placeholder review copy for layout purposes — swap this for a real traveller review before publishing.',
+                        'body'     => 'Placeholder review copy for layout purposes. Swap this for a real traveller review before publishing.',
                     ],
                 ],
 
@@ -627,7 +627,7 @@ function jj_trip_seed_definitions() {
                 'duration'     => '5 Nights, 6 Days',
                 'price_from'   => '2850',
                 'group_size'   => 'Twelve rooms, whole-riad buyout',
-                'welcome_copy' => "Marrakesh holds two cities at once: the medina, dense and alive with the souks, and the quiet interior of a riad built to shut all of it out.\n\nPalazzo Montefiore sits within walking distance of Bab Aylane — twelve rooms around a courtyard, an in-house hammam, and a rooftop that catches the evening light over the old city. You will not hear the souks from inside. That is not an accident; it is the entire point of a riad.\n\nMost of the week stays close in, restful and unhurried. One day leaves the city behind entirely for the Agafay, a landscape that looks more like the moon than a desert.",
+                'welcome_copy' => "Marrakesh holds two cities at once: the medina, dense and alive with the souks, and the quiet interior of a riad built to shut all of it out.\n\nPalazzo Montefiore sits within walking distance of Bab Aylane: twelve rooms around a courtyard, an in-house hammam, and a rooftop that catches the evening light over the old city. You will not hear the souks from inside. That is not an accident; it is the entire point of a riad.\n\nMost of the week stays close in, restful and unhurried. One day leaves the city behind entirely for the Agafay, a landscape that looks more like the moon than a desert.",
 
                 // Weighted toward rest: this chapter sits in the margins.
                 'meter_pace'       => '30',
@@ -743,7 +743,7 @@ function jj_trip_seed_definitions() {
                 'trip_notes' => [
                     [
                         'title'    => 'Arrivals & Departures',
-                        'body'     => "Fly into Marrakesh Menara (RAK). Arrivals from 1pm on day one; departures any time on day six. The riad sits inside the medina near Bab Aylane, so the final approach is on foot — we meet you and handle the bags.",
+                        'body'     => "Fly into Marrakesh Menara (RAK). Arrivals from 1pm on day one; departures any time on day six. The riad sits inside the medina near Bab Aylane, so the final approach is on foot. We meet you and handle the bags.",
                         'icon'     => 'plane',
                         'featured' => '1',
                     ],
@@ -767,7 +767,7 @@ function jj_trip_seed_definitions() {
                     ],
                     [
                         'title'    => 'Weather',
-                        'body'     => 'March in Marrakesh runs 20–24°C by day and cools sharply after dark. The Agafay evening is genuinely cold — bring a proper layer.',
+                        'body'     => 'March in Marrakesh runs 20–24°C by day and cools sharply after dark. The Agafay evening is genuinely cold, so bring a proper layer.',
                         'icon'     => 'sun',
                         'featured' => '',
                     ],
@@ -839,7 +839,7 @@ function jj_trip_seed_definitions() {
                 'region'          => 'europe',
                 'vibe_tags'       => 'storybook,bucket-list,slow',
                 'intro_statement' => 'A chapter written in the fog: palaces, pine forest, and the kind of quiet that makes a long book feel short.',
-                'welcome_copy'    => "Placeholder premise copy — replace before this page goes out widely.\n\nSintra sits under cloud for much of the year, which is precisely the point. Gardens, palaces, and a cool grey light that makes staying in with a book feel like the correct decision rather than a wasted day.",
+                'welcome_copy'    => "Placeholder premise copy. Replace before this page goes out widely.\n\nSintra sits under cloud for much of the year, which is precisely the point. Gardens, palaces, and a cool grey light that makes staying in with a book feel like the correct decision rather than a wasted day.",
                 'duration'        => '4 Nights, 5 Days',
                 'meter_pace'      => '25',
                 'meter_relaxation'=> '90',
@@ -872,7 +872,7 @@ function jj_trip_seed_definitions() {
                 'region'          => 'north-america',
                 'vibe_tags'       => 'Colour, Food, Craft',
                 'intro_statement' => 'Warmth, colour and a courtyard to read in, somewhere between the markets and the mezcal.',
-                'welcome_copy'    => "Placeholder premise copy — replace before this page goes out widely.\n\nOaxaca is the loudest, most colourful chapter planned so far, built around a courtyard house and a city that takes its food and its craft as seriously as anywhere on earth.",
+                'welcome_copy'    => "Placeholder premise copy. Replace before this page goes out widely.\n\nOaxaca is the loudest, most colourful chapter planned so far, built around a courtyard house and a city that takes its food and its craft as seriously as anywhere on earth.",
                 'duration'        => '5 Nights, 6 Days',
                 'meter_pace'      => '40',
                 'meter_food'      => '95',
@@ -905,7 +905,7 @@ function jj_trip_seed_definitions() {
                 'region'          => 'europe',
                 'vibe_tags'       => 'slow,community,storybook',
                 'intro_statement' => 'A villa, a long table, and six days where the only fixed appointment is lunch.',
-                'welcome_copy'    => "Placeholder premise copy — replace before this page goes out widely.\n\nThe most indulgent chapter on the map: a private villa, a cook, a pool, and absolutely nowhere to be.",
+                'welcome_copy'    => "Placeholder premise copy. Replace before this page goes out widely.\n\nThe most indulgent chapter on the map: a private villa, a cook, a pool, and absolutely nowhere to be.",
                 'duration'        => '5 Nights, 6 Days',
                 'meter_pace'      => '20',
                 'meter_relaxation'=> '95',
@@ -936,7 +936,7 @@ function jj_trip_seed_definitions() {
                 'destination'     => 'Bali, Gilis & Komodo, Indonesia',
                 'region'          => 'asia',
                 'vibe_tags'       => 'contrast,wild,community',
-                'intro_statement' => 'Placeholder intro — replace this with the real Islands Edit copy before publishing.',
+                'intro_statement' => 'Placeholder intro. Replace this with the real Islands Edit copy before publishing.',
                 'duration'        => '',
                 'price_from'      => '',
                 'group_size'      => 'Max 12 travellers',
@@ -954,7 +954,7 @@ function jj_trip_seed_definitions() {
                 'destination'     => 'Cape Town, South Africa',
                 'region'          => 'africa',
                 'vibe_tags'       => 'City, Coast, Food',
-                'intro_statement' => 'Placeholder intro — replace this with the real Cape Town Edit copy before publishing.',
+                'intro_statement' => 'Placeholder intro. Replace this with the real Cape Town Edit copy before publishing.',
                 'duration'        => '',
                 'price_from'      => '',
                 'group_size'      => 'Max 12 travellers',

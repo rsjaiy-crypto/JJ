@@ -28,7 +28,7 @@ define( 'JJ_TRIP_META_PREFIX', '_jj_trip_' );
  * @return array
  */
 function jj_trip_duration_options() {
-    $options = [ '' => __( '— Select a length —', 'jaiye-journeys' ) ];
+    $options = [ '' => __( 'Select a length', 'jaiye-journeys' ) ];
 
     for ( $days = 3; $days <= 30; $days++ ) {
         $nights = $days - 1;
@@ -71,7 +71,7 @@ function jj_trip_schema() {
                 'status'         => [
                     'type'    => 'select',
                     'label'   => __( 'Status', 'jaiye-journeys' ),
-                    'desc'    => __( 'Coming soon shows only the hero, dates and "Get on The List". Waitlist shows the full trip page with no prices, payment terms or booking — every Book button becomes "Get on The List". Sold out keeps the full page but removes every Book button.', 'jaiye-journeys' ),
+                    'desc'    => __( 'Coming soon shows only the hero, dates and "Get on The List". Waitlist shows the full trip page with no prices, payment terms or booking; every Book button becomes "Get on The List". Sold out keeps the full page but removes every Book button.', 'jaiye-journeys' ),
                     'default' => 'open',
                     // Keys are what's stored. 'coming-soon' predates the
                     // split and every trip saved before it means Waitlist by
@@ -137,7 +137,7 @@ function jj_trip_schema() {
                     'desc'    => __( 'Drives the destination filter on the Journeys page.', 'jaiye-journeys' ),
                     'default' => '',
                     'options' => [
-                        ''               => __( '— Select a region —', 'jaiye-journeys' ),
+                        ''               => __( 'Select a region', 'jaiye-journeys' ),
                         'africa'         => __( 'Africa', 'jaiye-journeys' ),
                         'asia'           => __( 'Asia', 'jaiye-journeys' ),
                         'caribbean'      => __( 'Caribbean', 'jaiye-journeys' ),
@@ -151,7 +151,7 @@ function jj_trip_schema() {
                 'vibe_tags'       => [
                     'type'    => 'tags',
                     'label'   => __( 'Vibe tags', 'jaiye-journeys' ),
-                    'desc'    => __( 'Pick up to 3. Definitions live in inc/vibe-tags.php — edit the wording there, not per trip.', 'jaiye-journeys' ),
+                    'desc'    => __( 'Pick up to 3. Definitions live in inc/vibe-tags.php. Edit the wording there, not per trip.', 'jaiye-journeys' ),
                     'max'     => 3,
                     'options' => jj_vibe_tag_definitions(), // key => definition; the checkbox label is derived from the key.
                 ],
@@ -176,7 +176,7 @@ function jj_trip_schema() {
                 'duration'     => [
                     'type'    => 'select',
                     'label'   => __( 'Duration', 'jaiye-journeys' ),
-                    'desc'    => __( 'The exact stored value is what clients see — no separate formatting step.', 'jaiye-journeys' ),
+                    'desc'    => __( 'The exact stored value is what clients see, with no separate formatting step.', 'jaiye-journeys' ),
                     'default' => '',
                     'options' => jj_trip_duration_options(),
                 ],
@@ -344,7 +344,7 @@ function jj_trip_schema() {
                 ],
                 'route_map'       => [
                     'type'  => 'image',
-                    'label' => __( "Where You'll Go — route map", 'jaiye-journeys' ),
+                    'label' => __( "Where You'll Go: route map", 'jaiye-journeys' ),
                 ],
                 'route_copy'      => [
                     'type'  => 'textarea',
@@ -372,7 +372,7 @@ function jj_trip_schema() {
                         'day_name' => [
                             'type'  => 'text',
                             'label' => __( 'Day name (BTL only)', 'jaiye-journeys' ),
-                            'desc'  => __( 'Replaces "Day 1" on the tab — e.g. The Prologue. Leave blank on Edits to keep plain numbering.', 'jaiye-journeys' ),
+                            'desc'  => __( 'Replaces "Day 1" on the tab, e.g. The Prologue. Leave blank on Edits to keep plain numbering.', 'jaiye-journeys' ),
                         ],
                         'location' => [ 'type' => 'text', 'label' => __( 'Location', 'jaiye-journeys' ) ],
                         'headline' => [ 'type' => 'text', 'label' => __( 'Headline', 'jaiye-journeys' ) ],
@@ -400,8 +400,8 @@ function jj_trip_schema() {
                             'type'    => 'select',
                             'label'   => __( 'Icon', 'jaiye-journeys' ),
                             'options' => [
-                                'plane'   => __( 'Plane — arrivals/departures', 'jaiye-journeys' ),
-                                'bed'     => __( 'Bed — rooms/accommodation', 'jaiye-journeys' ),
+                                'plane'   => __( 'Plane: arrivals/departures', 'jaiye-journeys' ),
+                                'bed'     => __( 'Bed: rooms/accommodation', 'jaiye-journeys' ),
                                 'luggage' => __( 'Luggage', 'jaiye-journeys' ),
                                 'passport'=> __( 'Passport/visas', 'jaiye-journeys' ),
                                 'sun'     => __( 'Weather', 'jaiye-journeys' ),

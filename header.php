@@ -25,7 +25,7 @@
 
       <!-- Logo ------------------------------------------------>
       <div class="site-logo">
-        <a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home" class="site-logo__link" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?> — <?php esc_attr_e( 'Return to homepage', 'jaiye-journeys' ); ?>">
+        <a href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home" class="site-logo__link" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>, <?php esc_attr_e( 'return to homepage', 'jaiye-journeys' ); ?>">
           <img
             src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/logo.png' ); ?>"
             alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>"
@@ -63,7 +63,7 @@
       <a
         href="<?php echo esc_url( home_url( '/contact/' ) ); ?>"
         class="btn btn--plan-trip site-header__cta-desktop"
-        aria-label="<?php esc_attr_e( 'Plan My Trip — contact us', 'jaiye-journeys' ); ?>"
+        aria-label="<?php esc_attr_e( 'Plan My Trip: contact us', 'jaiye-journeys' ); ?>"
       >
         <?php esc_html_e( 'Plan My Trip', 'jaiye-journeys' ); ?>
       </a>

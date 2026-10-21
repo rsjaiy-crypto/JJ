@@ -197,7 +197,7 @@ foreach ( $trips as $trip ) {
         <a
           href="<?php echo esc_url( home_url( '/contact/' ) ); ?>"
           class="btn btn--ghost"
-          aria-label="<?php esc_attr_e( 'Talk to us — contact Jaiye Journeys', 'jaiye-journeys' ); ?>"
+          aria-label="<?php esc_attr_e( 'Talk to us: contact Jaiye Journeys', 'jaiye-journeys' ); ?>"
         >
           <?php esc_html_e( 'Talk to Us', 'jaiye-journeys' ); ?>
         </a>
