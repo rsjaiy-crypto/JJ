@@ -102,7 +102,7 @@ function jj_trip_schema() {
                 'waitlist_url'   => [
                     'type'  => 'url',
                     'label' => __( 'Waitlist link', 'jaiye-journeys' ),
-                    'desc'  => __( 'Where "Get on The List" goes while the trip is on the waitlist. Keep the checkout link in Book Now URL so the switch to On sale needs no edits.', 'jaiye-journeys' ),
+                    'desc'  => __( 'Where "Get on The List" goes while the trip is Coming soon or on the Waitlist, e.g. a Tally form. Blank means the Contact page.', 'jaiye-journeys' ),
                 ],
             ],
         ],
@@ -218,24 +218,16 @@ function jj_trip_schema() {
             ],
         ],
 
-        /* ── Booking card ─────────────────────────────────────────── */
+        /* ── Dates card on the trip page ──────────────────────────── */
+        // Key kept as 'booking' so the box keeps its place for anyone who
+        // has rearranged the Edit Trip screen.
         'booking' => [
-            'title'  => __( 'Booking Card', 'jaiye-journeys' ),
+            'title'  => __( 'Dates & Payment Terms', 'jaiye-journeys' ),
             'fields' => [
-                'booking_url'    => [
-                    'type'  => 'url',
-                    'label' => __( 'Book Now URL', 'jaiye-journeys' ),
-                    'desc'  => __( 'Tally form or checkout link.', 'jaiye-journeys' ),
-                ],
-                'enquiry_url'    => [
-                    'type'  => 'url',
-                    'label' => __( 'Enquire URL', 'jaiye-journeys' ),
-                    'desc'  => __( 'Leave blank to fall back to the Contact page.', 'jaiye-journeys' ),
-                ],
                 'payment_terms'  => [
                     'type'  => 'textarea',
                     'label' => __( 'Payment terms note', 'jaiye-journeys' ),
-                    'desc'  => __( 'Small print under the booking buttons.', 'jaiye-journeys' ),
+                    'desc'  => __( 'Small print under the booking buttons, also shown on the booking page.', 'jaiye-journeys' ),
                     'rows'  => 3,
                 ],
                 'departures'     => [
@@ -256,9 +248,16 @@ function jj_trip_schema() {
                                 'sold-out'  => __( 'Sold out', 'jaiye-journeys' ),
                             ],
                         ],
-                        'book_url'     => [ 'type' => 'url', 'label' => __( 'Book URL (optional)', 'jaiye-journeys' ) ],
                     ],
                 ],
+            ],
+        ],
+
+        /* ── Booking page (Stripe) ────────────────────────────────── */
+        'booking_page' => [
+            'title'  => __( 'Booking Page', 'jaiye-journeys' ),
+            'desc'   => __( 'What guests choose and pay on the booking page. Add rooms to switch it on.', 'jaiye-journeys' ),
+            'fields' => [
                 'deposit_gbp'    => [
                     'type'    => 'money',
                     'label'   => __( 'Deposit per person (£)', 'jaiye-journeys' ),
@@ -280,7 +279,7 @@ function jj_trip_schema() {
                 ],
                 'rooms'          => [
                     'type'      => 'repeater',
-                    'label'     => __( 'Rooms (booking page)', 'jaiye-journeys' ),
+                    'label'     => __( 'Rooms', 'jaiye-journeys' ),
                     'desc'      => __( 'Add rooms to switch on the booking page, where guests pick their dates, room and number of travellers, then pay on Stripe. Prices are per person; pence and cents are fine (e.g. 2550.50). Leave the $ prices blank to sell in pounds only. Needs the Stripe settings in Trips → Booking Settings.', 'jaiye-journeys' ),
                     'row_label' => __( 'Room', 'jaiye-journeys' ),
                     'subfields' => [
@@ -1062,16 +1061,14 @@ function jj_trip_is_presale( $post_id = null ) {
 
 
 /**
- * Where "Get on The List" points.
- *
- * Booking URL stays in the chain for trips set up before the Waitlist link
- * field existed; new trips should keep the checkout link there instead.
+ * Where "Get on The List" points: the Waitlist link, else the trip's
+ * enquiry form, else the Contact page.
  *
  * @param int|null $post_id Post ID.
  * @return string
  */
 function jj_trip_waitlist_url( $post_id = null ) {
-    foreach ( [ 'waitlist_url', 'booking_url', 'enquiry_embed', 'enquiry_url' ] as $key ) {
+    foreach ( [ 'waitlist_url', 'enquiry_embed' ] as $key ) {
         $url = jj_trip_field( $key, $post_id );
         if ( $url ) {
             return $url;
@@ -1079,6 +1076,32 @@ function jj_trip_waitlist_url( $post_id = null ) {
     }
     return home_url( '/contact/' );
 }
+
+/**
+ * One-off, when the Book Now URL field was removed (October 2026): a
+ * Coming soon or Waitlist trip whose "Get on The List" link lived in Book
+ * Now URL gets it copied into Waitlist link, so the button keeps going to
+ * the same place. Old values stay in the database, unused.
+ */
+function jj_trip_migrate_waitlist_links() {
+    if ( get_option( 'jj_trip_waitlist_links_moved' ) ) {
+        return;
+    }
+    $trips = get_posts( [
+        'post_type'      => 'trip',
+        'post_status'    => 'any',
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+    ] );
+    foreach ( $trips as $trip_id ) {
+        $old = get_post_meta( $trip_id, JJ_TRIP_META_PREFIX . 'booking_url', true );
+        if ( $old && ! jj_trip_field( 'waitlist_url', $trip_id ) && in_array( jj_trip_status( $trip_id ), [ 'announced', 'coming-soon' ], true ) ) {
+            update_post_meta( $trip_id, JJ_TRIP_META_PREFIX . 'waitlist_url', esc_url_raw( $old ) );
+        }
+    }
+    update_option( 'jj_trip_waitlist_links_moved', 1 );
+}
+add_action( 'init', 'jj_trip_migrate_waitlist_links', 20 );
 
 
 /**

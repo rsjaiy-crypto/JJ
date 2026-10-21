@@ -374,8 +374,7 @@ function jj_trip_seed_definitions() {
                 'meter_nightlife'  => '35',
                 'meter_relaxation' => '45',
 
-                'booking_url'   => 'https://tally.so/r/1ApXBp',
-                'enquiry_url'   => '',
+                'waitlist_url'   => 'https://tally.so/r/1ApXBp',
                 'payment_terms' => 'A £500 / $700 deposit secures your place, refunded in full if you change your mind within 60 days of booking. The balance is then taken in automatic monthly payments with no interest, up to the trip’s final payment date, or you can pay in full at booking.',
 
                 'departures' => [
@@ -384,21 +383,18 @@ function jj_trip_seed_definitions() {
                         'dates'        => '14 – 22 May',
                         'availability' => 'Places available',
                         'status'       => 'available',
-                        'book_url'     => '',
                     ],
                     [
                         'year'         => '2027',
                         'dates'        => '10 – 18 September',
                         'availability' => 'Only 3 places left',
                         'status'       => 'limited',
-                        'book_url'     => '',
                     ],
                     [
                         'year'         => '2028',
                         'dates'        => '12 – 20 May',
                         'availability' => 'Places available',
                         'status'       => 'available',
-                        'book_url'     => '',
                     ],
                 ],
 
@@ -637,8 +633,7 @@ function jj_trip_seed_definitions() {
                 'meter_nightlife'  => '20',
                 'meter_relaxation' => '90',
 
-                'booking_url'   => 'https://tally.so/r/Gxq2JL',
-                'enquiry_url'   => '',
+                'waitlist_url'   => 'https://tally.so/r/Gxq2JL',
                 'payment_terms' => 'A £500 / $700 deposit secures your place, refunded in full if you change your mind within 60 days of booking. The balance is then taken in automatic monthly payments with no interest, up to the trip’s final payment date, or you can pay in full at booking.',
 
                 'departures' => [
@@ -647,7 +642,6 @@ function jj_trip_seed_definitions() {
                         'dates'        => '18 – 23 March',
                         'availability' => 'The List is open',
                         'status'       => 'limited',
-                        'book_url'     => '',
                     ],
                 ],
 
@@ -844,7 +838,7 @@ function jj_trip_seed_definitions() {
                 'meter_pace'      => '25',
                 'meter_relaxation'=> '90',
                 'meter_culture'   => '80',
-                'booking_url'     => 'https://tally.so/r/Gxq2JL',
+                'waitlist_url'     => 'https://tally.so/r/Gxq2JL',
                 'collage_images'  => jj_trip_seed_gallery( [
                     'travel-tuscany.jpg',
                     'travel-terrace.jpg',
@@ -856,7 +850,6 @@ function jj_trip_seed_definitions() {
                         'dates'        => 'October',
                         'availability' => 'The List is open',
                         'status'       => 'limited',
-                        'book_url'     => '',
                     ],
                 ],
             ],
@@ -877,7 +870,7 @@ function jj_trip_seed_definitions() {
                 'meter_pace'      => '40',
                 'meter_food'      => '95',
                 'meter_culture'   => '90',
-                'booking_url'     => 'https://tally.so/r/Gxq2JL',
+                'waitlist_url'     => 'https://tally.so/r/Gxq2JL',
                 'collage_images'  => jj_trip_seed_gallery( [
                     'travel-sea.jpg',
                     'travel-tea.jpg',
@@ -889,7 +882,6 @@ function jj_trip_seed_definitions() {
                         'dates'        => 'April',
                         'availability' => 'The List is open',
                         'status'       => 'limited',
-                        'book_url'     => '',
                     ],
                 ],
             ],
@@ -910,7 +902,7 @@ function jj_trip_seed_definitions() {
                 'meter_pace'      => '20',
                 'meter_relaxation'=> '95',
                 'meter_food'      => '90',
-                'booking_url'     => 'https://tally.so/r/Gxq2JL',
+                'waitlist_url'     => 'https://tally.so/r/Gxq2JL',
                 'collage_images'  => jj_trip_seed_gallery( [
                     'travel-tuscany.jpg',
                     'travel-terrace.jpg',
@@ -922,7 +914,6 @@ function jj_trip_seed_definitions() {
                         'dates'        => 'September',
                         'availability' => 'The List is open',
                         'status'       => 'limited',
-                        'book_url'     => '',
                     ],
                 ],
             ],
@@ -941,7 +932,7 @@ function jj_trip_seed_definitions() {
                 'price_from'      => '',
                 'group_size'      => 'Max 12 travellers',
                 'welcome_copy'    => 'Placeholder copy. This trip was created so the homepage link resolves; fill it in properly in Trips → The Islands Edit.',
-                'booking_url'     => 'https://tally.so/r/RGVxVj',
+                'waitlist_url'     => 'https://tally.so/r/RGVxVj',
                 'payment_terms'   => 'A £500 / $700 deposit secures your place, refunded in full if you change your mind within 60 days of booking. The balance is then taken in automatic monthly payments with no interest, up to the trip’s final payment date, or you can pay in full at booking.',
             ],
         ],
@@ -959,7 +950,7 @@ function jj_trip_seed_definitions() {
                 'price_from'      => '',
                 'group_size'      => 'Max 12 travellers',
                 'welcome_copy'    => 'Placeholder copy. This trip was created so the homepage link resolves; fill it in properly in Trips → The Cape Town Edit.',
-                'booking_url'     => 'https://tally.so/r/aQa9D2',
+                'waitlist_url'     => 'https://tally.so/r/aQa9D2',
                 'payment_terms'   => 'A £500 / $700 deposit secures your place, refunded in full if you change your mind within 60 days of booking. The balance is then taken in automatic monthly payments with no interest, up to the trip’s final payment date, or you can pay in full at booking.',
             ],
         ],

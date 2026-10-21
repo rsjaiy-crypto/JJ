@@ -18,12 +18,9 @@ while ( have_posts() ) :
 
     $trip_id     = get_the_ID();
     $destination = jj_trip_field( 'destination', $trip_id );
-    $booking_url = jj_trip_field( 'booking_url', $trip_id );
-    $enquiry_url = jj_trip_field( 'enquiry_url', $trip_id );
-
-    if ( empty( $enquiry_url ) ) {
-        $enquiry_url = home_url( '/contact/' );
-    }
+    $enquiry_url = home_url( '/contact/' );
+    // Set below: the booking page's link for trips that can be booked.
+    $booking_url = '';
 
     $days       = jj_trip_rows( 'days', $trip_id );
     $departures = jj_trip_rows( 'departures', $trip_id );
@@ -66,13 +63,11 @@ while ( have_posts() ) :
         $booking_url = '';
     }
 
-    // Trips with Rooms book through their own booking page, in the same tab;
-    // the rest keep the Book Now URL, which opens in a new one.
+    // Trips book through their own booking page (it needs Rooms); without
+    // it there are no Book buttons and the page falls back to Enquire.
     $booking_page = ! $waitlist && ! $sold_out && jj_trip_booking_ready( $trip_id );
-    $book_target  = ' target="_blank" rel="noopener"';
     if ( $booking_page ) {
         $booking_url = jj_trip_booking_page_url( $trip_id );
-        $book_target = '';
     }
     ?>
 
@@ -172,7 +167,7 @@ while ( have_posts() ) :
           <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
         </a>
       <?php elseif ( $booking_url ) : ?>
-        <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent btn--sm trip-subnav__cta"<?php echo $book_target; // phpcs:ignore WordPress.Security.EscapeOutput -- fixed string. ?>>
+        <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent btn--sm trip-subnav__cta">
           <?php esc_html_e( 'Book Now', 'jaiye-journeys' ); ?>
         </a>
       <?php endif; ?>
@@ -317,7 +312,6 @@ while ( have_posts() ) :
             // chapter gets its own "Book Chapter N" and Book Now is dropped.
             $multi_chapter = count( $departures ) > 1;
             $chapter_ctas  = 0;
-            $single_url    = '';
             $sold_chapters = 0;
             ?>
             <?php if ( $multi_chapter ) : ?>
@@ -369,8 +363,6 @@ while ( have_posts() ) :
                 $chapter_url = '';
                 if ( $booking_page ) {
                     $chapter_url = ( ( isset( $departure['status'] ) && 'sold-out' === $departure['status'] ) || jj_trip_departure_full( $trip_id, $i ) ) ? '' : jj_trip_booking_page_url( $trip_id, $i );
-                } elseif ( ! $sold_out && ! $waitlist && ! empty( $departure['book_url'] ) ) {
-                    $chapter_url = $departure['book_url'];
                 }
                 ?>
                 <?php
@@ -378,7 +370,6 @@ while ( have_posts() ) :
                 $chapter_sold   = ! $waitlist && ( ( isset( $departure['status'] ) && 'sold-out' === $departure['status'] ) || jj_trip_departure_full( $trip_id, $i ) );
                 $sold_chapters += $chapter_sold ? 1 : 0;
                 if ( ! $multi_chapter ) {
-                    $single_url  = $chapter_url;
                     $chapter_url = '';
                 } elseif ( $chapter_url ) {
                     $chapter_ctas++;
@@ -396,7 +387,7 @@ while ( have_posts() ) :
                   </p>
                 <?php endif; ?>
                 <?php if ( $chapter_url ) : ?>
-                  <a href="<?php echo esc_url( $chapter_url ); ?>" class="btn btn--accent trip-booking__chapter-cta"<?php echo $book_target; // phpcs:ignore WordPress.Security.EscapeOutput -- fixed string. ?>>
+                  <a href="<?php echo esc_url( $chapter_url ); ?>" class="btn btn--accent trip-booking__chapter-cta">
                     <?php
                     printf(
                         /* translators: %d: chapter number */
@@ -467,22 +458,17 @@ while ( have_posts() ) :
           <?php else : ?>
           <?php
           // BTL chapter buttons replace Book Now, and there's none when every
-          // chapter is sold out. A single chapter's own Book URL stands in
-          // when the trip has no Book Now URL.
+          // chapter is sold out.
           $card_book_url = $booking_url;
-          if ( $departures && $is_btl ) {
-              if ( $chapter_ctas || count( $departures ) === $sold_chapters ) {
-                  $card_book_url = '';
-              } elseif ( ! $card_book_url && ! $multi_chapter ) {
-                  $card_book_url = $single_url;
-              }
+          if ( $departures && $is_btl && ( $chapter_ctas || count( $departures ) === $sold_chapters ) ) {
+              $card_book_url = '';
           }
           ?>
           <div class="trip-booking__actions">
             <?php if ( $sold_out ) : ?>
               <p class="trip-booking__sold-out"><?php esc_html_e( 'This trip is sold out. Enquire to hear about the next departure.', 'jaiye-journeys' ); ?></p>
             <?php elseif ( $card_book_url ) : ?>
-              <a href="<?php echo esc_url( $card_book_url ); ?>" class="btn btn--accent"<?php echo $book_target; // phpcs:ignore WordPress.Security.EscapeOutput -- fixed string. ?>>
+              <a href="<?php echo esc_url( $card_book_url ); ?>" class="btn btn--accent">
                 <?php esc_html_e( 'Book Now', 'jaiye-journeys' ); ?>
               </a>
             <?php endif; ?>
@@ -599,7 +585,7 @@ while ( have_posts() ) :
           </a>
         <?php endif; ?>
         <?php if ( $booking_url ) : ?>
-          <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent"<?php echo $book_target; // phpcs:ignore WordPress.Security.EscapeOutput -- fixed string. ?>>
+          <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent">
             <?php esc_html_e( 'Book Now', 'jaiye-journeys' ); ?>
           </a>
         <?php endif; ?>
@@ -796,7 +782,7 @@ while ( have_posts() ) :
         <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
       </a>
     <?php elseif ( $booking_url ) : ?>
-      <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent btn--sm"<?php echo $book_target; // phpcs:ignore WordPress.Security.EscapeOutput -- fixed string. ?>>
+      <a href="<?php echo esc_url( $booking_url ); ?>" class="btn btn--accent btn--sm">
         <?php esc_html_e( 'Book Now', 'jaiye-journeys' ); ?>
       </a>
     <?php else : ?>

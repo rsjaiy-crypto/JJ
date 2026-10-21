@@ -140,6 +140,20 @@ the site header or footer, so no tracking loads there.
   through `jj_trip_sanitise_value()`. Everything else stays in wp-admin.
 - New routes need a `JJ_TRIP_REWRITE_VERSION` bump (1.2.0 added /manage/).
 
+### Edit Trip boxes (tidied October 2026)
+
+- **Removed:** Book Now URL, Enquire URL and each departure's Book URL. Trips
+  book only through the Stripe booking page (private groups are invoiced),
+  so a trip without Rooms has no Book buttons and falls back to Enquire.
+  Enquire always goes to the Contact page. Old values stay in the database,
+  unused. `jj_trip_migrate_waitlist_links()` copied any Coming soon /
+  Waitlist trip's old Book Now URL into **Waitlist link** once (option
+  `jj_trip_waitlist_links_moved`).
+- "Get on The List" = Waitlist link, else the Enquiry form URL, else Contact.
+- **Dates & Payment Terms** (box key `booking`): payment terms note and
+  departures. **Booking Page** (`booking_page`): deposits, payment plan
+  dates, rooms.
+
 ### Cards and listings
 
 - Homepage "Upcoming Trips" = trips ticked **Show on homepage**, soonest first.

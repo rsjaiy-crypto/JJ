@@ -33,10 +33,7 @@ while ( have_posts() ) :
     $currency   = jj_booking_visitor_currency( $currencies );
     $symbols    = jj_booking_currencies();
 
-    $enquiry_url = jj_trip_field( 'enquiry_url', $trip_id );
-    if ( empty( $enquiry_url ) ) {
-        $enquiry_url = home_url( '/contact/' );
-    }
+    $enquiry_url = home_url( '/contact/' );
 
     $returning = isset( $_GET['session_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
     $session   = $returning ? jj_trip_completed_session( $trip_id ) : null;
