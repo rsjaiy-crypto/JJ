@@ -59,7 +59,9 @@ function jj_register_trip_post_type() {
             'slug'       => 'trips',
             'with_front' => false,
         ],
-        'supports'           => [ 'title', 'editor', 'thumbnail', 'excerpt', 'revisions', 'page-attributes' ],
+        // No 'editor': trip pages are built from the boxes below and never show
+        // the main text box, so it's left off the Edit Trip screen.
+        'supports'           => [ 'title', 'thumbnail', 'excerpt', 'revisions', 'page-attributes' ],
     ] );
 }
 add_action( 'init', 'jj_register_trip_post_type' );
