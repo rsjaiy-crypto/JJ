@@ -4,8 +4,7 @@
  * booking page sells), with photo, description and price per person.
  *
  * Shows what's available; booking itself stays with the page's Book
- * buttons. With several chapters, each room lists its availability per
- * chapter. Waitlist shows the rooms with no prices or availability.
+ * buttons. Each room lists its places left per chapter. Waitlist shows the rooms with no prices or availability.
  *
  * Expects $trip_id, $rooms, $waitlist, $sold_out, $is_btl.
  *
@@ -29,9 +28,9 @@ defined( 'ABSPATH' ) || exit;
         <div class="trip-rooms__grid">
           <?php foreach ( $rooms as $i => $room ) : ?>
             <?php
-            // Availability per chapter: sold out, a few places left, or
-            // available. Same rule as the booking page: numbers only at 3 or
-            // fewer. A sold-out trip shows every room sold out.
+            // Availability per chapter: places left (in coral at 3 or fewer),
+            // sold out, or Available for a room with no limit. A sold-out
+            // trip shows every room sold out.
             $avail = [];
             foreach ( $room_keys as $d ) {
                 $left    = jj_trip_places_left( $trip_id, $d, $i );
@@ -41,6 +40,9 @@ defined( 'ABSPATH' ) || exit;
                 } elseif ( null !== $left && $left <= 3 ) {
                     /* translators: %d: places left */
                     $avail[ $d ] = [ 'few', sprintf( _n( 'Only %d place left', 'Only %d places left', $left, 'jaiye-journeys' ), $left ) ];
+                } elseif ( null !== $left ) {
+                    /* translators: %d: places left */
+                    $avail[ $d ] = [ 'open', sprintf( _n( '%d place left', '%d places left', $left, 'jaiye-journeys' ), $left ) ];
                 } else {
                     $avail[ $d ] = [ 'open', __( 'Available', 'jaiye-journeys' ) ];
                 }
@@ -62,17 +64,15 @@ defined( 'ABSPATH' ) || exit;
                 <?php if ( ! $waitlist ) : ?>
                   <?php if ( $room_sold ) : ?>
                     <p class="trip-room__status"><?php esc_html_e( 'Sold out', 'jaiye-journeys' ); ?></p>
-                  <?php elseif ( count( $avail ) > 1 ) : ?>
+                  <?php else : ?>
                     <ul class="trip-room__avail" role="list">
                       <?php foreach ( $avail as $d => $a ) : ?>
                         <li class="trip-room__chapter is-<?php echo esc_attr( $a[0] ); ?>">
-                          <span><?php echo esc_html( $is_btl ? sprintf( /* translators: %d: chapter number */ __( 'Chapter %d', 'jaiye-journeys' ), $d + 1 ) : trim( ( isset( $room_deps[ $d ]['dates'] ) ? $room_deps[ $d ]['dates'] : '' ) . ' ' . ( isset( $room_deps[ $d ]['year'] ) ? $room_deps[ $d ]['year'] : '' ) ) ); ?></span>
+                          <span><?php echo esc_html( ! $room_deps ? __( 'Places', 'jaiye-journeys' ) : ( $is_btl ? sprintf( /* translators: %d: chapter number */ __( 'Chapter %d', 'jaiye-journeys' ), $d + 1 ) : trim( ( isset( $room_deps[ $d ]['dates'] ) ? $room_deps[ $d ]['dates'] : '' ) . ' ' . ( isset( $room_deps[ $d ]['year'] ) ? $room_deps[ $d ]['year'] : '' ) ) ) ); ?></span>
                           <span><?php echo esc_html( $a[1] ); ?></span>
                         </li>
                       <?php endforeach; ?>
                     </ul>
-                  <?php elseif ( 'few' === $avail[ $room_keys[0] ][0] ) : ?>
-                    <p class="trip-room__status"><?php echo esc_html( $avail[ $room_keys[0] ][1] ); ?></p>
                   <?php endif; ?>
                 <?php endif; ?>
 
