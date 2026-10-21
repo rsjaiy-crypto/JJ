@@ -151,6 +151,76 @@ If you change the trip post type's slug or rewrite settings, bump
 `JJ_TRIP_REWRITE_VERSION` in `inc/trip-cpt.php`. Deploys don't reactivate the
 theme, so this is what flushes the rewrite rules.
 
+## Where things stand (updated 21 October 2026)
+
+A record of what's done, so a new session doesn't redo or undo it. Keep it
+current when something here changes.
+
+### Stripe bookings: live
+
+- **Live mode since 20–21 October 2026.** Booking Settings holds a live
+  restricted key (`rk_live_`) and the live webhook's signing secret. The
+  sandbox was used for testing first and still has its own keys, webhook
+  and JAIYEJAIYE10 code.
+- **Restricted key permissions** (if a payment plan fails to set up, check
+  these first): Write on Checkout Sessions, Customers, Products, Prices,
+  Subscriptions; Read on PaymentIntents, Invoices, Coupons, Promotion codes.
+- **Live webhook:** `https://jaiyejourneys.com/wp-json/jj/v1/stripe`, snapshot
+  payload, the 5 events in Booking Settings. Its auto-generated name in
+  Stripe ("sophisticated-sensation") doesn't matter.
+- **Stripe account settings the owner chose** (Settings → Billing →
+  Subscriptions and emails): Smart Retries, 8 tries in 2 weeks; if all
+  retries fail, *leave the subscription overdue* (never cancel, so a plan's
+  later instalments aren't lost); emails on failed card payments and
+  expiring cards; card updates via a *Stripe-hosted page*; upcoming-renewal
+  and trial emails off; customer subscription-management link off (guests
+  mustn't cancel their own plan). Receipts on for successful payments and
+  refunds. Invoice reminders and one-off invoice retries don't apply.
+- **Stripe holds each instalment as a draft invoice for about an hour**
+  before charging. That's normal, not a fault.
+- **Refunds are manual in Stripe** (refund the payment, and for a payment
+  plan also cancel the subscription), then the owner updates the booking in
+  Trips → Bookings by hand. See "Next up".
+- **JAIYEJAIYE10** (10% off, payment plan only) exists in live Stripe as a
+  promotion code.
+
+### Features built and live (October 2026)
+
+- Booking page with deposit + payment plan or pay in full, £ / $, Stripe
+  Checkout, webhook, Bookings in wp-admin, owner emails.
+- Discount codes (payment plan only, off the balance). See the booking
+  section above.
+- Prices with pence: room prices, deposits and the From price use the
+  `money` field type (`jj_money_clean()`, `jj_money_minor()`,
+  `jj_money_display()` in `inc/trip-fields.php`). Booking code works in
+  minor units from the saved price onwards.
+- Confirmation page: "You're all booked, {name}!" with a one-off confetti
+  burst in brand colours (`js/booking.js`; skipped for reduced motion). The
+  owner tried and removed a hand-drawn underline under the name; don't
+  bring it back.
+- Trip Dates card (BTL): one chapter shows **Book Now**; several chapters
+  each get **Book Chapter N** and no general Book Now; a departure with
+  Status *Sold out* shows a deep green **Chapter N · Sold out** block
+  instead of its button. The pill beside the dates is the departure's
+  *Availability label* (free text the owner types), not the status.
+- Trip section menu (Overview, Chapters…) sticks under the fixed header on
+  every screen; on phones it's a swipeable strip that follows the current
+  section. The phone bottom bar's Contents list is hidden as redundant.
+- Homepage services: an accordion on phones (`js/services.js`); tablet and
+  desktop unchanged.
+
+### Working with the owner
+
+- Steph isn't a developer and often works from the claude.ai app, sharing
+  screenshots. Explain in plain language, step by step, and say exactly
+  which screen and button to use.
+- Write in **UK English** and **don't use em dashes**.
+- Show changes and what was tested, and push to `main` only when the owner
+  says "push live". After deploying, ask the owner to check the live page,
+  and to press **Update theme** in WP Pusher if it hasn't refreshed.
+- Never ask for, or accept, Stripe secret keys or webhook secrets in chat.
+  They go straight into Trips → Booking Settings.
+
 ## Next up (agreed with the owner, 20 October 2026)
 
 Not built yet. Remove each item from this list once it's live.
