@@ -31,6 +31,7 @@ while ( have_posts() ) :
     $faqs       = jj_trip_rows( 'faqs', $trip_id );
     $notes      = jj_trip_rows( 'trip_notes', $trip_id );
     $included   = jj_trip_rows( 'included_groups', $trip_id );
+    $rooms      = jj_trip_rooms( $trip_id );
 
     $price_from     = jj_trip_field( 'price_from', $trip_id );
     $price_from_usd = $price_from ? jj_trip_field( 'price_from_usd', $trip_id ) : '';
@@ -137,6 +138,9 @@ while ( have_posts() ) :
   $toc = [ 'welcome' => __( 'Overview', 'jaiye-journeys' ) ];
   if ( $departures ) {
       $toc['book'] = $is_btl ? __( 'Chapters', 'jaiye-journeys' ) : __( 'Dates', 'jaiye-journeys' );
+  }
+  if ( $rooms ) {
+      $toc['rooms'] = __( 'Rooms', 'jaiye-journeys' );
   }
   if ( $has_inclusions ) {
       $toc['inclusions'] = __( "What's Included", 'jaiye-journeys' );
@@ -497,6 +501,12 @@ while ( have_posts() ) :
 
     </div>
   </section>
+
+
+  <!-- ============================================================
+       5b. ROOMS
+       ============================================================ -->
+  <?php require get_template_directory() . '/inc/trip-sections/rooms.php'; ?>
 
 
   <!-- ============================================================
