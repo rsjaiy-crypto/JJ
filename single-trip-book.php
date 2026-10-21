@@ -51,6 +51,9 @@ while ( have_posts() ) :
         'terms'     => __( 'Please confirm you’ve read the booking terms.', 'jaiye-journeys' ),
         'stripe'    => __( 'We couldn’t open the secure payment page just now. Please try again, or enquire and we’ll help.', 'jaiye-journeys' ),
         'code'      => __( 'That discount code can’t be used. Check it, or remove it to continue without one.', 'jaiye-journeys' ),
+        'full'      => __( 'Sorry, that room has just sold out for these dates. Please choose another room or chapter, or enquire and we’ll help.', 'jaiye-journeys' ),
+        'places'    => __( 'Sorry, there aren’t enough places left in that room for everyone. Please choose fewer travellers or another room.', 'jaiye-journeys' ),
+        'busy'      => __( 'Lots of people are booking right now. Please try again in a moment.', 'jaiye-journeys' ),
         'codeplan'  => __( 'That discount code works with the payment plan only. Choose the payment plan, or remove the code to pay in full.', 'jaiye-journeys' ),
     ];
 
@@ -59,9 +62,26 @@ while ( have_posts() ) :
     $want_dep = isset( $_GET['chapter'] ) ? (int) $_GET['chapter'] - 1 : -1;
     $sel_dep  = isset( $departures[ $want_dep ] ) ? $want_dep : ( $departures ? array_key_first( $departures ) : -1 );
 
-    $open_rooms = array_filter( $rooms, function ( $room ) {
-        return ! $room['sold_out'];
-    } );
+    // Places left per room, per departure that can still be booked (rooms
+    // with no limit are left out). A trip without dates keeps them under 0.
+    $dep_keys  = $has_dates ? array_keys( $departures ) : [ 0 ];
+    $sel_key   = $has_dates ? $sel_dep : 0;
+    $room_left = [];
+    foreach ( $rooms as $i => $room ) {
+        foreach ( $dep_keys as $d ) {
+            $left = jj_trip_places_left( $trip_id, $d, $i );
+            if ( null !== $left ) {
+                $room_left[ $i ][ $d ] = $left;
+            }
+        }
+    }
+    $room_full = function ( $i ) use ( $rooms, $room_left, $sel_key ) {
+        return $rooms[ $i ]['sold_out'] || ( isset( $room_left[ $i ][ $sel_key ] ) && 0 === $room_left[ $i ][ $sel_key ] );
+    };
+
+    $open_rooms = array_filter( $rooms, function ( $room, $i ) use ( $room_full ) {
+        return ! $room_full( $i );
+    }, ARRAY_FILTER_USE_BOTH );
     $sel_room = $open_rooms ? array_key_first( $open_rooms ) : -1;
     $max_all  = $rooms ? max( array_column( $rooms, 'max_guests' ) ) : 1;
 
@@ -288,7 +308,11 @@ while ( have_posts() ) :
               </legend>
               <div class="booking-rooms">
                 <?php foreach ( $rooms as $i => $room ) : ?>
-                  <label class="booking-room<?php echo $room['sold_out'] ? ' is-sold-out' : ''; ?>">
+                  <?php
+                  $full = $room_full( $i );
+                  $left = isset( $room_left[ $i ][ $sel_key ] ) ? $room_left[ $i ][ $sel_key ] : null;
+                  ?>
+                  <label class="booking-room<?php echo $full ? ' is-sold-out' : ''; ?>">
                     <input type="radio" name="room" value="<?php echo (int) $i; ?>"
                            data-name="<?php echo esc_attr( $room['name'] ); ?>"
                            <?php foreach ( $currencies as $cur ) : ?>
@@ -296,8 +320,10 @@ while ( have_posts() ) :
                              data-full-<?php echo esc_attr( $cur ); ?>="<?php echo (int) $room['prices'][ $cur ]['full']; ?>"
                            <?php endforeach; ?>
                            data-max="<?php echo (int) $room['max_guests']; ?>"
+                           <?php if ( $room['sold_out'] ) : ?>data-sold="1"<?php endif; ?>
+                           <?php if ( isset( $room_left[ $i ] ) ) : ?>data-left="<?php echo esc_attr( wp_json_encode( (object) $room_left[ $i ] ) ); ?>"<?php endif; ?>
                            <?php checked( $sel_room, $i ); ?>
-                           <?php disabled( $room['sold_out'] ); ?>
+                           <?php disabled( $full ); ?>
                            required>
                     <?php if ( $room['image'] ) : ?>
                       <span class="booking-room__media">
@@ -310,11 +336,19 @@ while ( have_posts() ) :
                         <span class="booking-room__desc"><?php echo esc_html( $room['description'] ); ?></span>
                       <?php endif; ?>
                       <span class="booking-room__price">
-                        <?php if ( $room['sold_out'] ) : ?>
-                          <?php esc_html_e( 'Sold out', 'jaiye-journeys' ); ?>
-                        <?php else : ?>
+                        <span class="booking-room__sold js-room-sold" <?php echo $full ? '' : 'hidden'; ?>><?php esc_html_e( 'Sold out', 'jaiye-journeys' ); ?></span>
+                        <span class="js-room-prices" <?php echo $full ? 'hidden' : ''; ?>>
                           <?php echo $room_price( $room ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped when built. ?>
-                        <?php endif; ?>
+                        </span>
+                        <?php /* Few places left: say so (js/booking.js keeps it right per chapter). */ ?>
+                        <span class="booking-room__left js-room-left" <?php echo ( ! $full && null !== $left && $left <= 3 ) ? '' : 'hidden'; ?>>
+                          <?php
+                          if ( null !== $left ) {
+                              /* translators: %d: places left */
+                              echo esc_html( sprintf( _n( 'Only %d place left', 'Only %d places left', $left, 'jaiye-journeys' ), $left ) );
+                          }
+                          ?>
+                        </span>
                       </span>
                     </span>
                   </label>

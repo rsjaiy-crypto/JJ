@@ -94,6 +94,17 @@ or **pay in full** (the room's discounted pay-in-full price).
   are all set. Test mode offers a "Quick test schedule" (payments 5 min apart).
 - Amounts are always computed on the server from the trip's fields; the form
   only sends indexes. `js/booking.js` mirrors `jj_booking_quote()`.
+- **Places (room inventory):** each room's "Places per chapter" (guests;
+  blank = no limit). `jj_trip_places_taken()` counts travellers on bookings
+  (current Stripe mode, not binned) per departure and room index (older
+  bookings matched by room name / dates label) plus **holds**: places kept
+  for 30 minutes (the Checkout Session's expiry) while a guest is on
+  Stripe, stored in trip meta `_jj_trip_holds` and released when the
+  webhook records the booking. Checkout re-counts under a per-trip lock
+  (`jj_trip_lock()`). A full room shows Sold out on the booking page; a
+  chapter whose rooms are all full drops out of `jj_trip_bookable_departures()`
+  and shows "Chapter N · Sold out" on the trip page. Edit Trip has a
+  "Places sold" box. Cancelled bookings free their places once binned.
 - Discount codes: the owner makes them in Stripe (Product catalogue →
   Coupons, as a promotion code or a coupon ID). On the **payment plan** the
   code comes off the balance, so the deposit stays the same and every later
@@ -211,6 +222,8 @@ current when something here changes.
   section. The phone bottom bar's Contents list is hidden as redundant.
 - Homepage services: an accordion on phones (`js/services.js`); tablet and
   desktop unchanged.
+- Room inventory ("Places per chapter"), with holds during payment and a
+  "Places sold" box in Edit Trip. See the booking section above.
 - Trip page **From price in $** for US visitors: optional `price_from_usd`
   field. `js/trip.js` picks £ or $ from the browser's time zone (US zones →
   $; `?currency=` overrides) and adds `currency=` to the page's booking links

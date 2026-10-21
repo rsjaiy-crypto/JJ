@@ -364,13 +364,14 @@ while ( have_posts() ) :
                 <?php
                 $chapter_url = '';
                 if ( $booking_page ) {
-                    $chapter_url = ( isset( $departure['status'] ) && 'sold-out' === $departure['status'] ) ? '' : jj_trip_booking_page_url( $trip_id, $i );
+                    $chapter_url = ( ( isset( $departure['status'] ) && 'sold-out' === $departure['status'] ) || jj_trip_departure_full( $trip_id, $i ) ) ? '' : jj_trip_booking_page_url( $trip_id, $i );
                 } elseif ( ! $sold_out && ! $waitlist && ! empty( $departure['book_url'] ) ) {
                     $chapter_url = $departure['book_url'];
                 }
                 ?>
                 <?php
-                $chapter_sold   = ! $waitlist && isset( $departure['status'] ) && 'sold-out' === $departure['status'];
+                // Marked sold out, or every room's places are taken.
+                $chapter_sold   = ! $waitlist && ( ( isset( $departure['status'] ) && 'sold-out' === $departure['status'] ) || jj_trip_departure_full( $trip_id, $i ) );
                 $sold_chapters += $chapter_sold ? 1 : 0;
                 if ( ! $multi_chapter ) {
                     $single_url  = $chapter_url;

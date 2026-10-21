@@ -290,6 +290,20 @@
   color: var(--color-text-muted);
 }
 
+/* "Only 2 places left" under the price */
+.booking-room__left {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-salmon);
+}
+
+.booking-room__price [hidden] {
+  display: none !important;
+}
+
 /* ── Travellers: round pills ───────────────────────────────────── */
 
 .booking-pills {

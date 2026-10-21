@@ -110,6 +110,8 @@ function jj_trip_rooms( $post_id ) {
                 'usd' => [ 'plan' => $usd, 'full' => $usd ? ( $full_usd > 0 ? $full_usd : $usd ) : 0 ],
             ],
             'max_guests'  => max( 1, min( 4, isset( $room['max_guests'] ) ? (int) $room['max_guests'] : 2 ) ),
+            // Guests per chapter; null means no limit.
+            'places'      => isset( $room['places'] ) && '' !== trim( (string) $room['places'] ) ? max( 0, (int) $room['places'] ) : null,
             'sold_out'    => ! empty( $room['sold_out'] ),
         ];
     }
@@ -192,7 +194,7 @@ function jj_trip_plan_dates( $post_id ) {
 function jj_trip_bookable_departures( $post_id ) {
     $out = [];
     foreach ( jj_trip_rows( 'departures', $post_id ) as $i => $departure ) {
-        if ( isset( $departure['status'] ) && 'sold-out' === $departure['status'] ) {
+        if ( ( isset( $departure['status'] ) && 'sold-out' === $departure['status'] ) || jj_trip_departure_full( $post_id, $i ) ) {
             continue;
         }
         $out[ $i ] = $departure;
@@ -443,6 +445,230 @@ function jj_booking_discount_uses( $code ) {
             [ 'key' => '_jj_bk_mode', 'value' => jj_stripe_mode() ],
         ],
     ] ) );
+}
+
+
+/* ── Places (room inventory) ───────────────────────────────────────── */
+
+/*
+ * Each room type can have a number of places per chapter (Rooms → "Places
+ * per chapter"; blank is no limit). Paid bookings count against it, plus
+ * places held while a guest is on Stripe's payment page, so the last place
+ * can't be sold twice. A cancelled booking frees its places once it's moved
+ * to the Bin. Only bookings in the current Stripe mode count, so test
+ * bookings never use up live places.
+ */
+
+define( 'JJ_TRIP_HOLDS_META', '_jj_trip_holds' );
+
+/**
+ * Places taken per departure and room: paid bookings plus live holds.
+ *
+ * @param int  $trip_id Trip ID.
+ * @param bool $fresh   Count again rather than reuse this request's count
+ *                      (checkout does, once it holds the lock).
+ * @return array [ departure index => [ room index => travellers ] ]
+ */
+function jj_trip_places_taken( $trip_id, $fresh = false ) {
+    static $cache = [];
+    if ( ! $fresh && isset( $cache[ $trip_id ] ) ) {
+        return $cache[ $trip_id ];
+    }
+
+    $taken = [];
+    $add   = function ( $dep, $room, $guests ) use ( &$taken ) {
+        if ( $dep >= 0 && $room >= 0 && $guests > 0 ) {
+            $taken[ $dep ][ $room ] = ( isset( $taken[ $dep ][ $room ] ) ? $taken[ $dep ][ $room ] : 0 ) + $guests;
+        }
+    };
+
+    // Older bookings stored only the room name and dates label: match those.
+    $room_by_name = [];
+    foreach ( jj_trip_rows( 'rooms', $trip_id ) as $i => $room ) {
+        if ( ! empty( $room['name'] ) ) {
+            $room_by_name[ $room['name'] ] = $i;
+        }
+    }
+    $dep_by_label = [];
+    foreach ( jj_trip_rows( 'departures', $trip_id ) as $i => $departure ) {
+        $dep_by_label[ jj_trip_departure_label( $trip_id, $i, $departure ) ] = $i;
+    }
+
+    $bookings = get_posts( [
+        'post_type'      => 'jj_booking',
+        'post_status'    => [ 'publish', 'private', 'draft', 'pending' ],
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'meta_query'     => [ // phpcs:ignore WordPress.DB.SlowDBQuery
+            [ 'key' => '_jj_bk_trip_id', 'value' => (int) $trip_id ],
+            [ 'key' => '_jj_bk_mode', 'value' => jj_stripe_mode() ],
+        ],
+    ] );
+    foreach ( $bookings as $booking_id ) {
+        $dep  = jj_booking_get( $booking_id, 'dep_i' );
+        $room = jj_booking_get( $booking_id, 'room_i' );
+        if ( '' === $dep ) {
+            $label = jj_booking_get( $booking_id, 'departure' );
+            $dep   = isset( $dep_by_label[ $label ] ) ? $dep_by_label[ $label ] : ( count( $dep_by_label ) <= 1 ? 0 : -1 );
+        }
+        if ( '' === $room ) {
+            $name = jj_booking_get( $booking_id, 'room' );
+            $room = isset( $room_by_name[ $name ] ) ? $room_by_name[ $name ] : -1;
+        }
+        $add( (int) $dep, (int) $room, (int) jj_booking_get( $booking_id, 'travellers' ) );
+    }
+
+    foreach ( jj_trip_holds( $trip_id ) as $hold ) {
+        $add( (int) $hold['dep'], (int) $hold['room'], (int) $hold['guests'] );
+    }
+
+    $cache[ $trip_id ] = $taken;
+    return $taken;
+}
+
+/**
+ * Places left for one room in one departure, or null for no limit.
+ *
+ * @return int|null
+ */
+function jj_trip_places_left( $trip_id, $dep_i, $room_i, $fresh = false ) {
+    $rooms = jj_trip_rooms( $trip_id );
+    if ( ! isset( $rooms[ $room_i ] ) || null === $rooms[ $room_i ]['places'] ) {
+        return null;
+    }
+    $taken = jj_trip_places_taken( $trip_id, $fresh );
+    $used  = isset( $taken[ $dep_i ][ $room_i ] ) ? $taken[ $dep_i ][ $room_i ] : 0;
+    return max( 0, $rooms[ $room_i ]['places'] - $used );
+}
+
+/**
+ * Is every room in a departure full or marked sold out? A room with no
+ * place limit never fills, so its departure stays open.
+ *
+ * @return bool
+ */
+function jj_trip_departure_full( $trip_id, $dep_i ) {
+    $rooms = jj_trip_rooms( $trip_id );
+    if ( ! $rooms ) {
+        return false;
+    }
+    foreach ( $rooms as $room_i => $room ) {
+        if ( ! $room['sold_out'] && 0 !== jj_trip_places_left( $trip_id, $dep_i, $room_i ) ) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
+ * Unexpired holds: places kept for guests on Stripe's payment page.
+ *
+ * @return array[] [ session id => [ dep, room, guests, until ] ]
+ */
+function jj_trip_holds( $trip_id ) {
+    $holds = get_post_meta( $trip_id, JJ_TRIP_HOLDS_META, true );
+    if ( ! is_array( $holds ) ) {
+        return [];
+    }
+    return array_filter( $holds, function ( $hold ) {
+        return isset( $hold['until'] ) && $hold['until'] > time();
+    } );
+}
+
+function jj_trip_hold_places( $trip_id, $session_id, $dep_i, $room_i, $guests, $until ) {
+    $holds                = jj_trip_holds( $trip_id );
+    $holds[ $session_id ] = [ 'dep' => (int) $dep_i, 'room' => (int) $room_i, 'guests' => (int) $guests, 'until' => (int) $until ];
+    update_post_meta( $trip_id, JJ_TRIP_HOLDS_META, $holds );
+}
+
+function jj_trip_release_hold( $trip_id, $session_id ) {
+    $holds = jj_trip_holds( $trip_id );
+    if ( isset( $holds[ $session_id ] ) ) {
+        unset( $holds[ $session_id ] );
+        update_post_meta( $trip_id, JJ_TRIP_HOLDS_META, $holds );
+    }
+}
+
+/**
+ * One checkout at a time per trip, so two guests can't both take the last
+ * place. add_option() only succeeds for the first caller; a lock left by a
+ * request that died is ignored after a minute.
+ *
+ * @return bool Whether the lock was taken.
+ */
+function jj_trip_lock( $trip_id ) {
+    $name = 'jj_booking_lock_' . (int) $trip_id;
+    for ( $try = 0; $try < 20; $try++ ) {
+        if ( add_option( $name, time(), '', 'no' ) ) {
+            return true;
+        }
+        if ( (int) get_option( $name ) < time() - MINUTE_IN_SECONDS ) {
+            delete_option( $name );
+            continue;
+        }
+        usleep( 250000 );
+    }
+    return false;
+}
+
+function jj_trip_unlock( $trip_id ) {
+    delete_option( 'jj_booking_lock_' . (int) $trip_id );
+}
+
+
+/**
+ * "Places sold" box beside each trip in wp-admin: per chapter and room,
+ * places booked, held on the payment page right now, and left.
+ */
+function jj_trip_places_meta_box() {
+    add_meta_box( 'jj-trip-places', __( 'Places sold', 'jaiye-journeys' ), 'jj_trip_places_box', 'trip', 'side', 'high' );
+}
+add_action( 'add_meta_boxes_trip', 'jj_trip_places_meta_box' );
+
+function jj_trip_places_box( $post ) {
+    $trip_id = $post->ID;
+    $rooms   = array_filter( jj_trip_rooms( $trip_id ), function ( $room ) {
+        return null !== $room['places'];
+    } );
+    if ( ! $rooms ) {
+        echo '<p>' . esc_html__( 'Fill in "Places per chapter" on a room (in Rooms) and this box will count its bookings.', 'jaiye-journeys' ) . '</p>';
+        return;
+    }
+
+    $held = [];
+    foreach ( jj_trip_holds( $trip_id ) as $hold ) {
+        $held[ $hold['dep'] ][ $hold['room'] ] = ( isset( $held[ $hold['dep'] ][ $hold['room'] ] ) ? $held[ $hold['dep'] ][ $hold['room'] ] : 0 ) + $hold['guests'];
+    }
+    $taken      = jj_trip_places_taken( $trip_id );
+    $departures = jj_trip_rows( 'departures', $trip_id );
+    $deps       = $departures ? $departures : [ [] ];
+
+    foreach ( $deps as $d => $departure ) {
+        if ( $departures ) {
+            printf( '<p><strong>%s</strong></p>', esc_html( jj_trip_departure_label( $trip_id, $d, $departure ) ) );
+        }
+        echo '<table class="widefat striped" style="margin-bottom:12px"><tbody>';
+        foreach ( $rooms as $r => $room ) {
+            $hold = isset( $held[ $d ][ $r ] ) ? $held[ $d ][ $r ] : 0;
+            $sold = ( isset( $taken[ $d ][ $r ] ) ? $taken[ $d ][ $r ] : 0 ) - $hold;
+            $left = max( 0, $room['places'] - $sold - $hold );
+            printf(
+                '<tr><td>%s</td><td style="text-align:right;white-space:nowrap">%s</td></tr>',
+                esc_html( $room['name'] ),
+                esc_html(
+                    sprintf(
+                        /* translators: 1: places sold, 2: places in total, 3: places left */
+                        __( '%1$d of %2$d sold · %3$d left', 'jaiye-journeys' ),
+                        $sold,
+                        $room['places'],
+                        $left
+                    ) . ( $hold ? ' ' . sprintf( /* translators: %d: places held */ __( '(%d paying now)', 'jaiye-journeys' ), $hold ) : '' )
+                )
+            );
+        }
+        echo '</tbody></table>';
+    }
+    echo '<p class="description">' . esc_html__( 'Counts paid bookings in Trips → Bookings. Move a cancelled booking to the Bin to free its places.', 'jaiye-journeys' ) . '</p>';
 }
 
 
@@ -769,6 +995,22 @@ function jj_trip_start_checkout( $trip_id ) {
         $fail( 'terms' );
     }
 
+    // Places: count again under a lock, so the last place can't be sold
+    // twice. A trip without departure rows keeps its places under 0.
+    $dep_key = jj_trip_rows( 'departures', $trip_id ) ? $dep_i : 0;
+    if ( ! jj_trip_lock( $trip_id ) ) {
+        $fail( 'busy' );
+    }
+    $fail_open = $fail;
+    $fail      = function ( $code ) use ( $fail_open, $trip_id ) {
+        jj_trip_unlock( $trip_id );
+        $fail_open( $code );
+    };
+    $left = jj_trip_places_left( $trip_id, $dep_key, $room_i, true );
+    if ( null !== $left && $guests > $left ) {
+        $fail( 0 === $left ? 'full' : 'places' );
+    }
+
     // Discount codes are for the payment plan, apart from those Booking
     // Settings lets guests use when paying in full.
     $discount = null;
@@ -799,6 +1041,8 @@ function jj_trip_start_checkout( $trip_id ) {
     $metadata = [
         'trip'       => $title,
         'trip_id'    => $trip_id,
+        'dep_i'      => $dep_key,
+        'room_i'     => $room_i,
         'departure'  => $dep_label,
         'room'       => $room['name'],
         'travellers' => $guests,
@@ -832,7 +1076,8 @@ function jj_trip_start_checkout( $trip_id ) {
         'customer_creation'          => 'always',
         'billing_address_collection' => 'required',
         'phone_number_collection'    => [ 'enabled' => 'true' ],
-        'expires_at'                 => time() + HOUR_IN_SECONDS,
+        // Places are held until then; 30 minutes is Stripe's shortest.
+        'expires_at'                 => time() + 30 * MINUTE_IN_SECONDS,
         'line_items'                 => [
             [
                 'quantity'   => $per_person ? $guests : 1,
@@ -878,6 +1123,9 @@ function jj_trip_start_checkout( $trip_id ) {
         error_log( 'Jaiye booking: Stripe checkout failed for trip ' . $trip_id . ': ' . ( is_wp_error( $session ) ? $session->get_error_message() : 'no URL' ) ); // phpcs:ignore
         $fail( 'stripe' );
     }
+
+    jj_trip_hold_places( $trip_id, $session['id'], $dep_key, $room_i, $guests, $body['expires_at'] + MINUTE_IN_SECONDS );
+    jj_trip_unlock( $trip_id );
 
     // wp_redirect, not wp_safe_redirect: the destination is Stripe, checked above.
     wp_redirect( $session['url'], 303 ); // phpcs:ignore WordPress.Security.SafeRedirect
@@ -992,6 +1240,9 @@ function jj_booking_record_checkout( $session ) {
         return; // Not one of ours.
     }
 
+    // Paid: the booking now counts against the places, not the hold.
+    jj_trip_release_hold( (int) $meta['trip_id'], $session['id'] );
+
     $booking_id = jj_booking_find( 'session', $session['id'] );
     if ( $booking_id && ( 'full' === jj_booking_get( $booking_id, 'payment' ) || jj_booking_get( $booking_id, 'schedule' ) ) ) {
         return; // Already done.
@@ -1022,6 +1273,8 @@ function jj_booking_record_checkout( $session ) {
             'currency'   => $meta['currency'],
             'total'      => (int) $meta['total'],
             'plan'       => $meta['plan'],
+            'dep_i'      => isset( $meta['dep_i'] ) ? (int) $meta['dep_i'] : '',
+            'room_i'     => isset( $meta['room_i'] ) ? (int) $meta['room_i'] : '',
             'code'       => isset( $meta['code'] ) ? $meta['code'] : '',
             'discount'   => isset( $meta['discount'] ) ? (int) $meta['discount'] : 0,
             'paid'       => (int) $session['amount_total'],

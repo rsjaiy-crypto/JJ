@@ -306,6 +306,11 @@ function jj_trip_schema() {
                                 '4' => __( 'Up to 4', 'jaiye-journeys' ),
                             ],
                         ],
+                        'places'         => [
+                            'type'  => 'number',
+                            'label' => __( 'Places per chapter', 'jaiye-journeys' ),
+                            'desc'  => __( 'How many guests this room type takes in each chapter (one place per guest, so 4 shared rooms is 8 places). Bookings count against it, and the room shows Sold out when it\'s full. Blank means no limit.', 'jaiye-journeys' ),
+                        ],
                         'sold_out'       => [ 'type' => 'checkbox', 'label' => __( 'Sold out', 'jaiye-journeys' ) ],
                     ],
                 ],

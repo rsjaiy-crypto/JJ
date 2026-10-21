@@ -144,7 +144,41 @@
 		return el;
 	}
 
+	/* Rooms full for the chosen chapter can't be picked; a few left says so. */
+	function applyPlaces() {
+		var dep   = checked( 'departure' ) || form.querySelector( 'input[name="departure"]' );
+		var key   = dep && parseInt( dep.value, 10 ) >= 0 ? dep.value : '0';
+		var first = null;
+
+		Array.prototype.forEach.call( form.querySelectorAll( 'input[name="room"]' ), function ( input ) {
+			var lefts = JSON.parse( input.getAttribute( 'data-left' ) || '{}' );
+			var left  = Object.prototype.hasOwnProperty.call( lefts, key ) ? lefts[ key ] : null;
+			var full  = input.hasAttribute( 'data-sold' ) || 0 === left;
+			var card  = input.closest( '.booking-room' );
+			var note  = card.querySelector( '.js-room-left' );
+
+			input.disabled = full;
+			input.setAttribute( 'data-places', null === left ? '' : String( left ) );
+			card.classList.toggle( 'is-sold-out', full );
+			card.querySelector( '.js-room-sold' ).hidden   = ! full;
+			card.querySelector( '.js-room-prices' ).hidden = full;
+			note.hidden = full || null === left || left > 3;
+			if ( null !== left ) {
+				note.textContent = 'Only ' + left + ( 1 === left ? ' place left' : ' places left' );
+			}
+			if ( ! full && ! first ) {
+				first = input;
+			}
+		} );
+
+		var room = checked( 'room' );
+		if ( ( ! room || room.disabled ) && first ) {
+			first.checked = true;
+		}
+	}
+
 	function update() {
+		applyPlaces();
 		var room = checked( 'room' );
 		if ( ! room ) {
 			return;
@@ -153,6 +187,12 @@
 		form.querySelector( 'input[name="currency"]' ).value = currency;
 
 		var max = num( room, 'data-max' ) || 1;
+
+		// No more travellers than places left in this room for this chapter.
+		var places = room.getAttribute( 'data-places' );
+		if ( places ) {
+			max = Math.max( 1, Math.min( max, parseInt( places, 10 ) ) );
+		}
 
 		// Travellers: only as many as this room takes.
 		var pills = form.querySelectorAll( 'input[name="guests"]' );
@@ -170,9 +210,13 @@
 
 		var hint = form.querySelector( '.js-booking-guest-hint' );
 		if ( hint ) {
-			hint.textContent = max > 1
-				? 'Prices are per person. This room takes up to ' + max + ' travellers.'
-				: 'Prices are per person. This room is for one traveller.';
+			if ( places && parseInt( places, 10 ) < num( room, 'data-max' ) ) {
+				hint.textContent = 'Prices are per person. Only ' + max + ( 1 === max ? ' place is' : ' places are' ) + ' left in this room.';
+			} else {
+				hint.textContent = max > 1
+					? 'Prices are per person. This room takes up to ' + max + ' travellers.'
+					: 'Prices are per person. This room is for one traveller.';
+			}
 		}
 
 		// Prices arrive in minor units (pence or cents).
