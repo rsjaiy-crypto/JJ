@@ -26,7 +26,7 @@ get_header();
           <em><?php esc_html_e( 'We handle the rest.', 'jaiye-journeys' ); ?></em>
         </h1>
         <p class="pgc-hero__sub">
-          <?php esc_html_e( 'Family reunions, hen weekends, milestone birthdays, destination weddings. Tell us who is coming and what you are celebrating — we will design the trip around it.', 'jaiye-journeys' ); ?>
+          <?php esc_html_e( 'Family reunions, hen weekends, milestone birthdays, destination weddings. Tell us who is coming and what you are celebrating, and we will design the trip around it.', 'jaiye-journeys' ); ?>
         </p>
         <div class="pgc-hero__actions">
           <a
@@ -72,7 +72,7 @@ get_header();
 
         <div data-reveal>
           <p class="pgc-intro__body">
-            <?php esc_html_e( 'The celebrations below are what people come to us for most — but they are not the only occasions we plan. Tell us your brief, however unusual, and we will let you know what is possible.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'The celebrations below are what people come to us for most, but they are not the only occasions we plan. Tell us your brief, however unusual, and we will let you know what is possible.', 'jaiye-journeys' ); ?>
           </p>
         </div>
 
@@ -123,7 +123,7 @@ get_header();
               <?php esc_html_e( 'Three generations, one destination.', 'jaiye-journeys' ); ?>
             </h3>
             <p class="trip-card__desc">
-              <?php esc_html_e( 'We coordinate accommodation across households, split costs, and build in enough breathing room for everyone — including the ones who just want to sit by the pool.', 'jaiye-journeys' ); ?>
+              <?php esc_html_e( 'We coordinate accommodation across households, split costs, and build in enough breathing room for everyone, including the ones who just want to sit by the pool.', 'jaiye-journeys' ); ?>
             </p>
           </div>
         </article>
@@ -146,7 +146,7 @@ get_header();
               <?php esc_html_e( 'The bride arrives. We handled the rest.', 'jaiye-journeys' ); ?>
             </h3>
             <p class="pgc-cel__caption">
-              <?php esc_html_e( 'The UK\'s pre-wedding tradition — the equivalent of a bachelorette weekend.', 'jaiye-journeys' ); ?>
+              <?php esc_html_e( 'The UK\'s pre-wedding tradition: the equivalent of a bachelorette weekend.', 'jaiye-journeys' ); ?>
             </p>
             <p class="trip-card__desc">
               <?php esc_html_e( 'Activities, accommodation, and a payment system so nobody is chasing transfers. Built around what the bride actually wants, not what a template suggests.', 'jaiye-journeys' ); ?>
@@ -169,7 +169,7 @@ get_header();
               <span class="overline"><?php esc_html_e( 'Milestone Birthdays', 'jaiye-journeys' ); ?></span>
             </p>
             <h3 class="trip-card__title">
-              <?php esc_html_e( '30, 40, 50 — whichever one deserves a proper trip.', 'jaiye-journeys' ); ?>
+              <?php esc_html_e( '30, 40, 50. Whichever one deserves a proper trip.', 'jaiye-journeys' ); ?>
             </h3>
             <p class="trip-card__desc">
               <?php esc_html_e( 'The right people, somewhere that means something, and an itinerary that runs itself so the host can actually be present on the day.', 'jaiye-journeys' ); ?>
@@ -200,7 +200,7 @@ get_header();
           </div>
         </article>
 
-        <!-- Card 5: Something Else Entirely — full-width forest green -->
+        <!-- Card 5: Something Else Entirely (full-width forest green) -->
         <article class="pgc-invite-card" data-reveal>
           <div class="pgc-invite-card__inner">
             <p class="overline pgc-invite-card__overline">
@@ -242,7 +242,7 @@ get_header();
             <?php esc_html_e( 'Also Under This Roof', 'jaiye-journeys' ); ?>
           </p>
           <h2 class="pgc-retreat__heading">
-            <?php esc_html_e( 'Between the Lines — a retreat for readers.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Between the Lines: a retreat for readers.', 'jaiye-journeys' ); ?>
           </h2>
           <p class="pgc-retreat__body">
             <?php esc_html_e( 'Not every celebration needs a guest list. Between the Lines is our literary residency for book clubs and reading communities who want a week of genuine rest, good food, and better conversation.', 'jaiye-journeys' ); ?>
@@ -306,7 +306,7 @@ get_header();
             <?php esc_html_e( 'Design', 'jaiye-journeys' ); ?>
           </h3>
           <p class="pgc-process__step-body">
-            <?php esc_html_e( 'We build out the options — accommodation, activities, and logistics matched to your group.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'We build out the options: accommodation, activities, and logistics matched to your group.', 'jaiye-journeys' ); ?>
           </p>
         </div>
 
@@ -357,7 +357,7 @@ get_header();
 
         <ul class="pgc-included__list" data-reveal>
           <li>
-            <?php esc_html_e( 'Individual payment links — so nobody is chasing transfers.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Individual payment links, so nobody is chasing transfers.', 'jaiye-journeys' ); ?>
           </li>
           <li>
             <?php esc_html_e( 'A custom itinerary each guest can access on their phone, without messaging you for the details.', 'jaiye-journeys' ); ?>
@@ -403,7 +403,7 @@ get_header();
             <?php esc_html_e( 'Private group trips start from ten guests. The price depends on the destination, the headcount, and how hands-on you would like us to be.', 'jaiye-journeys' ); ?>
           </p>
           <p class="pgc-invest__body">
-            <?php esc_html_e( 'Send us the brief and we will come back with a real proposal — not a price list.', 'jaiye-journeys' ); ?>
+            <?php esc_html_e( 'Send us the brief and we will come back with a real proposal, not a price list.', 'jaiye-journeys' ); ?>
           </p>
         </div>
 
@@ -432,7 +432,7 @@ get_header();
           class="btn btn--ghost"
           href="<?php echo esc_url( home_url( '/contact/' ) ); ?>"
           data-reveal
-          aria-label="<?php esc_attr_e( 'Get in touch — contact Jaiye Journeys', 'jaiye-journeys' ); ?>"
+          aria-label="<?php esc_attr_e( 'Get in touch with Jaiye Journeys', 'jaiye-journeys' ); ?>"
         >
           <?php esc_html_e( 'Get in Touch', 'jaiye-journeys' ); ?>
         </a>
@@ -470,7 +470,7 @@ get_header();
     els.forEach(function (el) { io.observe(el); });
   }
 
-  /* ---- Process connector line — reveal when row enters view ---- */
+  /* ---- Process connector line: reveal when row enters view ---- */
   var line = document.querySelector('.pgc-process__line');
   if (line && 'IntersectionObserver' in window) {
     var lineIO = new IntersectionObserver(function (entries) {
