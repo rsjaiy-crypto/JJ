@@ -1,0 +1,13 @@
+{
+  "name": "Jaiye Journeys Manage",
+  "short_name": "JJ Manage",
+  "start_url": "/manage/",
+  "scope": "/manage/",
+  "display": "standalone",
+  "background_color": "#f5e9db",
+  "theme_color": "#093923",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

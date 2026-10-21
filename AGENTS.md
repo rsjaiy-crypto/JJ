@@ -118,6 +118,28 @@ or **pay in full** (the room's discounted pay-in-full price).
   redemption limit. A live restricted key needs Coupons and Promotion codes:
   Read.
 
+### Owner dashboard (/manage/)
+
+`inc/manage.php` (routes, data, saving), `manage/*.php` (screens),
+`css/manage.css`, `js/manage.js`, `manage/manifest.json` and icons. A
+phone-first page behind the WordPress login (editors and admins only,
+noindex, never cached) that can be added to the home screen. It doesn't use
+the site header or footer, so no tracking loads there.
+
+- **Overview:** bookings needing attention (overdue, plan not set up), money
+  booked / received / still to come per currency (live bookings only), places
+  sold per chapter and room, latest bookings.
+- **Bookings:** filter by trip and status, search name or email, optionally
+  include test bookings. A booking shows its plan, a private note
+  (`_jj_bk_note`), Email guest, Open in Stripe, "Set up the payment plan
+  again" for plan errors, and Cancel (moves it to the Bin so its places free
+  up; refunds and cancelling the plan still happen in Stripe).
+- **Trips:** quick edits to status, go-on-sale / sold-out times, From prices,
+  deposits, room prices and places, chapter labels and status, payment plan
+  dates. Saving only touches those fields and columns, cleaned by type
+  through `jj_trip_sanitise_value()`. Everything else stays in wp-admin.
+- New routes need a `JJ_TRIP_REWRITE_VERSION` bump (1.2.0 added /manage/).
+
 ### Cards and listings
 
 - Homepage "Upcoming Trips" = trips ticked **Show on homepage**, soonest first.

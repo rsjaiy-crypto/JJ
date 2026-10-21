@@ -20,6 +20,7 @@ require_once get_template_directory() . '/inc/trip-fields.php';
 require_once get_template_directory() . '/inc/trip-cpt.php';
 require_once get_template_directory() . '/inc/trip-meta.php';
 require_once get_template_directory() . '/inc/trip-booking.php';
+require_once get_template_directory() . '/inc/manage.php';
 require_once get_template_directory() . '/inc/trip-seed.php';
 
 

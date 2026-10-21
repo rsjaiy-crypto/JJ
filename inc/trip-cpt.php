@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  * Bump this whenever the CPT slug, rewrite args or archive settings change.
  * It drives the rewrite flush below — see jj_trip_maybe_flush_rewrites().
  */
-define( 'JJ_TRIP_REWRITE_VERSION', '1.1.0' );
+define( 'JJ_TRIP_REWRITE_VERSION', '1.2.0' );
 
 
 /**
