@@ -181,6 +181,9 @@
 		var fullTotal = num( room, 'data-full-' + currency ) * guests;
 		var payments  = deposit > 0 ? split( planTotal - deposit, dates.length ) : [];
 
+		// Codes listed in Booking Settings also come off the pay-in-full price.
+		var fullOff = discount && discount.full ? codeOff( fullTotal, fullTotal - 100 ) : 0;
+
 		// Payment plan only where there are dates ahead and a balance to spread.
 		var planChoice = form.querySelector( '.js-booking-plan' );
 		if ( planChoice ) {
@@ -203,8 +206,9 @@
 			}
 			var fullNote = form.querySelector( '[data-note="full"]' );
 			if ( fullNote ) {
-				var saving = planTotal - fullTotal;
-				fullNote.textContent = money( fullTotal ) + ' today' +
+				var fullPay = fullTotal - fullOff;
+				var saving  = planTotal - fullPay;
+				fullNote.textContent = money( fullPay ) + ' today' +
 					( saving > 0 ? ', saving ' + money( saving ) : ', nothing more to pay' );
 			}
 		}
@@ -212,13 +216,14 @@
 		var payment = checked( 'payment' );
 		var onPlan  = payments.length && ( ! payment || 'plan' === payment.value );
 
-		// A code comes off the plan balance, so the deposit stays the same.
-		// Matches jj_booking_discount_amount().
+		// On the plan a code comes off the balance, so the deposit stays the
+		// same. Matches jj_booking_quote().
 		var off = 0;
 		if ( onPlan && discount ) {
-			off = discount.percent ? Math.round( planTotal * discount.percent / 100 ) : discount.amount;
-			off = Math.max( 0, Math.min( off, planTotal - deposit - dates.length ) );
+			off = codeOff( planTotal, planTotal - deposit - dates.length );
 			payments = split( planTotal - deposit - off, dates.length );
+		} else if ( ! onPlan ) {
+			off = fullOff;
 		}
 		showCode( onPlan );
 
@@ -228,10 +233,10 @@
 		}
 		setText( 'room', room.getAttribute( 'data-name' ) );
 		setText( 'guests', String( guests ) );
-		setText( 'total', money( onPlan ? planTotal - off : fullTotal ) );
+		setText( 'total', money( ( onPlan ? planTotal : fullTotal ) - off ) );
 		setText( 'discount', off ? '−' + money( off ) : '' ).parentNode.hidden = ! off;
 		setText( 'discountlabel', off ? 'Discount (' + discount.code + ')' : 'Discount' );
-		setText( 'due', money( onPlan ? deposit : fullTotal ) );
+		setText( 'due', money( onPlan ? deposit : fullTotal - off ) );
 
 		var list = form.querySelector( '[data-summary="plan"]' );
 		var note = form.querySelector( '[data-summary="plannote"]' );
@@ -267,16 +272,21 @@
 		} );
 	}
 
-	/* The code box: on for the payment plan, with Stripe's answer below it. */
+	/* What the applied code takes off a total. Matches jj_booking_discount_amount(). */
+	function codeOff( total, most ) {
+		var amount = discount.percent ? Math.round( total * discount.percent / 100 ) : discount.amount;
+		return Math.max( 0, Math.min( amount, most ) );
+	}
+
+	/* The code box, with Stripe's answer below it. */
 	function showCode( onPlan ) {
 		if ( ! codeBox ) {
 			return;
 		}
-		var input   = codeBox.querySelector( 'input' );
-		var message = codeBox.querySelector( '.js-booking-code-message' );
-		var state   = onPlan && codeState.text ? codeState : { text: 'Discount codes apply to the payment plan.', cls: '' };
-		input.disabled = ! onPlan;
-		codeBox.querySelector( '.js-booking-code-apply' ).disabled = ! onPlan;
+		var input    = codeBox.querySelector( 'input' );
+		var message  = codeBox.querySelector( '.js-booking-code-message' );
+		var planOnly = ! onPlan && discount && ! discount.full;
+		var state    = planOnly ? { text: discount.code + ' works with the payment plan only.', cls: '' } : codeState;
 		message.textContent = state.text;
 		message.className = 'booking-code__message js-booking-code-message' + ( state.cls ? ' ' + state.cls : '' );
 	}
@@ -310,7 +320,10 @@
 				if ( result.ok && result.data.code ) {
 					discount = result.data;
 					input.value = discount.code;
-					codeState = { text: discount.code + ': ' + discount.label + ' your payment plan.', cls: 'is-ok' };
+					codeState = {
+						text: discount.code + ': ' + discount.label + ( discount.full ? ', paying in full or on the payment plan.' : ' your payment plan.' ),
+						cls: 'is-ok'
+					};
 				} else {
 					codeState = { text: result.data.message || 'Sorry, that code isn’t recognised.', cls: 'is-error' };
 				}
@@ -328,6 +341,18 @@
 				e.preventDefault(); // Apply the code rather than submit the booking.
 				applyCode();
 			}
+		} );
+		// Paying in full with a plan-only code: book without it, as the
+		// summary shows, rather than send it and be turned back.
+		form.addEventListener( 'submit', function () {
+			var payment = checked( 'payment' );
+			if ( discount && ! discount.full && payment && 'full' === payment.value ) {
+				codeBox.querySelector( 'input' ).disabled = true;
+			}
+		} );
+		// Coming back from Stripe with the browser's Back button: usable again.
+		window.addEventListener( 'pageshow', function () {
+			codeBox.querySelector( 'input' ).disabled = false;
 		} );
 		codeBox.querySelector( 'input' ).addEventListener( 'input', function ( e ) {
 			if ( discount && e.target.value.trim().toUpperCase() !== discount.code ) {

@@ -51,6 +51,7 @@ while ( have_posts() ) :
         'terms'     => __( 'Please confirm you’ve read the booking terms.', 'jaiye-journeys' ),
         'stripe'    => __( 'We couldn’t open the secure payment page just now. Please try again, or enquire and we’ll help.', 'jaiye-journeys' ),
         'code'      => __( 'That discount code can’t be used. Check it, or remove it to continue without one.', 'jaiye-journeys' ),
+        'codeplan'  => __( 'That discount code works with the payment plan only. Choose the payment plan, or remove the code to pay in full.', 'jaiye-journeys' ),
     ];
 
     // Preselect the chapter a guest clicked "Book" on, else the first open one.
@@ -420,7 +421,7 @@ while ( have_posts() ) :
               </p>
             </div>
 
-            <?php if ( $first_plan ) : ?>
+            <?php if ( $first_plan || jj_booking_full_codes() ) : ?>
               <div class="booking-code js-booking-code"
                    data-endpoint="<?php echo esc_url( rest_url( 'jj/v1/discount' ) ); ?>"
                    data-trip="<?php echo (int) $trip_id; ?>">
@@ -430,7 +431,7 @@ while ( have_posts() ) :
                          maxlength="64" autocomplete="off" autocapitalize="characters" spellcheck="false">
                   <button type="button" class="booking-code__apply js-booking-code-apply"><?php esc_html_e( 'Apply', 'jaiye-journeys' ); ?></button>
                 </div>
-                <p class="booking-code__message js-booking-code-message" role="status" aria-live="polite"><?php esc_html_e( 'Discount codes apply to the payment plan.', 'jaiye-journeys' ); ?></p>
+                <p class="booking-code__message js-booking-code-message" role="status" aria-live="polite"></p>
               </div>
             <?php endif; ?>
 

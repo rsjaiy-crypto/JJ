@@ -95,9 +95,12 @@ or **pay in full** (the room's discounted pay-in-full price).
 - Amounts are always computed on the server from the trip's fields; the form
   only sends indexes. `js/booking.js` mirrors `jj_booking_quote()`.
 - Discount codes: the owner makes them in Stripe (Product catalogue →
-  Coupons, as a promotion code or a coupon ID). **Payment plan only**: the
+  Coupons, as a promotion code or a coupon ID). On the **payment plan** the
   code comes off the balance, so the deposit stays the same and every later
-  payment is smaller. The booking page checks codes via
+  payment is smaller. Codes are plan-only **unless listed in Booking
+  Settings → "Codes that also work paying in full"** (`jj_booking_full_codes`,
+  e.g. the waitlist code BTLREADS10); those also come off the pay-in-full
+  price, stacking with its discount. Partner codes stay plan-only. The booking page checks codes via
   `/wp-json/jj/v1/discount` and checkout checks again. Stripe doesn't count
   redemptions (the discount is built into our amounts), so
   `jj_booking_discount_uses()` counts bookings with the code against any

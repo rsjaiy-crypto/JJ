@@ -29,6 +29,7 @@ define( 'JJ_STRIPE_KEY_OPTION', 'jj_stripe_secret_key' );
 define( 'JJ_STRIPE_WEBHOOK_OPTION', 'jj_stripe_webhook_secret' );
 define( 'JJ_BOOKING_NOTIFY_OPTION', 'jj_booking_notify_email' );
 define( 'JJ_BOOKING_FAST_TEST_OPTION', 'jj_booking_fast_test_plan' );
+define( 'JJ_BOOKING_FULL_CODES_OPTION', 'jj_booking_full_codes' );
 define( 'JJ_BOOKING_OVERDUE_DAYS', 14 );
 
 
@@ -227,9 +228,11 @@ function jj_trip_departure_label( $post_id, $index, $departure ) {
  * @param int    $guests   Travellers.
  * @param string $currency gbp|usd.
  * @param string $payment  plan|full.
- * @param array  $discount Optional, from jj_booking_discount(). Payment plan
- *                         only: it comes off the balance, so the deposit stays
- *                         the same and every later payment is smaller.
+ * @param array  $discount Optional, from jj_booking_discount(). On the payment
+ *                         plan it comes off the balance, so the deposit stays
+ *                         the same and every later payment is smaller. Paying
+ *                         in full, only codes listed in Booking Settings apply,
+ *                         on top of the pay-in-full price.
  * @return array|null today, total, discount (minor units), plan [[ts, minor], …]; null if unavailable.
  */
 function jj_booking_quote( $post_id, $room, $guests, $currency, $payment, $discount = null ) {
@@ -256,10 +259,11 @@ function jj_booking_quote( $post_id, $room, $guests, $currency, $payment, $disco
     }
 
     $total = $prices['full'] * $guests;
+    $off   = ! empty( $discount['full'] ) ? jj_booking_discount_amount( $discount, $total, $total - 100 ) : 0;
     return [
-        'today'    => $total,
-        'total'    => $total,
-        'discount' => 0,
+        'today'    => $total - $off,
+        'total'    => $total - $off,
+        'discount' => $off,
         'plan'     => [],
     ];
 }
@@ -268,12 +272,13 @@ function jj_booking_quote( $post_id, $room, $guests, $currency, $payment, $disco
 /* ── Discount codes ────────────────────────────────────────────────── */
 
 /**
- * How much a discount takes off a payment plan total.
+ * How much a discount takes off a total.
  *
  * @param array|null $discount From jj_booking_discount().
- * @param int        $total    Plan total, minor units.
- * @param int        $most     The most it may take off: the balance less a
- *                             penny per payment, so the plan still runs.
+ * @param int        $total    Total, minor units.
+ * @param int        $most     The most it may take off: on a plan the balance
+ *                             less a penny per payment, so the plan still
+ *                             runs; paying in full, all but £1 / $1.
  * @return int Minor units.
  */
 function jj_booking_discount_amount( $discount, $total, $most ) {
@@ -287,7 +292,9 @@ function jj_booking_discount_amount( $discount, $total, $most ) {
 /**
  * Check a discount code made in Stripe (Product catalogue → Coupons): either
  * a promotion code guests type, or a coupon's own ID. Codes are for payment
- * plans only, since the pay-in-full price is already lower.
+ * plans, since the pay-in-full price is already lower, except those listed
+ * in Booking Settings ("Codes that also work paying in full"), which stack
+ * on the pay-in-full price.
  *
  * The discount is built into the amounts the site charges rather than
  * attached in Stripe, so Stripe doesn't count redemptions. The site counts
@@ -295,7 +302,7 @@ function jj_booking_discount_amount( $discount, $total, $most ) {
  *
  * @param string $code     As typed.
  * @param string $currency gbp|usd.
- * @return array|WP_Error code, percent, amount (minor units), label.
+ * @return array|WP_Error code, percent, amount (minor units), label, full.
  */
 function jj_booking_discount( $code, $currency ) {
     $code    = strtoupper( preg_replace( '/[^A-Za-z0-9_-]/', '', (string) $code ) );
@@ -342,6 +349,7 @@ function jj_booking_discount( $code, $currency ) {
             'amount'  => 0,
             /* translators: %s: percentage */
             'label'   => sprintf( __( '%s%% off', 'jaiye-journeys' ), rtrim( rtrim( number_format( $percent, 2 ), '0' ), '.' ) ),
+            'full'    => in_array( $code, jj_booking_full_codes(), true ),
         ];
     }
 
@@ -364,7 +372,17 @@ function jj_booking_discount( $code, $currency ) {
         'amount'  => $amount,
         /* translators: %s: amount */
         'label'   => sprintf( __( '%s off', 'jaiye-journeys' ), jj_booking_money( $amount, $currency ) ),
+        'full'    => in_array( $code, jj_booking_full_codes(), true ),
     ];
+}
+
+/**
+ * Codes that also work when paying in full (Booking Settings), upper case.
+ *
+ * @return string[]
+ */
+function jj_booking_full_codes() {
+    return array_values( array_filter( preg_split( '/[\s,]+/', strtoupper( (string) get_option( JJ_BOOKING_FULL_CODES_OPTION, '' ) ) ) ) );
 }
 
 /**
@@ -751,12 +769,16 @@ function jj_trip_start_checkout( $trip_id ) {
         $fail( 'terms' );
     }
 
-    // Discount codes are for the payment plan only.
+    // Discount codes are for the payment plan, apart from those Booking
+    // Settings lets guests use when paying in full.
     $discount = null;
-    if ( '' !== trim( $code ) && 'plan' === $payment ) {
+    if ( '' !== trim( $code ) ) {
         $discount = jj_booking_discount( $code, $currency );
         if ( is_wp_error( $discount ) ) {
             $fail( 'code' );
+        }
+        if ( 'full' === $payment && empty( $discount['full'] ) ) {
+            $fail( 'codeplan' );
         }
     }
 
@@ -791,9 +813,17 @@ function jj_trip_start_checkout( $trip_id ) {
     }
 
     $line_name = $title . ' · ' . $room['name'];
-    $line_desc = array_filter( [
+    // Charge per person where today's amount splits evenly; a discount on a
+    // pay-in-full booking may not, so then it's one line for the booking.
+    $per_person = 0 === $quote['today'] % $guests;
+    $line_desc  = array_filter( [
         $dep_label,
-        $is_plan ? __( 'Deposit per person', 'jaiye-journeys' ) : __( 'Paid in full, per person', 'jaiye-journeys' ),
+        $is_plan
+            ? __( 'Deposit per person', 'jaiye-journeys' )
+            : ( $per_person
+                ? __( 'Paid in full, per person', 'jaiye-journeys' )
+                /* translators: %d: number of travellers */
+                : sprintf( _n( 'Paid in full, %d traveller', 'Paid in full, %d travellers', $guests, 'jaiye-journeys' ), $guests ) ),
     ] );
 
     $body = [
@@ -805,10 +835,10 @@ function jj_trip_start_checkout( $trip_id ) {
         'expires_at'                 => time() + HOUR_IN_SECONDS,
         'line_items'                 => [
             [
-                'quantity'   => $guests,
+                'quantity'   => $per_person ? $guests : 1,
                 'price_data' => [
                     'currency'     => $currency,
-                    'unit_amount'  => intdiv( $quote['today'], $guests ),
+                    'unit_amount'  => $per_person ? intdiv( $quote['today'], $guests ) : $quote['today'],
                     'product_data' => [
                         'name'        => $line_name,
                         'description' => implode( ' · ', $line_desc ),
@@ -1569,6 +1599,14 @@ function jj_booking_settings_register() {
         'sanitize_callback' => 'sanitize_email',
         'default'           => '',
     ] );
+    register_setting( 'jj_booking', JJ_BOOKING_FULL_CODES_OPTION, [
+        'type'              => 'string',
+        'sanitize_callback' => function ( $value ) {
+            preg_match_all( '/[A-Z0-9_-]+/', strtoupper( (string) $value ), $codes );
+            return implode( ', ', array_unique( $codes[0] ) );
+        },
+        'default'           => '',
+    ] );
     register_setting( 'jj_booking', JJ_BOOKING_FAST_TEST_OPTION, [
         'type'              => 'string',
         'sanitize_callback' => function ( $value ) {
@@ -1668,6 +1706,13 @@ function jj_booking_settings_page() {
             <td>
               <input type="email" id="jj-notify" name="<?php echo esc_attr( JJ_BOOKING_NOTIFY_OPTION ); ?>" value="<?php echo esc_attr( get_option( JJ_BOOKING_NOTIFY_OPTION ) ); ?>" class="regular-text" placeholder="<?php echo esc_attr( get_option( 'admin_email' ) ); ?>">
               <p class="description"><?php esc_html_e( 'New bookings, payment plans that couldn’t be set up, and payments unpaid for 14 days. Blank uses the site admin email.', 'jaiye-journeys' ); ?></p>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row"><label for="jj-full-codes"><?php esc_html_e( 'Codes that also work paying in full', 'jaiye-journeys' ); ?></label></th>
+            <td>
+              <input type="text" id="jj-full-codes" name="<?php echo esc_attr( JJ_BOOKING_FULL_CODES_OPTION ); ?>" value="<?php echo esc_attr( get_option( JJ_BOOKING_FULL_CODES_OPTION ) ); ?>" class="regular-text" placeholder="BTLREADS10">
+              <p class="description"><?php esc_html_e( 'Discount codes normally work with the payment plan only. Codes listed here (separate several with commas) also work when paying in full, on top of the pay-in-full price. Make the codes themselves in Stripe.', 'jaiye-journeys' ); ?></p>
             </td>
           </tr>
           <?php if ( 'test' === $mode ) : ?>
