@@ -150,3 +150,32 @@ There's no WordPress test environment. At minimum:
 If you change the trip post type's slug or rewrite settings, bump
 `JJ_TRIP_REWRITE_VERSION` in `inc/trip-cpt.php`. Deploys don't reactivate the
 theme, so this is what flushes the rewrite rules.
+
+## Next up (agreed with the owner, 20 October 2026)
+
+Not built yet. Remove each item from this list once it's live.
+
+1. **Meta pixel, in code (no plugin).** The owner will supply the Pixel ID
+   (a public number, fine to commit like `JAIYE_GA4_ID` in `functions.php`)
+   and possibly a `facebook-domain-verification` meta tag. Events:
+   `PageView` on every page; `ViewContent` on trip pages; `InitiateCheckout`
+   when the booking form is submitted; `Purchase` on the booking
+   confirmation (`value` = amount paid today, `currency` = the session's).
+   Load it only when tracking is allowed, the same way as GA4.
+2. **Country-based cookie consent.** Today one opt-in banner shows to
+   everyone, and GA4 only loads on "Accept", so declines and ignored banners
+   go untracked worldwide. Plan: UK, EU/EEA and Switzerland keep the opt-in
+   banner; the US and elsewhere get tracking by default with a footer
+   "Cookie settings" opt-out, and Global Privacy Control is honoured. Reuse
+   the visitor-country lookup the booking page already does for £ / $. The
+   owner is checking the US opt-out approach with whoever reviews the
+   privacy policy before this goes live.
+3. **Google Consent Mode v2** for GA4, so declined visits send cookieless
+   signals.
+4. **Cookie banner wording** should mention advertising, not just "to make
+   your visit smoother". The Privacy Policy (a WordPress page, content)
+   needs Meta adding; tell the owner rather than editing it.
+5. **Later, optional:** Meta Conversions API (send `Purchase` from the Stripe
+   webhook, respecting the same consent rules), and having the site mark
+   bookings Refunded / Cancelled when Stripe reports a refund or a cancelled
+   plan (today the owner updates Trips → Bookings by hand).
