@@ -30,7 +30,7 @@ $jj_links_title = function () {
 add_filter( 'pre_get_document_title', $jj_links_title, 99 );
 add_filter( 'rank_math/frontend/title', $jj_links_title, 99 );
 
-// The sign-up form's script, on this page only.
+// The sign-up form and trip carousel scripts, on this page only.
 add_action( 'wp_enqueue_scripts', function () {
     wp_enqueue_script(
         'jaiye-signup-form',
@@ -39,15 +39,30 @@ add_action( 'wp_enqueue_scripts', function () {
         filemtime( get_template_directory() . '/js/signup-form.js' ),
         true
     );
+    wp_enqueue_script(
+        'jaiye-links',
+        get_template_directory_uri() . '/js/links.js',
+        [],
+        filemtime( get_template_directory() . '/js/links.js' ),
+        true
+    );
 } );
 
+// Quick links, matching the Flodesk page. [ label, address, new tab? ]
+// A link with an empty address is left off the page until it's filled in.
 $jj_links_buttons = [
-    [ __( 'The Ticketing Desk', 'jaiye-journeys' ), 'https://tally.so/r/eq6rp0', true ],
-    [ __( 'Private Groups & Celebrations', 'jaiye-journeys' ), home_url( '/private-groups-celebrations/' ), false ],
-    [ __( 'The Business Desk', 'jaiye-journeys' ), home_url( '/business-desk/' ), false ],
-    [ __( 'Between the Lines', 'jaiye-journeys' ), home_url( '/between-the-lines/' ), false ],
+    [ __( 'Between the Lines: The Waitlist', 'jaiye-journeys' ), home_url( '/between-the-lines/?waitlist=btl' ), false ],
+    [ __( 'Between the Lines: Reading Retreats', 'jaiye-journeys' ), home_url( '/between-the-lines/' ), false ],
+    [ __( 'Flight Request', 'jaiye-journeys' ), 'https://tally.so/r/eq6rp0', true ],
+    [ __( 'Explore Jaiye Journeys', 'jaiye-journeys' ), home_url( '/' ), false ],
+    [ __( 'Book your Viator experiences', 'jaiye-journeys' ), 'https://www.viator.com/en-GB/?pid=P00058688&uid=U00684406&mcid=58086&currency=GBP', true ],
+    [ __( 'Our Partners', 'jaiye-journeys' ), 'https://www.foratravel.com/partners/regina-jaiyeola', true ],
+    [ __( 'Fora Advisor Profile', 'jaiye-journeys' ), 'https://www.foratravel.com/advisor/regina-jaiyeola', true ],
     [ __( 'The Jaiye Concierge', 'jaiye-journeys' ), 'https://thejaiyeconcierge.com', true ],
 ];
+$jj_links_buttons = array_filter( $jj_links_buttons, function ( $button ) {
+    return '' !== $button[1];
+} );
 ?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
@@ -86,11 +101,27 @@ $jj_links_buttons = [
   </header>
 
   <!-- 4. Primary button -->
-  <a href="<?php echo esc_url( home_url( '/contact/' ) ); ?>" class="btn btn--primary links__btn links__btn--main">
+  <?php // The Fora enquiry form, as on the Flodesk page (its one-off Facebook click ID removed). ?>
+  <a href="<?php echo esc_url( 'https://secure.foratravel.com/intake/jaiye-journeys/u0EhQCy0A5?utm_source=ig&utm_medium=social&utm_content=link_in_bio' ); ?>" class="btn btn--primary links__btn links__btn--main" target="_blank" rel="noopener">
     <?php esc_html_e( 'Plan My Trip', 'jaiye-journeys' ); ?>
+    <span class="sr-only"><?php esc_html_e( '(opens in a new tab)', 'jaiye-journeys' ); ?></span>
   </a>
 
-  <!-- 5. Upcoming trips (same cards as the homepage) -->
+  <!-- 5. Quick links (before the trips, so they're on the first screen) -->
+  <nav class="links__section links__list" aria-label="<?php esc_attr_e( 'Jaiye Journeys links', 'jaiye-journeys' ); ?>">
+    <?php foreach ( $jj_links_buttons as $jj_button ) : ?>
+      <a
+        href="<?php echo esc_url( $jj_button[1] ); ?>"
+        class="btn btn--secondary links__btn"
+        <?php if ( $jj_button[2] ) : ?>target="_blank" rel="noopener"<?php endif; ?>
+      >
+        <?php echo esc_html( $jj_button[0] ); ?>
+        <?php if ( $jj_button[2] ) : ?><span class="sr-only"><?php esc_html_e( '(opens in a new tab)', 'jaiye-journeys' ); ?></span><?php endif; ?>
+      </a>
+    <?php endforeach; ?>
+  </nav>
+
+  <!-- 6. Upcoming trips (same cards as the homepage) -->
   <?php
   $jj_links_trip_ids = [];
   foreach ( $jj_links_trips as $jj_slug ) {
@@ -103,7 +134,8 @@ $jj_links_buttons = [
   <?php if ( $jj_links_trip_ids ) : ?>
     <section class="links__section" aria-labelledby="links-trips-title">
       <h2 class="links__heading" id="links-trips-title"><?php esc_html_e( 'Upcoming Trips', 'jaiye-journeys' ); ?></h2>
-      <ul class="links__trips" role="list">
+      <div class="links__carousel js-links-carousel">
+      <ul class="links__trips js-links-track" role="list" tabindex="0" aria-label="<?php esc_attr_e( 'Upcoming trips, scroll sideways for more', 'jaiye-journeys' ); ?>">
         <?php foreach ( $jj_links_trip_ids as $jj_trip_id ) : ?>
           <?php
           $jj_btl   = ( 'btl' === jj_trip_field( 'brand', $jj_trip_id, 'jj-edit' ) );
@@ -150,22 +182,22 @@ $jj_links_buttons = [
           </li>
         <?php endforeach; ?>
       </ul>
+      <?php if ( count( $jj_links_trip_ids ) > 1 ) : ?>
+        <div class="links__carousel-controls">
+          <div class="links__dots" role="group" aria-label="<?php esc_attr_e( 'Choose a trip', 'jaiye-journeys' ); ?>">
+            <?php foreach ( $jj_links_trip_ids as $jj_i => $jj_trip_id ) : ?>
+              <button type="button" class="links__dot js-links-dot" aria-label="<?php echo esc_attr( sprintf( /* translators: 1: number, 2: total */ __( 'Trip %1$d of %2$d', 'jaiye-journeys' ), $jj_i + 1, count( $jj_links_trip_ids ) ) ); ?>"<?php echo 0 === $jj_i ? ' aria-current="true"' : ''; ?>></button>
+            <?php endforeach; ?>
+          </div>
+          <button type="button" class="links__pause js-links-pause" aria-label="<?php esc_attr_e( 'Pause the trips moving', 'jaiye-journeys' ); ?>" data-label-play="<?php esc_attr_e( 'Play the trips moving', 'jaiye-journeys' ); ?>" data-label-pause="<?php esc_attr_e( 'Pause the trips moving', 'jaiye-journeys' ); ?>" hidden>
+            <svg class="links__pause-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M8 5v14M16 5v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg class="links__play-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M8 5l11 7-11 7z" fill="currentColor"/></svg>
+          </button>
+        </div>
+      <?php endif; ?>
+      </div>
     </section>
   <?php endif; ?>
-
-  <!-- 6. Link buttons -->
-  <nav class="links__section links__list" aria-label="<?php esc_attr_e( 'Jaiye Journeys links', 'jaiye-journeys' ); ?>">
-    <?php foreach ( $jj_links_buttons as $jj_button ) : ?>
-      <a
-        href="<?php echo esc_url( $jj_button[1] ); ?>"
-        class="btn btn--secondary links__btn"
-        <?php if ( $jj_button[2] ) : ?>target="_blank" rel="noopener"<?php endif; ?>
-      >
-        <?php echo esc_html( $jj_button[0] ); ?>
-        <?php if ( $jj_button[2] ) : ?><span class="sr-only"><?php esc_html_e( '(opens in a new tab)', 'jaiye-journeys' ); ?></span><?php endif; ?>
-      </a>
-    <?php endforeach; ?>
-  </nav>
 
   <!-- 7. Email sign-up: sent straight to Klaviyo on submit -->
   <section class="links__section links__signup" aria-labelledby="links-signup-title">

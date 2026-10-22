@@ -3768,24 +3768,130 @@ textarea::placeholder {
   gap: var(--space-3);
 }
 
-/* Trip cards: the homepage card, shorter for a phone-length list */
-.links__trips {
-  display: grid;
-  gap: var(--space-5);
+/* Trip cards: the homepage card made compact, in a sideways carousel
+   that moves on a timer (js/links.js), so the link buttons stay near the
+   top. Each card shows a slice of the next one to hint at swiping. */
+/* Flex children default to their content's width; without this the
+   sideways list would stretch the whole page. */
+.links > * {
+  min-width: 0;
 }
+
+.links__carousel {
+  min-width: 0;
+  margin-inline: calc(-1 * var(--space-4));
+}
+
+.links__trips {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-4) var(--space-3);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--space-4);
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  contain: paint; /* keeps the off-screen cards from widening the page */
+}
+
+.links__trips::-webkit-scrollbar { display: none; }
+
+.links__trips:focus-visible {
+  outline: 2px solid var(--color-salmon);
+  outline-offset: -2px;
+}
+
+.links__trips > li {
+  flex: 0 0 82%;
+  scroll-snap-align: start;
+}
+
+.links__trips > li:only-child { flex-basis: 100%; }
 
 .links__trip {
   min-height: 0;
 }
 
+.links__trip:hover { transform: none; }
+
 .links__trip .trip-card__media,
 .links__trip .trip-card__img {
-  height: 180px;
+  height: 140px;
+}
+
+.links__trip .trip-card__body {
+  padding: var(--space-4);
+  gap: var(--space-1);
+}
+
+.links__trip .trip-card__title {
+  font-size: var(--text-lg);
+}
+
+.links__trip .trip-card__body > :has(+ .trip-card__cta) {
+  margin-bottom: var(--space-2);
 }
 
 .links__trip .trip-card__cta {
   min-height: 44px;
-  margin-top: var(--space-2);
+  margin-top: auto;
+}
+
+.links__carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.links__dots {
+  display: flex;
+}
+
+/* 44px tap area around a small dot */
+.links__dot {
+  position: relative;
+  width: 28px;
+  height: 44px;
+}
+
+.links__dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background-color: color-mix(in srgb, var(--color-forest) 25%, transparent);
+  transition: background-color var(--duration-base) var(--ease-out), width var(--duration-base) var(--ease-out);
+}
+
+.links__dot[aria-current="true"]::after {
+  width: 20px;
+  background-color: var(--color-forest);
+}
+
+.links__pause {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  color: var(--color-forest);
+}
+
+.links__pause[hidden] { display: none; }
+.links__play-icon,
+.links__pause.is-paused .links__pause-icon { display: none; }
+.links__pause.is-paused .links__play-icon { display: block; }
+
+.links__dot:focus-visible,
+.links__pause:focus-visible {
+  outline: 2px solid var(--color-salmon);
+  outline-offset: -4px;
+  border-radius: var(--radius-full);
 }
 
 /* Email sign-up */
