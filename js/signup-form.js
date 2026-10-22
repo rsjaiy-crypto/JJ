@@ -92,8 +92,7 @@
 						data: {
 							type: 'profile',
 							attributes: {
-								email: email,
-								subscriptions: { email: { marketing: { consent: 'SUBSCRIBED' } } }
+								email: email
 							}
 						}
 					}
