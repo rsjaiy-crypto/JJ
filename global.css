@@ -3810,12 +3810,65 @@ textarea::placeholder {
   text-underline-offset: 3px;
 }
 
-.links__notice {
+.links__form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.links__field label {
+  margin-bottom: var(--space-1);
+}
+
+.links__field input {
+  min-height: 48px;
+  font-size: 1rem; /* 16px stops iOS zooming in */
+}
+
+/* Honeypot: off-screen for people, still there for bots. */
+.links__hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.links__error {
   padding: var(--space-3) var(--space-4);
-  border: 1px dashed var(--color-salmon);
-  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--color-salmon);
+  background-color: color-mix(in srgb, var(--color-salmon) 12%, transparent);
   font-size: var(--text-sm);
   max-width: none;
+  margin: 0;
+}
+
+.links__error[hidden],
+.links__done[hidden],
+.js-signup-body[hidden] {
+  display: none;
+}
+
+.links__error a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.links__btn[disabled] {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.links__done {
+  text-align: center;
+}
+
+.links__done .links__heading:focus {
+  outline: none;
+}
+
+.links__done p {
+  max-width: none;
+  margin: 0;
 }
 
 /* Social icons */

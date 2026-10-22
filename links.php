@@ -7,29 +7,21 @@
  * run so the theme styles, scripts and cookie banner load. Styles live in
  * global.css under "Links page".
  *
- * Trip cards are read from the trips themselves (image, name, place,
+ * The email sign-up is built in (no Klaviyo embed or cookies), like the
+ * Between the Lines waitlist form. Trip cards are read from the trips themselves (image, name, place,
  * dates), like the homepage's Upcoming Trips, so they always match the
  * trip pages. Change which trips show in $jj_links_trips below.
  *
  * @package jaiye-journeys
  */
 
-/* ── PASTE YOUR KLAVIYO DETAILS HERE ──────────────────────────────────
-   Replace the two placeholders below with your own values, keeping the
-   quote marks. Until both are filled in, the sign-up section stays
-   hidden from visitors.
-   - Company ID: Klaviyo → Settings → Account → "Public API key / Site ID"
-   - Form ID:    Klaviyo → Sign-up forms → your embed form → the ID in its
-                 embed code (klaviyo-form-XXXXXX)                         */
-$jj_links_klaviyo_company = 'KLAVIYO_COMPANY_ID';
-$jj_links_klaviyo_form    = 'KLAVIYO_FORM_ID';
-/* ──────────────────────────────────────────────────────────────────── */
+// Email sign-up: Klaviyo list "Jaiye Journeys Master List", which triggers
+// the "JJ: General welcome" flow. Sent by js/signup-form.js on submit only,
+// through Klaviyo's public client API: no Klaviyo script, no cookies.
+$jj_links_list = 'TYKHn2';
 
 // Upcoming trips, in this order, by their page address (slug).
 $jj_links_trips = [ 'btl-marrakech', 'jj-bali', 'jj-peru', 'sintra-mist-manuscripts' ];
-
-$jj_links_klaviyo_ready = 'KLAVIYO_COMPANY_ID' !== $jj_links_klaviyo_company && 'KLAVIYO_FORM_ID' !== $jj_links_klaviyo_form
-    && '' !== trim( $jj_links_klaviyo_company ) && '' !== trim( $jj_links_klaviyo_form );
 
 // Page title: "Jaiye Journeys | Links" (also wins over Rank Math's title).
 $jj_links_title = function () {
@@ -38,18 +30,16 @@ $jj_links_title = function () {
 add_filter( 'pre_get_document_title', $jj_links_title, 99 );
 add_filter( 'rank_math/frontend/title', $jj_links_title, 99 );
 
-// Klaviyo's onsite script, once, in this template's footer only. The
-// site-wide copy (jaiye_klaviyo_tracking) is skipped here so it can't load
-// twice.
-remove_action( 'wp_footer', 'jaiye_klaviyo_tracking' );
-if ( $jj_links_klaviyo_ready ) {
-    add_action( 'wp_footer', function () use ( $jj_links_klaviyo_company ) {
-        printf(
-            '<script async type="text/javascript" src="%s"></script>' . "\n",
-            esc_url( 'https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=' . rawurlencode( $jj_links_klaviyo_company ) )
-        );
-    }, 20 );
-}
+// The sign-up form's script, on this page only.
+add_action( 'wp_enqueue_scripts', function () {
+    wp_enqueue_script(
+        'jaiye-signup-form',
+        get_template_directory_uri() . '/js/signup-form.js',
+        [],
+        filemtime( get_template_directory() . '/js/signup-form.js' ),
+        true
+    );
+} );
 
 $jj_links_buttons = [
     [ __( 'The Ticketing Desk', 'jaiye-journeys' ), 'https://tally.so/r/eq6rp0', true ],
@@ -177,11 +167,39 @@ $jj_links_buttons = [
     <?php endforeach; ?>
   </nav>
 
-  <!-- 7. Email sign-up (Klaviyo embed) -->
-  <?php if ( $jj_links_klaviyo_ready ) : ?>
-    <section class="links__section links__signup" aria-labelledby="links-signup-title">
+  <!-- 7. Email sign-up: sent straight to Klaviyo on submit -->
+  <section class="links__section links__signup" aria-labelledby="links-signup-title">
+    <div class="js-signup-body">
       <h2 class="links__heading" id="links-signup-title"><?php esc_html_e( 'Be first to hear about new trips', 'jaiye-journeys' ); ?></h2>
-      <div class="klaviyo-form-<?php echo esc_attr( $jj_links_klaviyo_form ); ?>"></div>
+      <form class="links__form js-signup"
+            data-company="<?php echo esc_attr( JAIYE_KLAVIYO_COMPANY_ID ); ?>"
+            data-list="<?php echo esc_attr( $jj_links_list ); ?>"
+            data-source="<?php esc_attr_e( 'Links page sign-up (website)', 'jaiye-journeys' ); ?>"
+            novalidate>
+        <div class="links__field">
+          <label for="links-first"><?php esc_html_e( 'First name', 'jaiye-journeys' ); ?></label>
+          <input id="links-first" name="first_name" type="text" autocomplete="given-name" required>
+        </div>
+        <div class="links__field">
+          <label for="links-email"><?php esc_html_e( 'Email address', 'jaiye-journeys' ); ?></label>
+          <input id="links-email" name="email" type="email" autocomplete="email" inputmode="email" required>
+        </div>
+        <?php /* Honeypot: people never see or fill this; bots do. */ ?>
+        <div class="links__hp" aria-hidden="true">
+          <label for="links-website">Website</label>
+          <input id="links-website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+        <p class="links__error js-signup-error" role="alert" hidden>
+          <?php
+          printf(
+              /* translators: %s: contact page link */
+              esc_html__( 'Sorry, something went wrong and we couldn’t add you just now. Please try again, or %s.', 'jaiye-journeys' ),
+              '<a href="' . esc_url( home_url( '/contact/' ) ) . '">' . esc_html__( 'get in touch', 'jaiye-journeys' ) . '</a>'
+          );
+          ?>
+        </p>
+        <button type="submit" class="btn btn--primary links__btn js-signup-submit"><?php esc_html_e( 'Sign me up', 'jaiye-journeys' ); ?></button>
+      </form>
       <p class="links__small">
         <?php
         printf(
@@ -191,10 +209,12 @@ $jj_links_buttons = [
         );
         ?>
       </p>
-    </section>
-  <?php elseif ( current_user_can( 'edit_pages' ) ) : ?>
-    <p class="links__notice"><?php esc_html_e( 'Only you can see this: add your Klaviyo company ID and form ID at the top of links.php to show the email sign-up here.', 'jaiye-journeys' ); ?></p>
-  <?php endif; ?>
+    </div>
+    <div class="links__done js-signup-done" hidden>
+      <h2 class="links__heading" tabindex="-1"><?php esc_html_e( 'You’re on the list.', 'jaiye-journeys' ); ?></h2>
+      <p><?php esc_html_e( 'Keep an eye on your inbox. You’ll be first to hear about every new trip.', 'jaiye-journeys' ); ?></p>
+    </div>
+  </section>
 
   <!-- 8. Social icons -->
   <ul class="links__social" role="list">
