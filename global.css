@@ -990,16 +990,17 @@ textarea::placeholder {
   .fp-service-tile + .fp-service-tile {
     border-top: 1px solid color-mix(in srgb, var(--color-sage) 25%, transparent);
   }
+
+  /* No Popular badge in the stacked phone list */
+  .fp-services__grid .fp-service-popular {
+    display: none;
+  }
 }
 
 /* Phones with JS: an accordion (js/services.js adds .is-accordion).
    Tapping a title opens its description and a "Find out more" link. */
 .fp-services__grid.is-accordion .fp-service-tile {
   padding: 0;
-}
-
-.fp-services__grid.is-accordion .fp-service-popular {
-  margin: var(--space-6) 0 0;
 }
 
 .fp-services__grid.is-accordion .fp-service-tile__title {
