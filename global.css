@@ -1237,13 +1237,6 @@ textarea::placeholder {
   }
 }
 
-/* On phones the tiles stack, so only line up the titles from tablet up. */
-@media (min-width: 768px) {
-  .fp-service-tile--no-badge .fp-service-tile__title {
-    padding-top: 50px;
-  }
-}
-
 /* 3-column grid on tablet */
 @media (min-width: 768px) {
   .fp-services__grid {
@@ -1267,6 +1260,113 @@ textarea::placeholder {
 @media (min-width: 1200px) {
   .fp-services__grid {
     grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Tablet and desktop: each service is a soft card with a hover lift and
+   a "Find out more" prompt pinned to the bottom. The
+   title link is stretched over the card so the whole tile is clickable.
+   Phones keep the accordion above. */
+@media (min-width: 768px) {
+  .fp-services__grid {
+    gap: var(--space-6);
+    padding-top: var(--space-4); /* room for the Popular badge */
+  }
+
+  .fp-service-tile {
+    position: relative;
+    padding: var(--space-8) var(--space-6) var(--space-6);
+    background-color: color-mix(in srgb, var(--color-cream) 5%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-sage) 25%, transparent);
+    border-radius: var(--radius-lg);
+    transition:
+      transform 300ms var(--ease-out),
+      background-color 300ms var(--ease-out),
+      border-color 300ms var(--ease-out),
+      box-shadow 300ms var(--ease-out);
+  }
+
+  .fp-service-tile__title {
+    font-size: var(--text-lg);
+  }
+
+  .fp-service-tile__title a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .fp-service-tile__title a:focus-visible {
+    outline: none;
+  }
+
+  .fp-service-tile:focus-within {
+    outline: 2px solid var(--color-salmon);
+    outline-offset: 4px;
+  }
+
+  /* Let the panel fill the card so "Find out more" sits on the bottom edge */
+  .fp-service-tile__panel,
+  .fp-service-tile__panel-inner {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .fp-service-tile__desc {
+    margin-bottom: var(--space-6);
+  }
+
+  .fp-service-tile__more {
+    display: inline-block;
+    margin-top: auto;
+    font-size: var(--text-xs);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-cream);
+    text-decoration: none;
+    transition: color 300ms var(--ease-out);
+  }
+
+  .fp-service-tile:hover {
+    transform: translateY(-6px);
+    background-color: color-mix(in srgb, var(--color-cream) 9%, transparent);
+    border-color: color-mix(in srgb, var(--color-salmon) 60%, transparent);
+    box-shadow: 0 18px 40px rgba(8, 31, 28, 0.35);
+  }
+
+  .fp-service-tile:hover .fp-service-tile__more {
+    color: var(--color-salmon);
+  }
+
+  /* The Popular badge sits on the card's top edge */
+  .fp-service-popular {
+    position: absolute;
+    top: 0;
+    right: var(--space-6);
+    transform: translateY(-50%);
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    padding: 8px 16px;
+  }
+
+  /* The most popular service gets a warmer outline */
+  .fp-service-tile:not(.fp-service-tile--no-badge) {
+    border-color: color-mix(in srgb, var(--color-salmon) 50%, transparent);
+  }
+}
+
+@media (min-width: 768px) and (prefers-reduced-motion: reduce) {
+  .fp-service-tile,
+  .fp-service-tile__more {
+    transition: none;
+  }
+
+  .fp-service-tile:hover {
+    transform: none;
   }
 }
 
@@ -1299,9 +1399,12 @@ textarea::placeholder {
 
 .fp-about__img {
   width: 100%;
-  height: clamp(360px, 65vw, 580px);
+  height: auto;
+  aspect-ratio: 4 / 5;
   object-fit: cover;
-  object-position: top center;
+  /* Steph sits in the lower half of this tall photo, so frame on her
+     rather than the ceiling */
+  object-position: center 72%;
   border-radius: var(--radius-lg);
   display: block;
 }
@@ -1350,7 +1453,8 @@ textarea::placeholder {
 
   .fp-about__img {
     height: clamp(520px, 52vw, 760px);
-    object-position: top center;
+    aspect-ratio: auto;
+    object-position: center 60%;
   }
 }
 
@@ -1362,7 +1466,7 @@ textarea::placeholder {
 
   .fp-about__img {
     height: clamp(600px, 56vw, 820px);
-    object-position: top center;
+    object-position: center 60%;
   }
 }
 
