@@ -198,9 +198,10 @@ triggers the "JJ: General welcome" flow.
   Between the Lines page and BTL Retreat template, opened by links with
   `data-btl-waitlist` and by `?waitlist=btl` (the owner's link in bio;
   `join=thelist` belongs to a Klaviyo pop-up). On submit it posts to
-  Klaviyo's public client API (`client/profiles` for names and properties,
-  then `client/subscriptions` for email consent on list **Sq3GFK**, which
-  triggers the BTL welcome flow) with the public company ID. No Klaviyo
+  Klaviyo's public client API (`client/subscriptions` first, for email
+  consent on list **Sq3GFK**, which triggers the BTL welcome flow, then
+  `client/profiles` for names and properties; a failed second step only
+  logs). Logged-in editors see Klaviyo's reason under any error with the public company ID. No Klaviyo
   script, no cookies, so it works without cookie consent. Property names and
   values (`Country`, `BTL Volume interest` = Marrakech / Sintra / Both,
   `Heard about us`, `Referred by`…) feed the owner's emails: don't rename

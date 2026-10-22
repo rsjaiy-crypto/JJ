@@ -3,10 +3,10 @@
  *
  * Opens from any [data-btl-waitlist] link, and on arrival with
  * ?waitlist=btl. On submit it sends the sign-up straight to Klaviyo's
- * public client API: the profile's names and properties first, then the
- * email marketing subscription to the list, which triggers the welcome
- * flow. No Klaviyo script, no cookies, so it works whatever the visitor
- * chose on the cookie banner.
+ * public client API: the email marketing subscription to the list first
+ * (it triggers the welcome flow), then the profile's names and answers.
+ * No Klaviyo script, no cookies, so it works whatever the visitor chose on
+ * the cookie banner.
  */
 ( function () {
 	'use strict';
@@ -96,17 +96,25 @@
 		return ( el.value || '' ).trim();
 	}
 
-	function showError( message ) {
+	function showError( message, err ) {
 		if ( message ) {
 			errorBox.textContent = message;
 		} else {
 			errorBox.innerHTML = dialog.querySelector( '.js-btlw-error-text' ).innerHTML;
 		}
+		// Klaviyo's reason, for logged-in editors only.
+		if ( err && document.body.classList.contains( 'logged-in' ) ) {
+			var detail = document.createElement( 'small' );
+			detail.style.display = 'block';
+			detail.style.marginTop = '0.5em';
+			detail.textContent = 'Only you can see this. Klaviyo said: ' + err.message;
+			errorBox.appendChild( detail );
+		}
 		errorBox.hidden = false;
 	}
 
 	function post( endpoint, data ) {
-		return fetch( API + endpoint + '/?company_id=' + encodeURIComponent( form.getAttribute( 'data-company' ) ), {
+		return fetch( API + endpoint + '?company_id=' + encodeURIComponent( form.getAttribute( 'data-company' ) ), {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/vnd.api+json',
@@ -115,7 +123,11 @@
 			},
 			body: JSON.stringify( { data: data } )
 		} ).then( function ( res ) {
-			if ( ! res.ok ) throw new Error( endpoint + ' ' + res.status );
+			if ( ! res.ok ) {
+				return res.text().then( function ( text ) {
+					throw new Error( endpoint + ' ' + res.status + ': ' + text.slice( 0, 400 ) );
+				} );
+			}
 		} );
 	}
 
@@ -170,30 +182,36 @@
 		submit.disabled = true;
 		submit.setAttribute( 'aria-busy', 'true' );
 
-		post( 'profiles', { type: 'profile', attributes: profile } )
-			.then( function () {
-				return post( 'subscriptions', {
-					type: 'subscription',
-					attributes: {
-						custom_source: 'Between the Lines waitlist form (website)',
-						profile: {
-							data: {
-								type: 'profile',
-								attributes: {
-									email: email,
-									subscriptions: { email: { marketing: { consent: 'SUBSCRIBED' } } }
-								}
-							}
+		// The subscription first: it's what puts them on the list and starts
+		// the welcome flow. Then their name and answers on the profile; if only
+		// that step fails they're still on the list, so it just logs.
+		post( 'subscriptions', {
+			type: 'subscription',
+			attributes: {
+				custom_source: 'Between the Lines waitlist form (website)',
+				profile: {
+					data: {
+						type: 'profile',
+						attributes: {
+							email: email,
+							subscriptions: { email: { marketing: { consent: 'SUBSCRIBED' } } }
 						}
-					},
-					relationships: {
-						list: { data: { type: 'list', id: form.getAttribute( 'data-list' ) } }
 					}
-				} );
+				}
+			},
+			relationships: {
+				list: { data: { type: 'list', id: form.getAttribute( 'data-list' ) } }
+			}
+		} )
+			.then( function () {
+				return post( 'profiles', { type: 'profile', attributes: profile } )
+					.catch( function ( err ) {
+						window.console && console.error( 'Waitlist answers not saved', err );
+					} );
 			} )
-			.then( success )
-			.catch( function () {
-				showError();
+			.then( success, function ( err ) {
+				window.console && console.error( 'Waitlist sign-up failed', err );
+				showError( null, err );
 			} )
 			.then( function () {
 				submit.disabled = false;
