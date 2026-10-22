@@ -107,21 +107,7 @@ $jj_links_buttons = array_filter( $jj_links_buttons, function ( $button ) {
     <span class="sr-only"><?php esc_html_e( '(opens in a new tab)', 'jaiye-journeys' ); ?></span>
   </a>
 
-  <!-- 5. Quick links (before the trips, so they're on the first screen) -->
-  <nav class="links__section links__list" aria-label="<?php esc_attr_e( 'Jaiye Journeys links', 'jaiye-journeys' ); ?>">
-    <?php foreach ( $jj_links_buttons as $jj_button ) : ?>
-      <a
-        href="<?php echo esc_url( $jj_button[1] ); ?>"
-        class="btn btn--secondary links__btn"
-        <?php if ( $jj_button[2] ) : ?>target="_blank" rel="noopener"<?php endif; ?>
-      >
-        <?php echo esc_html( $jj_button[0] ); ?>
-        <?php if ( $jj_button[2] ) : ?><span class="sr-only"><?php esc_html_e( '(opens in a new tab)', 'jaiye-journeys' ); ?></span><?php endif; ?>
-      </a>
-    <?php endforeach; ?>
-  </nav>
-
-  <!-- 6. Upcoming trips (same cards as the homepage) -->
+  <!-- 5. Upcoming trips (same cards as the homepage) -->
   <?php
   $jj_links_trip_ids = [];
   foreach ( $jj_links_trips as $jj_slug ) {
@@ -198,6 +184,20 @@ $jj_links_buttons = array_filter( $jj_links_buttons, function ( $button ) {
       </div>
     </section>
   <?php endif; ?>
+
+  <!-- 6. Quick links -->
+  <nav class="links__section links__list" aria-label="<?php esc_attr_e( 'Jaiye Journeys links', 'jaiye-journeys' ); ?>">
+    <?php foreach ( $jj_links_buttons as $jj_button ) : ?>
+      <a
+        href="<?php echo esc_url( $jj_button[1] ); ?>"
+        class="btn btn--secondary links__btn"
+        <?php if ( $jj_button[2] ) : ?>target="_blank" rel="noopener"<?php endif; ?>
+      >
+        <?php echo esc_html( $jj_button[0] ); ?>
+        <?php if ( $jj_button[2] ) : ?><span class="sr-only"><?php esc_html_e( '(opens in a new tab)', 'jaiye-journeys' ); ?></span><?php endif; ?>
+      </a>
+    <?php endforeach; ?>
+  </nav>
 
   <!-- 7. Email sign-up: sent straight to Klaviyo on submit -->
   <section class="links__section links__signup" aria-labelledby="links-signup-title">

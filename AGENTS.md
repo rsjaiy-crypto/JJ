@@ -160,11 +160,11 @@ the site header or footer, so no tracking loads there.
 `js/links.js`, `js/signup-form.js`, styles in `global.css` section 18.
 Standalone: no menu or full footer, but wp_head / wp_footer and the cookie
 banner run. Order: logo, Steph, tagline, Plan My Trip (Fora enquiry form),
-quick links matching the old Flodesk page (`$jj_links_buttons`; an empty
-address hides a link), Upcoming Trips as a sideways carousel of trip cards
-read from the trips by slug (`$jj_links_trips`; moves every 4.5s and loops,
-stops on swipe / dot / pause, waits on hover or focus, never moves with
-reduced motion), email sign-up, social icons. The sign-up is built in, not
+Upcoming Trips as a sideways carousel of trip cards read from the trips by
+slug (`$jj_links_trips`; moves every 4.5s and loops, stops on swipe / dot /
+pause, waits on hover or focus, never moves with reduced motion), quick
+links matching the old Flodesk page (`$jj_links_buttons`; an empty address
+hides a link), email sign-up, social icons. The sign-up is built in, not
 a Klaviyo embed: on submit it posts to Klaviyo's client API (no script, no
 cookies) and subscribes to **Jaiye Journeys Master List** (TYKHn2), which
 triggers the "JJ: General welcome" flow.
