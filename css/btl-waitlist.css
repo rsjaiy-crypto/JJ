@@ -1,0 +1,261 @@
+/* ==========================================================================
+   Between the Lines waitlist pop-up (inc/btl-waitlist-form.php)
+   Forest panel, cream text and fields, sage button, salmon accents.
+   ========================================================================== */
+
+html.btlw-open { overflow: hidden; }
+
+.btlw {
+  /* A margin all round on phones too, so there's always somewhere outside
+     the panel to tap to close it. */
+  width: min(640px, calc(100% - 24px));
+  max-width: 100%;
+  max-height: calc(100dvh - 24px);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-cream);
+  overflow: visible;
+}
+
+.btlw::backdrop { background: rgba(8, 31, 28, 0.72); }
+
+/* Without showModal (very old browsers) the dialog sits over the page. */
+.btlw[open]:not(:modal) {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+}
+
+.btlw__panel {
+  position: relative;
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  background: var(--color-forest);
+  padding: var(--space-12) var(--space-5) calc(var(--space-8) + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 640px) {
+  .btlw { max-height: calc(100dvh - 48px); }
+  .btlw__panel {
+    max-height: calc(100dvh - 48px);
+    padding: var(--space-12) var(--space-10) var(--space-10);
+  }
+}
+
+.btlw__close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: var(--color-cream);
+}
+
+.btlw__close:hover,
+.btlw__close:focus-visible { color: var(--color-salmon); }
+
+.btlw__title {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 1.5rem + 2vw, 2.75rem);
+  line-height: 1.1;
+  color: var(--color-cream);
+  margin-bottom: var(--space-4);
+}
+
+.btlw__title:focus { outline: none; }
+
+.btlw__intro,
+.btlw__done p {
+  font-weight: var(--fw-light);
+  line-height: 1.6;
+  margin-bottom: var(--space-6);
+}
+
+/* ── Fields ─────────────────────────────────────────────────────── */
+
+.btlw__form {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.btlw__row {
+  display: grid;
+  gap: var(--space-5);
+}
+
+@media (min-width: 520px) {
+  .btlw__row { grid-template-columns: 1fr 1fr; }
+}
+
+.btlw__field[hidden] { display: none; }
+
+.btlw label,
+.btlw legend {
+  display: block;
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  font-size: 0.95rem;
+  font-weight: var(--fw-regular);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--color-cream);
+}
+
+.btlw fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.btlw__req { color: var(--color-salmon); }
+.btlw__opt { opacity: 0.7; font-size: 0.85em; }
+
+.btlw input[type="text"],
+.btlw input[type="email"],
+.btlw select {
+  width: 100%;
+  min-height: 48px;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-body);
+  font-size: 1rem; /* 16px stops iOS zooming in */
+  font-weight: var(--fw-regular);
+  color: var(--color-forest);
+  background-color: var(--color-cream);
+  border: 2px solid var(--color-cream);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.btlw select {
+  padding-right: var(--space-10);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none' stroke='%23093923' stroke-width='1.6'%3E%3Cpath d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+}
+
+.btlw input::placeholder { color: color-mix(in srgb, var(--color-forest) 55%, transparent); }
+
+.btlw input:focus,
+.btlw select:focus {
+  outline: none;
+  border-color: var(--color-salmon);
+  box-shadow: 0 0 0 2px var(--color-salmon);
+}
+
+.btlw input:user-invalid,
+.btlw select:user-invalid { border-color: var(--color-salmon); }
+
+/* Radios and checkboxes */
+.btlw__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+}
+
+.btlw__options--stack {
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.btlw label.btlw__option {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 40px;
+  margin: 0;
+  cursor: pointer;
+  font-weight: var(--fw-light);
+}
+
+.btlw__option input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  flex-shrink: 0;
+  accent-color: var(--color-salmon);
+}
+
+.btlw__option input:focus-visible {
+  outline: 2px solid var(--color-salmon);
+  outline-offset: 2px;
+}
+
+/* Honeypot: off-screen for people, still there for bots. */
+.btlw__hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* ── Submit, small print, messages ──────────────────────────────── */
+
+.btlw__submit {
+  justify-self: start;
+  min-height: 52px;
+  padding: var(--space-3) var(--space-8);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-forest);
+  background-color: var(--color-sage);
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+@media (max-width: 519px) {
+  .btlw__submit { justify-self: stretch; }
+}
+
+.btlw__submit:hover,
+.btlw__submit:focus-visible {
+  background-color: var(--color-salmon);
+  outline: none;
+}
+
+.btlw__submit[disabled] {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.btlw__small {
+  font-size: 0.8rem;
+  font-weight: var(--fw-light);
+  line-height: 1.55;
+  opacity: 0.85;
+}
+
+.btlw a {
+  color: var(--color-cream);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.btlw a:hover,
+.btlw a:focus-visible { color: var(--color-salmon); }
+
+.btlw__error {
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-salmon);
+  background: color-mix(in srgb, var(--color-salmon) 18%, transparent);
+  line-height: 1.5;
+}
+
+.btlw__error[hidden],
+.btlw__done[hidden],
+.btlw__body[hidden] { display: none; }
+
+.btlw__done { padding-top: var(--space-6); }

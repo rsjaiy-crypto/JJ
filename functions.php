@@ -6,9 +6,6 @@
 
 define( 'JAIYE_GA4_ID', 'G-13CW9QRTBE' );
 define( 'JAIYE_KLAVIYO_COMPANY_ID', 'RujwSB' );
-// "BTL: The List waitlist (opens on click)" in Klaviyo. BTL "Get on The
-// List" links open it when Klaviyo is loaded (js/list-form.js).
-define( 'JAIYE_KLAVIYO_LIST_FORM', 'TkK3Qm' );
 
 
 // ============================================================
@@ -24,6 +21,7 @@ require_once get_template_directory() . '/inc/trip-cpt.php';
 require_once get_template_directory() . '/inc/trip-meta.php';
 require_once get_template_directory() . '/inc/trip-booking.php';
 require_once get_template_directory() . '/inc/manage.php';
+require_once get_template_directory() . '/inc/btl-waitlist.php';
 require_once get_template_directory() . '/inc/trip-seed.php';
 
 
@@ -112,15 +110,6 @@ function jaiye_enqueue_assets() {
         get_template_directory_uri() . '/js/cookie-consent.js',
         [],
         filemtime( get_template_directory() . '/js/cookie-consent.js' ),
-        true
-    );
-
-    // "Get on The List" links that open a Klaviyo form.
-    wp_enqueue_script(
-        'jaiye-list-form',
-        get_template_directory_uri() . '/js/list-form.js',
-        [],
-        filemtime( get_template_directory() . '/js/list-form.js' ),
         true
     );
 

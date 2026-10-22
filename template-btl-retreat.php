@@ -84,7 +84,7 @@ get_header();
         </div>
 
         <div class="btlr-glance__cta">
-          <a href="<?php echo esc_url( 'https://tally.so/r/Gxq2JL' ); ?>" data-klaviyo-form="<?php echo esc_attr( JAIYE_KLAVIYO_LIST_FORM ); ?>" target="_blank" rel="noopener" class="btn btn--accent">
+          <a href="#btl-waitlist" data-btl-waitlist aria-haspopup="dialog" class="btn btn--accent">
             <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
           </a>
         </div>
@@ -336,7 +336,7 @@ get_header();
       <section class="btlr-signoff">
         <h2><?php esc_html_e( 'This Chapter Is Ready for You', 'jaiye-journeys' ); ?></h2>
         <p><?php esc_html_e( "All that's left is your call. Reply with your dates and I'll get everything locked in. Steph x", 'jaiye-journeys' ); ?></p>
-        <a href="<?php echo esc_url( 'https://tally.so/r/Gxq2JL' ); ?>" data-klaviyo-form="<?php echo esc_attr( JAIYE_KLAVIYO_LIST_FORM ); ?>" target="_blank" rel="noopener" class="btn btn--accent">
+        <a href="#btl-waitlist" data-btl-waitlist aria-haspopup="dialog" class="btn btn--accent">
           <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
         </a>
       </section>
@@ -355,7 +355,7 @@ get_header();
     <p><?php esc_html_e( 'From', 'jaiye-journeys' ); ?></p>
     <p><?php esc_html_e( 'TBC pp', 'jaiye-journeys' ); ?></p>
   </div>
-  <a href="<?php echo esc_url( 'https://tally.so/r/Gxq2JL' ); ?>" data-klaviyo-form="<?php echo esc_attr( JAIYE_KLAVIYO_LIST_FORM ); ?>" target="_blank" rel="noopener" class="btn btn--accent btn--sm">
+  <a href="#btl-waitlist" data-btl-waitlist aria-haspopup="dialog" class="btn btn--accent btn--sm">
     <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
   </a>
 </div>

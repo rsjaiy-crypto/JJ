@@ -617,11 +617,10 @@ get_header();
         <?php esc_html_e( 'A luxury literary residency by Jaiye Journeys', 'jaiye-journeys' ); ?>
       </p>
       <a
-        href="https://tally.so/r/Gxq2JL"
-        data-klaviyo-form="<?php echo esc_attr( JAIYE_KLAVIYO_LIST_FORM ); ?>"
+        href="#btl-waitlist"
+        data-btl-waitlist
+        aria-haspopup="dialog"
         class="btl-hero__btn"
-        target="_blank"
-        rel="noopener noreferrer"
       >
         <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
       </a>
@@ -655,11 +654,10 @@ get_header();
             <?php esc_html_e( 'Every retreat has limited spaces. Every detail is handled. All you need to bring is your reading list.', 'jaiye-journeys' ); ?>
           </p>
           <a
-            href="https://tally.so/r/Gxq2JL"
-            data-klaviyo-form="<?php echo esc_attr( JAIYE_KLAVIYO_LIST_FORM ); ?>"
+            href="#btl-waitlist"
+            data-btl-waitlist
+            aria-haspopup="dialog"
             class="btl-concept__link"
-            target="_blank"
-            rel="noopener noreferrer"
           >
             <?php esc_html_e( 'Secure your place →', 'jaiye-journeys' ); ?>
           </a>
@@ -944,11 +942,10 @@ get_header();
       <?php esc_html_e( 'Get on The List to be first to know when retreats open, receive early access pricing, and become part of the BTL community before the doors open.', 'jaiye-journeys' ); ?>
     </p>
     <a
-      href="https://tally.so/r/Gxq2JL"
-      data-klaviyo-form="<?php echo esc_attr( JAIYE_KLAVIYO_LIST_FORM ); ?>"
+      href="#btl-waitlist"
+      data-btl-waitlist
+      aria-haspopup="dialog"
       class="btl-waitlist__btn"
-      target="_blank"
-      rel="noopener noreferrer"
     >
       <?php esc_html_e( 'Get on The List', 'jaiye-journeys' ); ?>
     </a>
