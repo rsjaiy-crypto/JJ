@@ -155,16 +155,15 @@
 		}
 
 		// Only answered questions are sent, so a blank never overwrites an
-		// earlier answer on the same profile.
+		// earlier answer on the same profile. Names and values match the
+		// earlier Between the Lines sign-ups in Klaviyo.
 		var properties = {
-			'Country': form.querySelector( 'input[name="Country"]:checked' ).value,
-			'BTL Volume interest': value( 'BTL Volume interest' )
+			'Retreat Interest': value( 'BTL Volume interest' )
 		};
-		if ( value( 'Whereabouts' ) ) properties.Whereabouts = value( 'Whereabouts' );
 
 		var club = form.querySelector( 'input[name="Book club member"]:checked' );
 		if ( club ) {
-			properties[ 'Book club member' ] = club.value;
+			properties[ 'Part of book club' ] = club.value;
 			if ( 'Yes' === club.value && value( 'Book club name' ) ) {
 				properties[ 'Book club name' ] = value( 'Book club name' );
 			}
@@ -173,10 +172,14 @@
 		var heard = Array.prototype.map.call( form.querySelectorAll( 'input[name="Heard about us"]:checked' ), function ( el ) {
 			return el.value;
 		} );
-		if ( heard.length ) properties[ 'Heard about us' ] = heard;
+		if ( heard.length ) properties[ 'How did you hear about us' ] = heard.join( ', ' );
 		if ( heard.indexOf( 'A friend told me' ) > -1 ) properties[ 'Referred by' ] = value( 'Referred by' );
 
-		var profile = { email: email, first_name: value( 'first_name' ), properties: properties };
+		// Where they're based goes in Klaviyo's own location fields.
+		var location = { country: form.querySelector( 'input[name="Country"]:checked' ).value };
+		if ( value( 'Whereabouts' ) ) location.city = value( 'Whereabouts' );
+
+		var profile = { email: email, first_name: value( 'first_name' ), location: location, properties: properties };
 		if ( value( 'last_name' ) ) profile.last_name = value( 'last_name' );
 
 		submit.disabled = true;

@@ -202,10 +202,13 @@ triggers the "JJ: General welcome" flow.
   consent on list **Sq3GFK**, which triggers the BTL welcome flow, then
   `client/profiles` for names and properties; a failed second step only
   logs). Logged-in editors see Klaviyo's reason under any error with the public company ID. No Klaviyo
-  script, no cookies, so it works without cookie consent. Property names and
-  values (`Country`, `BTL Volume interest` = Marrakech / Sintra / Both,
-  `Heard about us`, `Referred by`…) feed the owner's emails: don't rename
-  them. Failures show the Tally backup link `https://tally.so/r/Gxq2JL`.
+  script, no cookies, so it works without cookie consent. Answers are saved
+  under the names and values the earlier sign-ups use (owner's choice):
+  `Retreat Interest` = "Volume 1: Marrakech, Morocco" / "Volume 2: Sintra,
+  Portugal" / "Both 2027 residencies"; `How did you hear about us` (ticked
+  options joined with ", ", TikTok saved as "Tiktok"); `Part of book club`
+  Yes / No; Country and Whereabouts in Klaviyo's location country / city;
+  new questions as `Book club name` and `Referred by`. Don't rename them. Failures show the Tally backup link `https://tally.so/r/Gxq2JL`.
   Trip pages' own Get on The List buttons are separate (Waitlist link).
 - The owner dictates messages with Wispr Flow, so spellings in their requests
   can be transcription errors. Ask when a name looks off.

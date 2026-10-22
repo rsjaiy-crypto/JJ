@@ -3,8 +3,11 @@
  * The Between the Lines waitlist pop-up. Rendered in the footer by
  * jj_btl_waitlist_render(); hidden until opened.
  *
- * Field names are the Klaviyo profile fields and properties they save to;
- * the welcome emails depend on them, so don't rename them or their values.
+ * js/btl-waitlist.js saves the answers under the names and values the
+ * earlier Between the Lines sign-ups use in Klaviyo (Retreat Interest, How
+ * did you hear about us, Part of book club, location country and city), so
+ * segments and emails see old and new sign-ups alike. Don't change the
+ * option values without checking Klaviyo.
  *
  * @package jaiye-journeys
  */
@@ -60,10 +63,10 @@ defined( 'ABSPATH' ) || exit;
           <label for="btlw-volume"><?php esc_html_e( 'Which Volume are you interested in?', 'jaiye-journeys' ); ?> <span class="btlw__req" aria-hidden="true">*</span></label>
           <select id="btlw-volume" name="BTL Volume interest" required>
             <option value=""><?php esc_html_e( 'Choose a Volume', 'jaiye-journeys' ); ?></option>
-            <?php // Saved values are what the emails use; Marrakech keeps its original spelling there. ?>
-            <option value="Marrakech"><?php esc_html_e( 'Volume 1: Marrakesh, Morocco', 'jaiye-journeys' ); ?></option>
-            <option value="Sintra"><?php esc_html_e( 'Volume 2: Sintra, Portugal', 'jaiye-journeys' ); ?></option>
-            <option value="Both"><?php esc_html_e( 'Both 2027 residencies', 'jaiye-journeys' ); ?></option>
+            <?php // Saved values match the earlier sign-ups in Klaviyo ("Retreat Interest"), so Marrakech keeps that spelling there. ?>
+            <option value="Volume 1: Marrakech, Morocco"><?php esc_html_e( 'Volume 1: Marrakesh, Morocco', 'jaiye-journeys' ); ?></option>
+            <option value="Volume 2: Sintra, Portugal"><?php esc_html_e( 'Volume 2: Sintra, Portugal', 'jaiye-journeys' ); ?></option>
+            <option value="Both 2027 residencies"><?php esc_html_e( 'Both 2027 residencies', 'jaiye-journeys' ); ?></option>
           </select>
         </div>
 
@@ -86,7 +89,7 @@ defined( 'ABSPATH' ) || exit;
             <?php
             $sources = [
                 'Instagram'        => __( 'Instagram', 'jaiye-journeys' ),
-                'TikTok'           => __( 'TikTok', 'jaiye-journeys' ),
+                'Tiktok'           => __( 'TikTok', 'jaiye-journeys' ), // Saved as "Tiktok", like earlier sign-ups.
                 'Google'           => __( 'Google', 'jaiye-journeys' ),
                 'A friend told me' => __( 'A friend told me', 'jaiye-journeys' ),
                 'Travel advisor'   => __( 'Fora / Virtuoso / travel advisor network', 'jaiye-journeys' ),
