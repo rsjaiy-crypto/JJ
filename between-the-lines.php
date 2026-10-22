@@ -618,6 +618,7 @@ get_header();
       </p>
       <a
         href="https://tally.so/r/Gxq2JL"
+        data-klaviyo-form="<?php echo esc_attr( JAIYE_KLAVIYO_LIST_FORM ); ?>"
         class="btl-hero__btn"
         target="_blank"
         rel="noopener noreferrer"
@@ -655,6 +656,7 @@ get_header();
           </p>
           <a
             href="https://tally.so/r/Gxq2JL"
+            data-klaviyo-form="<?php echo esc_attr( JAIYE_KLAVIYO_LIST_FORM ); ?>"
             class="btl-concept__link"
             target="_blank"
             rel="noopener noreferrer"
@@ -943,6 +945,7 @@ get_header();
     </p>
     <a
       href="https://tally.so/r/Gxq2JL"
+      data-klaviyo-form="<?php echo esc_attr( JAIYE_KLAVIYO_LIST_FORM ); ?>"
       class="btl-waitlist__btn"
       target="_blank"
       rel="noopener noreferrer"

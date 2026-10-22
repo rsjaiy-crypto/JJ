@@ -178,6 +178,10 @@ the site header or footer, so no tracking loads there.
   numbered within their volume. Volume names: Marrakesh = "Scents and Sounds",
   Sintra = "Mists and Mysteries".
 - The waitlist is called **The List** ("Get on The List").
+  On the Between the Lines page and the BTL Retreat template, links to the
+  BTL list (Tally `Gxq2JL`) carry `data-klaviyo-form` and open the Klaviyo
+  pop-up `JAIYE_KLAVIYO_LIST_FORM` (`js/list-form.js`) when Klaviyo is
+  loaded, i.e. the visitor accepted cookies; otherwise they open Tally.
 - The owner dictates messages with Wispr Flow, so spellings in their requests
   can be transcription errors. Ask when a name looks off.
 
