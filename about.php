@@ -47,16 +47,16 @@ $partners = [
     class="ab-hero"
     aria-label="<?php esc_attr_e( 'About Steph, founder of Jaiye Journeys', 'jaiye-journeys' ); ?>"
   >
-    <div class="ab-hero__media" aria-hidden="true">
+    <div class="ab-hero__media">
       <img
         src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/steph-hero.jpg' ); ?>"
-        alt=""
+        alt="<?php esc_attr_e( 'Steph smiling on a boat above clear turquoise water', 'jaiye-journeys' ); ?>"
         class="ab-hero__bg-img"
         loading="eager"
         decoding="async"
         fetchpriority="high"
       >
-      <div class="ab-hero__overlay"></div>
+      <div class="ab-hero__overlay" aria-hidden="true"></div>
     </div>
 
     <div class="container ab-hero__inner">
@@ -91,10 +91,10 @@ $partners = [
       </p>
     </div>
 
-    <div class="ab-intro__image-col" aria-hidden="true">
+    <div class="ab-intro__image-col">
       <img
         src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/steph-intro.jpg?v=2' ); ?>"
-        alt=""
+        alt="<?php esc_attr_e( 'Steph in sunglasses and a white shirt against a bright blue wall', 'jaiye-journeys' ); ?>"
         class="ab-intro__img"
         loading="lazy"
       >
@@ -111,10 +111,10 @@ $partners = [
     aria-label="<?php esc_attr_e( 'My story', 'jaiye-journeys' ); ?>"
   >
 
-    <div class="ab-story__media" aria-hidden="true">
+    <div class="ab-story__media">
       <img
         src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/steph-story.jpg' ); ?>"
-        alt=""
+        alt="<?php esc_attr_e( 'Steph in profile against a bright blue wall', 'jaiye-journeys' ); ?>"
         class="ab-story__img"
         loading="lazy"
       >
@@ -364,13 +364,13 @@ $partners = [
       </h2>
     </div>
 
-    <div class="ab-collage__strip" aria-hidden="true">
+    <div class="ab-collage__strip">
 
       <!-- card 1 -->
       <div class="ab-collage__card" style="--card-transform: rotate(-5deg) translateY(10px)">
         <img
           src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/steph-desert-quad.jpg' ); ?>"
-          alt="" class="ab-collage__img" loading="lazy"
+          alt="<?php esc_attr_e( 'Steph on a quad bike in the desert, arms raised', 'jaiye-journeys' ); ?>" class="ab-collage__img" loading="lazy"
         >
       </div>
 
@@ -378,7 +378,7 @@ $partners = [
       <div class="ab-collage__card" style="--card-transform: rotate(3deg) translateY(-15px)">
         <img
           src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/steph-water.jpg' ); ?>"
-          alt="" class="ab-collage__img" loading="lazy"
+          alt="<?php esc_attr_e( 'Steph floating on her back in clear shallow water', 'jaiye-journeys' ); ?>" class="ab-collage__img" loading="lazy"
         >
       </div>
 
@@ -386,7 +386,7 @@ $partners = [
       <div class="ab-collage__card" style="--card-transform: rotate(-2deg) translateY(20px)">
         <img
           src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/steph-marrakech.jpg' ); ?>"
-          alt="" class="ab-collage__img" loading="lazy"
+          alt="<?php esc_attr_e( 'A cushioned window seat and lunch table in dappled sunlight', 'jaiye-journeys' ); ?>" class="ab-collage__img" loading="lazy"
         >
       </div>
 
@@ -394,7 +394,7 @@ $partners = [
       <div class="ab-collage__card" style="--card-transform: rotate(6deg) translateY(-8px)">
         <img
           src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/travel-tuscany.jpg' ); ?>"
-          alt="" class="ab-collage__img" loading="lazy"
+          alt="<?php esc_attr_e( 'A peach villa with green shutters and red flowers on the balcony', 'jaiye-journeys' ); ?>" class="ab-collage__img" loading="lazy"
         >
       </div>
 
@@ -402,7 +402,7 @@ $partners = [
       <div class="ab-collage__card" style="--card-transform: rotate(-4deg) translateY(15px)">
         <img
           src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/travel-bali-pool.jpg' ); ?>"
-          alt="" class="ab-collage__img" loading="lazy"
+          alt="<?php esc_attr_e( 'A white parasol and loungers beside a pool among palms', 'jaiye-journeys' ); ?>" class="ab-collage__img" loading="lazy"
         >
       </div>
 
@@ -410,7 +410,7 @@ $partners = [
       <div class="ab-collage__card" style="--card-transform: rotate(2deg) translateY(-20px)">
         <img
           src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/travel-tea.jpg' ); ?>"
-          alt="" class="ab-collage__img" loading="lazy"
+          alt="<?php esc_attr_e( 'Hot chocolate and a teapot on a sunny breakfast table', 'jaiye-journeys' ); ?>" class="ab-collage__img" loading="lazy"
         >
       </div>
 
@@ -418,7 +418,7 @@ $partners = [
       <div class="ab-collage__card" style="--card-transform: rotate(-7deg) translateY(5px)">
         <img
           src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/travel-lobby.jpg' ); ?>"
-          alt="" class="ab-collage__img" loading="lazy"
+          alt="<?php esc_attr_e( 'A floral sofa with cushions beneath tall palms in a grand lobby', 'jaiye-journeys' ); ?>" class="ab-collage__img" loading="lazy"
         >
       </div>
 
@@ -426,7 +426,7 @@ $partners = [
       <div class="ab-collage__card" style="--card-transform: rotate(4deg) translateY(-20px)">
         <img
           src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/travel-riad-pool.jpg' ); ?>"
-          alt="" class="ab-collage__img" loading="lazy"
+          alt="<?php esc_attr_e( 'Palm trees and terracotta arches reflected in a still pool', 'jaiye-journeys' ); ?>" class="ab-collage__img" loading="lazy"
         >
       </div>
 
@@ -434,7 +434,7 @@ $partners = [
       <div class="ab-collage__card" style="--card-transform: rotate(-2deg) translateY(15px)">
         <img
           src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/travel-terrace.jpg' ); ?>"
-          alt="" class="ab-collage__img" loading="lazy"
+          alt="<?php esc_attr_e( 'A sunlit lounge with cream sofas and wooden tables', 'jaiye-journeys' ); ?>" class="ab-collage__img" loading="lazy"
         >
       </div>
 
@@ -442,7 +442,7 @@ $partners = [
       <div class="ab-collage__card" style="--card-transform: rotate(8deg) translateY(-10px)">
         <img
           src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/travel-yacht.jpg' ); ?>"
-          alt="" class="ab-collage__img" loading="lazy"
+          alt="<?php esc_attr_e( 'A man stepping onto a wooden motorboat in a marina', 'jaiye-journeys' ); ?>" class="ab-collage__img" loading="lazy"
         >
       </div>
 
@@ -450,7 +450,7 @@ $partners = [
       <div class="ab-collage__card" style="--card-transform: rotate(-5deg) translateY(20px)">
         <img
           src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/travel-sea.jpg' ); ?>"
-          alt="" class="ab-collage__img" loading="lazy"
+          alt="<?php esc_attr_e( 'Sunlight sparkling on the sea', 'jaiye-journeys' ); ?>" class="ab-collage__img" loading="lazy"
         >
       </div>
 
@@ -458,7 +458,7 @@ $partners = [
       <div class="ab-collage__card" style="--card-transform: rotate(3deg) translateY(-15px)">
         <img
           src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/trip-bahia.jpg' ); ?>"
-          alt="" class="ab-collage__img" loading="lazy"
+          alt="<?php esc_attr_e( 'A volcano on the horizon under a pink sunset sky', 'jaiye-journeys' ); ?>" class="ab-collage__img" loading="lazy"
         >
       </div>
 

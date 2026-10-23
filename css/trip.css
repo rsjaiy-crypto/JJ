@@ -1735,6 +1735,40 @@
   margin: 0 0 var(--space-3);
 }
 
+/* BTL: "A six-day reading retreat in …" under the title */
+.trip-hero__sub {
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  font-weight: var(--fw-light);
+  line-height: 1.4;
+  color: var(--color-cream);
+  margin: calc(var(--space-2) * -1) 0 var(--space-5);
+  max-width: 36ch;
+}
+
+/* BTL: link back to the Between the Lines page under "Other journeys" */
+.trip-other__inner:has(.trip-other__btl) {
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.trip-other__btl {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: var(--text-base);
+  color: var(--color-forest);
+  text-decoration: underline;
+  text-decoration-color: var(--color-salmon);
+  text-underline-offset: 4px;
+  text-align: center;
+}
+
+.trip-soon__back .trip-other__btl {
+  display: block;
+  margin-top: var(--space-5);
+}
+
 /* BTL leans further into the serif and drops the tag pills' hard edges */
 .trip--btl .trip-hero__title {
   font-style: italic;

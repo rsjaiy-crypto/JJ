@@ -1,0 +1,551 @@
+/* ==========================================================================
+   The Journal: posts index, archives, single posts, and the "From The
+   Journal" block on the Between the Lines page.
+   Loaded by inc/journal.php. Tokens come from global.css :root.
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   1. Listing header (home.php, archive.php, index.php)
+   -------------------------------------------------------------------------- */
+
+.jl-hero {
+  background-color: var(--color-cream);
+  padding-block: clamp(64px, 9vw, 120px) clamp(40px, 5vw, 64px);
+  text-align: center;
+}
+
+.jl-hero__overline {
+  display: block;
+  margin-bottom: var(--space-4);
+}
+
+.jl-hero__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-4xl);
+  font-style: italic;
+  font-weight: var(--fw-regular);
+  color: var(--color-forest);
+  line-height: 1.1;
+  margin: 0 auto;
+  max-width: 18ch;
+}
+
+.jl-hero__intro {
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  font-weight: var(--fw-light);
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--color-forest) 80%, transparent);
+  max-width: 560px;
+  margin: var(--space-6) auto 0;
+}
+
+.jl-hero__intro p {
+  margin: 0;
+}
+
+/* Category links under the heading */
+.jl-topics {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-10);
+}
+
+.jl-topics a {
+  display: inline-flex;
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-forest);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  transition: background-color var(--duration-base) var(--ease-out), color var(--duration-base) var(--ease-out);
+}
+
+.jl-topics a:hover,
+.jl-topics a[aria-current="page"] {
+  background-color: var(--color-forest);
+  border-color: var(--color-forest);
+  color: var(--color-cream);
+}
+
+
+/* --------------------------------------------------------------------------
+   2. Post grid and cards
+   -------------------------------------------------------------------------- */
+
+.jl-list {
+  background-color: var(--color-cream);
+  padding-bottom: var(--section-gap);
+}
+
+.jl-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(var(--space-12), 5vw, var(--space-16)) var(--space-8);
+}
+
+@media (min-width: 768px) {
+  .jl-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1200px) {
+  .jl-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+.jl-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.jl-card__media {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background-color: color-mix(in srgb, var(--color-sage) 30%, transparent);
+}
+
+.jl-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--duration-slow) var(--ease-out);
+}
+
+.jl-card:hover .jl-card__img {
+  transform: scale(1.03);
+}
+
+.jl-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.jl-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--fw-regular);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-forest) 70%, transparent);
+  margin: 0;
+  max-width: none;
+}
+
+.jl-meta__category {
+  color: var(--color-salmon);
+}
+
+.jl-card__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-regular);
+  line-height: 1.2;
+  color: var(--color-forest);
+  margin: 0;
+}
+
+.jl-card__link {
+  color: inherit;
+}
+
+/* The title link covers the card, so the whole card is one tap target */
+.jl-card__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.jl-card__link:focus-visible {
+  outline: none;
+}
+
+.jl-card:has(.jl-card__link:focus-visible) {
+  outline: 2px solid var(--color-salmon);
+  outline-offset: 6px;
+  border-radius: var(--radius-md);
+}
+
+.jl-card__excerpt {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-light);
+  line-height: 1.75;
+  color: color-mix(in srgb, var(--color-forest) 80%, transparent);
+  margin: 0;
+  max-width: none;
+}
+
+.jl-card__cta {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: var(--text-base);
+  color: var(--color-salmon);
+}
+
+/* Newest post on the first page: wide, image beside text */
+@media (min-width: 768px) {
+  .jl-card--feature {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    align-items: center;
+    gap: clamp(var(--space-8), 4vw, var(--space-16));
+  }
+
+  .jl-card--feature .jl-card__title {
+    font-size: var(--text-2xl);
+  }
+}
+
+.jl-empty {
+  max-width: none;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: var(--text-lg);
+  color: var(--color-forest);
+}
+
+/* Pagination (the_posts_pagination) */
+.jl-list .pagination {
+  margin-top: var(--section-gap-sm);
+}
+
+.jl-list .nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.jl-list .page-numbers {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding-inline: var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-forest);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.jl-list .page-numbers.current,
+.jl-list a.page-numbers:hover {
+  background-color: var(--color-forest);
+  border-color: var(--color-forest);
+  color: var(--color-cream);
+}
+
+
+/* --------------------------------------------------------------------------
+   3. Single post (single.php)
+   -------------------------------------------------------------------------- */
+
+.jp-header {
+  background-color: var(--color-cream);
+  padding-block: clamp(56px, 8vw, 112px) clamp(32px, 4vw, 56px);
+  text-align: center;
+}
+
+.jp-header__category {
+  display: inline-block;
+  margin-bottom: var(--space-5);
+}
+
+.jp-header__category a {
+  color: inherit;
+}
+
+.jp-header__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-4xl);
+  font-weight: var(--fw-regular);
+  line-height: 1.1;
+  color: var(--color-forest);
+  margin: 0 auto;
+  max-width: 20ch;
+}
+
+.jp-header .jl-meta {
+  justify-content: center;
+  margin-top: var(--space-6);
+}
+
+.jp-figure {
+  background-color: var(--color-cream);
+  margin: 0;
+}
+
+.jp-figure__inner {
+  max-width: 1080px;
+  margin-inline: auto;
+}
+
+.jp-figure__img {
+  width: 100%;
+  height: auto;
+  max-height: 80vh;
+  object-fit: cover;
+  display: block;
+  border-radius: var(--radius-md);
+}
+
+.jp-figure__caption {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-style: italic;
+  font-weight: var(--fw-light);
+  color: color-mix(in srgb, var(--color-forest) 70%, transparent);
+  text-align: center;
+  margin-top: var(--space-3);
+}
+
+.jp-body {
+  background-color: var(--color-cream);
+  padding-block: clamp(48px, 7vw, 96px);
+}
+
+/* Post content typography */
+.jp-content {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--fw-light);
+  line-height: 1.85;
+  color: color-mix(in srgb, var(--color-forest) 88%, transparent);
+}
+
+.jp-content > * + * {
+  margin-top: 1.4em;
+}
+
+.jp-content p {
+  max-width: none;
+  margin-bottom: 0;
+}
+
+.jp-content > p:first-child {
+  font-size: var(--text-md);
+  color: var(--color-forest);
+}
+
+.jp-content h2 {
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+  font-weight: var(--fw-regular);
+  line-height: 1.2;
+  color: var(--color-forest);
+  margin-top: 2em;
+}
+
+.jp-content h3 {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-style: italic;
+  font-weight: var(--fw-regular);
+  line-height: 1.25;
+  color: var(--color-forest);
+  margin-top: 1.8em;
+}
+
+.jp-content ul,
+.jp-content ol {
+  padding-left: var(--space-6);
+}
+
+.jp-content ul { list-style: disc; }
+.jp-content ol { list-style: decimal; }
+.jp-content li + li { margin-top: var(--space-2); }
+
+.jp-content a {
+  color: var(--color-forest);
+  text-decoration: underline;
+  text-decoration-color: var(--color-salmon);
+  text-underline-offset: 3px;
+}
+
+.jp-content a:hover {
+  color: var(--color-salmon);
+}
+
+.jp-content blockquote {
+  border: 0;
+  border-block: 1px solid var(--color-sage);
+  padding: var(--space-10) 0;
+  margin-block: 2em;
+  text-align: center;
+}
+
+.jp-content blockquote,
+.jp-content blockquote p {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-style: italic;
+  line-height: 1.35;
+  color: var(--color-forest);
+}
+
+.jp-content img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+
+.jp-content figure {
+  margin-inline: 0;
+}
+
+.jp-content figcaption {
+  font-size: var(--text-xs);
+  font-style: italic;
+  text-align: center;
+  margin-top: var(--space-2);
+  color: color-mix(in srgb, var(--color-forest) 70%, transparent);
+}
+
+/* Author */
+.jp-author {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-16);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--color-border);
+}
+
+.jp-author__name {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: var(--text-lg);
+  color: var(--color-forest);
+  margin: 0;
+}
+
+.jp-author__bio {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--fw-light);
+  line-height: 1.75;
+  color: color-mix(in srgb, var(--color-forest) 80%, transparent);
+  margin: 0;
+  max-width: none;
+}
+
+.jp-author__link {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-salmon);
+}
+
+
+/* --------------------------------------------------------------------------
+   4. Closing call to action (single posts, Reading Retreats archive)
+   -------------------------------------------------------------------------- */
+
+.jp-cta {
+  background-color: var(--color-deep-green);
+  text-align: center;
+  padding: clamp(64px, 8vw, 96px) var(--container-pad);
+}
+
+.jp-cta__overline {
+  display: block;
+  color: var(--color-sage);
+  margin-bottom: var(--space-3);
+}
+
+.jp-cta__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-style: italic;
+  font-weight: var(--fw-regular);
+  line-height: 1.2;
+  color: var(--color-cream);
+  margin: 0;
+}
+
+.jp-cta__body {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--fw-light);
+  line-height: 1.75;
+  color: var(--color-sage);
+  max-width: 480px;
+  margin: var(--space-4) auto 0;
+}
+
+.jp-cta__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-4) var(--space-8);
+  margin-top: var(--space-10);
+}
+
+.jp-cta__link {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: var(--text-base);
+  color: var(--color-cream);
+  text-decoration: underline;
+  text-decoration-color: var(--color-salmon);
+  text-underline-offset: 4px;
+}
+
+
+/* --------------------------------------------------------------------------
+   5. Related posts and "From The Journal"
+   -------------------------------------------------------------------------- */
+
+.jl-related {
+  background-color: var(--color-cream);
+  padding-block: var(--section-gap);
+}
+
+.jl-related__overline {
+  display: block;
+  text-align: center;
+  margin-bottom: var(--space-3);
+}
+
+.jl-related__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: var(--fw-regular);
+  color: var(--color-forest);
+  text-align: center;
+  margin: 0 0 var(--space-12);
+}
+
+.jl-related__more {
+  margin-top: var(--space-12);
+  text-align: center;
+  max-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jl-card__img,
+  .jl-card:hover .jl-card__img {
+    transition: none;
+    transform: none;
+  }
+}

@@ -42,7 +42,7 @@ if ( ! empty( $cs_departures[0] ) ) {
         the_post_thumbnail( 'full', [
             'class'   => 'trip-hero__img',
             'loading' => 'eager',
-            'alt'     => esc_attr( get_the_title() ),
+            'alt'     => jj_attachment_alt( get_post_thumbnail_id(), jj_trip_volume_title( $trip_id ) ),
         ] );
         ?>
       <?php endif; ?>
@@ -61,6 +61,9 @@ if ( ! empty( $cs_departures[0] ) ) {
       </p>
 
       <h1 class="trip-hero__title"><?php echo esc_html( jj_trip_volume_title( $trip_id ) ); ?></h1>
+      <?php if ( $is_btl ) : ?>
+        <p class="trip-hero__sub"><?php echo esc_html( jj_trip_retreat_line( $trip_id ) ); ?></p>
+      <?php endif; ?>
 
       <?php jj_render_trip_vibe_tags( $trip_id ); ?>
     </div>
@@ -138,6 +141,11 @@ if ( ! empty( $cs_departures[0] ) ) {
         <a href="<?php echo esc_url( home_url( '/our-journeys/' ) ); ?>" class="btn btn--primary">
           <?php esc_html_e( 'Other journeys', 'jaiye-journeys' ); ?>
         </a>
+        <?php if ( $is_btl ) : ?>
+          <a href="<?php echo esc_url( jj_page_url( 'between-the-lines' ) ); ?>" class="trip-other__btl">
+            <?php esc_html_e( 'About Between the Lines reading retreats', 'jaiye-journeys' ); ?>
+          </a>
+        <?php endif; ?>
       </p>
     </div>
   </section>

@@ -138,7 +138,8 @@ the site header or footer, so no tracking loads there.
   deposits, room prices and places, chapter labels and status, payment plan
   dates. Saving only touches those fields and columns, cleaned by type
   through `jj_trip_sanitise_value()`. Everything else stays in wp-admin.
-- New routes need a `JJ_TRIP_REWRITE_VERSION` bump (1.2.0 added /manage/).
+- New routes need a `JJ_TRIP_REWRITE_VERSION` bump (1.2.0 added /manage/,
+  1.3.0 added /llms.txt).
 
 ### Edit Trip boxes (tidied October 2026)
 
@@ -182,6 +183,28 @@ triggers the "JJ: General welcome" flow.
   availability.
 - Every card uses `jj_trip_status_tag()` and the call to action "Step inside".
   Every trip page ends with the "Other journeys" button.
+
+### Search and AI readability (October 2026)
+
+- `inc/seo.php`: the Between the Lines FAQ copy (`jj_btl_faqs()`, used by
+  the page, its FAQPage JSON-LD and llms.txt; its prices and dates are typed
+  copy, so update them by hand), structured data added to **Rank Math's**
+  graph through `rank_math/json_ld` (FAQPage on the BTL page; one Event per
+  chapter on the Marrakesh and Sintra trip pages only, listed by slug in
+  `JJ_EVENT_TRIP_SLUGS`, with an Offer only while On sale), the alt-text
+  fallback for Media Library images, and `/llms.txt` (served only while Rank
+  Math's own llms.txt module is off). Never print a second JSON-LD block
+  beside Rank Math's.
+- The Journal (blog): `home.php`, `archive.php`, `index.php`, `single.php`,
+  `inc/journal.php`, `inc/journal-list.php`, `inc/journal-cta.php`,
+  `css/journal.css`. Posts page = /journal/ (Settings → Reading). Posts in
+  the **Reading Retreats** category (`reading-retreats`) end with the BTL
+  call to action; others with Contact. "Journal" joins the menus before
+  Contact once a Posts page is set.
+- BTL trip pages show "A six-day reading retreat in …" under the title
+  (`jj_trip_retreat_line()`, from Duration and Destination) and link back to
+  the Between the Lines page. `#btl-waitlist` on the BTL page opens the
+  waitlist pop-up, like `?waitlist=btl`.
 
 ## House style and wording
 

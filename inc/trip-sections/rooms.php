@@ -50,7 +50,7 @@ defined( 'ABSPATH' ) || exit;
             <article class="trip-room js-reveal<?php echo $room_sold ? ' is-sold-out' : ''; ?>">
               <?php if ( $room['image'] ) : ?>
                 <div class="trip-room__media">
-                  <?php echo wp_get_attachment_image( $room['image'], 'medium_large', false, [ 'class' => 'trip-room__img', 'loading' => 'lazy' ] ); ?>
+                  <?php echo wp_get_attachment_image( $room['image'], 'medium_large', false, [ 'class' => 'trip-room__img', 'loading' => 'lazy', 'alt' => jj_attachment_alt( $room['image'], $room['name'] ) ] ); ?>
                 </div>
               <?php endif; ?>
               <div class="trip-room__body">

@@ -22,6 +22,8 @@ require_once get_template_directory() . '/inc/trip-meta.php';
 require_once get_template_directory() . '/inc/trip-booking.php';
 require_once get_template_directory() . '/inc/manage.php';
 require_once get_template_directory() . '/inc/btl-waitlist.php';
+require_once get_template_directory() . '/inc/journal.php';
+require_once get_template_directory() . '/inc/seo.php';
 require_once get_template_directory() . '/inc/trip-seed.php';
 
 
@@ -262,6 +264,14 @@ function jaiye_fallback_nav_menu() {
     </li>
     <?php
     foreach ( $trailing_items as $slug => $label ) {
+        // The Journal sits before Contact once a Posts page is set.
+        if ( 'contact' === $slug && jj_journal_ready() ) {
+            printf(
+                '<li class="menu-item"><a href="%s">%s</a></li>',
+                esc_url( jj_journal_url() ),
+                esc_html__( 'Journal', 'jaiye-journeys' )
+            );
+        }
         $page = get_page_by_path( $slug );
         $url  = $page ? get_permalink( $page->ID ) : home_url( '/' . $slug . '/' );
         printf(

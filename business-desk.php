@@ -16,13 +16,13 @@ get_header();
     class="bd-hero"
     aria-label="<?php esc_attr_e( 'The Business Desk', 'jaiye-journeys' ); ?>"
   >
-    <div class="bd-hero__media" aria-hidden="true">
+    <div class="bd-hero__media">
       <img
         src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/corporatetransfers.jpg' ); ?>"
-        alt=""
+        alt="<?php esc_attr_e( 'A black chauffeur car parked on a city street lined with tall buildings', 'jaiye-journeys' ); ?>"
         class="bd-hero__img"
       >
-      <div class="bd-hero__overlay"></div>
+      <div class="bd-hero__overlay" aria-hidden="true"></div>
     </div>
 
     <div class="container bd-hero__inner">

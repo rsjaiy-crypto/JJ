@@ -665,6 +665,36 @@ function jj_trip_volume_title( $post_id = null ) {
 
 
 /**
+ * A BTL trip's one-line description under its title, e.g. "A six-day
+ * reading retreat in Marrakesh, Morocco". The length comes from the
+ * Duration field ("5 Nights, 6 Days") and is left out when that's blank.
+ *
+ * @param int|null $post_id Post ID.
+ * @return string Empty for trips that aren't Between the Lines.
+ */
+function jj_trip_retreat_line( $post_id = null ) {
+    $post_id = $post_id ? $post_id : get_the_ID();
+    if ( 'btl' !== jj_trip_field( 'brand', $post_id, 'jj-edit' ) ) {
+        return '';
+    }
+
+    $words = [ 3 => 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen' ];
+    $days  = preg_match( '/(\d+)\s*Days?/i', (string) jj_trip_field( 'duration', $post_id ), $m ) ? (int) $m[1] : 0;
+    $place = jj_trip_field( 'destination', $post_id );
+
+    if ( $days && $place ) {
+        /* translators: 1: length in words, e.g. "six", 2: destination */
+        return sprintf( __( 'A %1$s-day reading retreat in %2$s', 'jaiye-journeys' ), isset( $words[ $days ] ) ? $words[ $days ] : $days, $place );
+    }
+    if ( $place ) {
+        /* translators: %s: destination */
+        return sprintf( __( 'A reading retreat in %s', 'jaiye-journeys' ), $place );
+    }
+    return __( 'A Between the Lines reading retreat', 'jaiye-journeys' );
+}
+
+
+/**
  * Published Between the Lines trips, in volume order.
  *
  * A volume is a residency (a destination); its chapters are the individual

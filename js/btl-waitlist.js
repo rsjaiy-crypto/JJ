@@ -2,7 +2,7 @@
  * Between the Lines waitlist pop-up (inc/btl-waitlist-form.php).
  *
  * Opens from any [data-btl-waitlist] link, and on arrival with
- * ?waitlist=btl. On submit it sends the sign-up straight to Klaviyo's
+ * ?waitlist=btl or #btl-waitlist. On submit it sends the sign-up straight to Klaviyo's
  * public client API: the email marketing subscription to the list first
  * (it triggers the welcome flow), then the profile's names and answers.
  * No Klaviyo script, no cookies, so it works whatever the visitor chose on
@@ -71,7 +71,8 @@
 		open( link );
 	} );
 
-	if ( /[?&]waitlist=btl(?:&|$)/.test( window.location.search ) ) {
+	// ?waitlist=btl is the link in bio; #btl-waitlist comes from Journal posts.
+	if ( /[?&]waitlist=btl(?:&|$)/.test( window.location.search ) || '#btl-waitlist' === window.location.hash ) {
 		open( null );
 	}
 

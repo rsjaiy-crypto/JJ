@@ -49,7 +49,15 @@
                 foreach ( $footer_links as $slug => $label ) :
                     $page = get_page_by_path( $slug );
                     $url  = $page ? get_permalink( $page->ID ) : home_url( '/' . $slug . '/' );
+                    // The Journal sits before Contact once a Posts page is set.
+                    if ( 'contact' === $slug && jj_journal_ready() ) :
                 ?>
+                  <li class="menu-item">
+                    <a href="<?php echo esc_url( jj_journal_url() ); ?>">
+                      <?php esc_html_e( 'Journal', 'jaiye-journeys' ); ?>
+                    </a>
+                  </li>
+                <?php endif; ?>
                   <li class="menu-item">
                     <a href="<?php echo esc_url( $url ); ?>">
                       <?php echo esc_html( $label ); ?>

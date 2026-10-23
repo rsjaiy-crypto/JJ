@@ -59,13 +59,14 @@ get_header();
   height: auto;
 }
 
-.btl-hero__sub {
+.btl-hero__title {
   font-family: var(--font-heading);
   font-style: italic;
   font-size: var(--text-xl);
   font-weight: var(--fw-regular);
   color: var(--color-cream);
   line-height: 1.35;
+  letter-spacing: normal;
   margin-top: 32px;
   max-width: none;
   margin-bottom: 0;
@@ -211,12 +212,17 @@ get_header();
 .btl-usp__tile {
   padding: 48px 40px;
   background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Tiles start hidden only once the script below runs, so they still show
+   without JavaScript. */
+.btl-usp--animate .btl-usp__tile {
   opacity: 0;
   transform: translateY(40px);
   transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out);
 }
 
-.btl-usp__tile.btl-usp__tile--visible {
+.btl-usp--animate .btl-usp__tile.btl-usp__tile--visible {
   opacity: 1;
   transform: translateY(0);
 }
@@ -253,7 +259,7 @@ get_header();
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .btl-usp__tile {
+  .btl-usp--animate .btl-usp__tile {
     opacity: 1;
     transform: none;
     transition: none;
@@ -513,7 +519,7 @@ get_header();
 }
 
 
-/* ── 7. WAITLIST CTA ──────────────────────────────────────────────── */
+/* ── 9. WAITLIST CTA ──────────────────────────────────────────────── */
 
 .btl-waitlist {
   background-color: var(--color-deep-green);
@@ -583,6 +589,140 @@ get_header();
 .btl-waitlist__btn:active {
   transform: translateY(0);
 }
+
+/* ── 7. FROM THE JOURNAL ──────────────────────────────────────────── */
+/* Cards come from css/journal.css (.jl-grid, .jl-card). */
+
+.btl-journal {
+  background-color: var(--color-cream);
+  padding-bottom: clamp(64px, 8vw, 96px);
+}
+
+.btl-journal__overline {
+  display: block;
+  text-align: center;
+  margin-bottom: var(--space-3);
+}
+
+.btl-journal__heading {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: var(--fw-regular);
+  color: var(--color-deep-green);
+  text-align: center;
+  margin-bottom: var(--space-12);
+}
+
+.btl-journal__more {
+  margin-top: var(--space-12);
+  text-align: center;
+  max-width: none;
+}
+
+
+/* ── 8. FAQ ───────────────────────────────────────────────────────── */
+
+.btl-faq {
+  background-color: var(--color-surface);
+  padding-block: clamp(64px, 8vw, 96px);
+}
+
+.btl-faq__inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+
+.btl-faq__overline {
+  display: block;
+  margin-bottom: var(--space-3);
+}
+
+.btl-faq__heading {
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-style: italic;
+  font-weight: var(--fw-regular);
+  color: var(--color-deep-green);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.btl-faq__list {
+  border-top: 1px solid var(--color-border);
+}
+
+.btl-faq__item {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.btl-faq__question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-block: var(--space-6);
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
+  font-weight: var(--fw-regular);
+  color: var(--color-forest);
+  line-height: 1.3;
+  cursor: pointer;
+  list-style: none;
+}
+
+.btl-faq__question::-webkit-details-marker {
+  display: none;
+}
+
+/* Plus that turns into a minus when open */
+.btl-faq__question::after {
+  content: "+";
+  flex: 0 0 auto;
+  font-family: var(--font-body);
+  font-size: var(--text-xl);
+  font-weight: var(--fw-light);
+  line-height: 1;
+  color: var(--color-salmon);
+}
+
+.btl-faq__item[open] > .btl-faq__question::after {
+  content: "\2212";
+}
+
+.btl-faq__question:focus-visible {
+  outline: 2px solid var(--color-salmon);
+  outline-offset: 4px;
+}
+
+.btl-faq__answer {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--fw-light);
+  line-height: 1.8;
+  color: color-mix(in srgb, var(--color-forest) 85%, transparent);
+  max-width: 62ch;
+  margin: 0;
+  padding-bottom: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  .btl-faq__inner {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--space-16);
+  }
+
+  .btl-faq__intro {
+    flex: 0 0 34%;
+    position: sticky;
+    top: 160px;
+  }
+
+  .btl-faq__list {
+    flex: 1;
+  }
+}
 </style>
 
 <main id="main-content" class="site-main">
@@ -595,15 +735,15 @@ get_header();
     class="btl-hero"
     aria-label="<?php esc_attr_e( 'Between the Lines, a luxury literary residency', 'jaiye-journeys' ); ?>"
   >
-    <div class="btl-hero__media" aria-hidden="true">
+    <div class="btl-hero__media">
       <img
         src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/btl-hero.jpg' ); ?>"
-        alt=""
+        alt="<?php esc_attr_e( 'An e-reader, sunglasses and a camera on a sunlit rock above clear turquoise sea', 'jaiye-journeys' ); ?>"
         class="btl-hero__img"
         loading="eager"
         fetchpriority="high"
       >
-      <div class="btl-hero__overlay"></div>
+      <div class="btl-hero__overlay" aria-hidden="true"></div>
     </div>
 
     <div class="btl-hero__inner">
@@ -613,9 +753,9 @@ get_header();
         class="btl-hero__logo"
         loading="eager"
       >
-      <p class="btl-hero__sub">
-        <?php esc_html_e( 'A luxury literary residency by Jaiye Journeys', 'jaiye-journeys' ); ?>
-      </p>
+      <h1 class="btl-hero__title">
+        <?php esc_html_e( 'Luxury reading retreats by Jaiye Journeys', 'jaiye-journeys' ); ?>
+      </h1>
       <a
         href="#btl-waitlist"
         data-btl-waitlist
@@ -747,6 +887,8 @@ get_header();
     <script>
     (function() {
       var tiles = document.querySelectorAll('.btl-usp__tile');
+      if (!('IntersectionObserver' in window)) return;
+      document.querySelector('.btl-usp').classList.add('btl-usp--animate');
       var observer = new IntersectionObserver(function(entries) {
         entries.forEach(function(entry) {
           if (entry.isIntersecting) {
@@ -768,16 +910,13 @@ get_header();
        4. READING IMAGES
        Three images flush edge to edge, no captions.
        ============================================================ -->
-  <div
-    class="btl-images"
-    aria-hidden="true"
-  >
+  <div class="btl-images">
     <div class="btl-images__grid">
 
       <div class="btl-images__item">
         <img
           src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/btl-kindle-beach.jpg' ); ?>"
-          alt=""
+          alt="<?php esc_attr_e( 'A Kindle, sunglasses and a cap on a sun lounger by the sand', 'jaiye-journeys' ); ?>"
           class="btl-images__img"
           loading="lazy"
         >
@@ -786,7 +925,7 @@ get_header();
       <div class="btl-images__item">
         <img
           src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/btl-reading-pool.jpg' ); ?>"
-          alt=""
+          alt="<?php esc_attr_e( 'Reading a paperback with a highlighted passage at the edge of a sparkling pool', 'jaiye-journeys' ); ?>"
           class="btl-images__img"
           loading="lazy"
         >
@@ -795,7 +934,7 @@ get_header();
       <div class="btl-images__item">
         <img
           src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/btl-hero.jpg' ); ?>"
-          alt=""
+          alt="<?php esc_attr_e( 'An e-reader and sunglasses on a rock by the sea, a reading spot in the sun', 'jaiye-journeys' ); ?>"
           class="btl-images__img"
           loading="lazy"
         >
@@ -921,7 +1060,80 @@ get_header();
 
 
   <!-- ============================================================
-       7. WAITLIST CTA
+       7. FROM THE JOURNAL
+       Latest Reading Retreats posts. Hidden until that category has
+       a published post.
+       ============================================================ -->
+  <?php
+  $btl_journal_cat   = get_category_by_slug( JJ_JOURNAL_BTL_CATEGORY );
+  $btl_journal_posts = $btl_journal_cat ? get_posts( [
+      'post_type'           => 'post',
+      'post_status'         => 'publish',
+      'posts_per_page'      => 3,
+      'cat'                 => $btl_journal_cat->term_id,
+      'ignore_sticky_posts' => true,
+      'no_found_rows'       => true,
+      'fields'              => 'ids',
+  ] ) : [];
+  ?>
+  <?php if ( $btl_journal_posts ) : ?>
+    <section class="btl-journal" aria-labelledby="btl-journal-heading">
+      <div class="container">
+        <span class="overline btl-journal__overline">
+          <?php esc_html_e( 'From The Journal', 'jaiye-journeys' ); ?>
+        </span>
+        <h2 class="btl-journal__heading" id="btl-journal-heading">
+          <?php echo esc_html( $btl_journal_cat->name ); ?>
+        </h2>
+        <div class="jl-grid">
+          <?php foreach ( $btl_journal_posts as $btl_post_id ) : ?>
+            <?php jj_journal_card( $btl_post_id, 'h3' ); ?>
+          <?php endforeach; ?>
+        </div>
+        <p class="btl-journal__more">
+          <a href="<?php echo esc_url( get_category_link( $btl_journal_cat ) ); ?>" class="btn btn--secondary">
+            <?php
+            /* translators: %s: category name, e.g. Reading Retreats */
+            printf( esc_html__( 'More on %s', 'jaiye-journeys' ), esc_html( $btl_journal_cat->name ) );
+            ?>
+          </a>
+        </p>
+      </div>
+    </section>
+  <?php endif; ?>
+
+
+  <!-- ============================================================
+       8. FAQ
+       Copy and its FAQPage structured data both come from
+       jj_btl_faqs() in inc/seo.php, so they always match.
+       ============================================================ -->
+  <section class="btl-faq" id="faq" aria-labelledby="btl-faq-heading">
+    <div class="container">
+      <div class="btl-faq__inner">
+        <div class="btl-faq__intro">
+          <span class="overline btl-faq__overline">
+            <?php esc_html_e( 'Before you pack', 'jaiye-journeys' ); ?>
+          </span>
+          <h2 class="btl-faq__heading" id="btl-faq-heading">
+            <?php esc_html_e( 'Reading retreat questions, answered.', 'jaiye-journeys' ); ?>
+          </h2>
+        </div>
+        <div class="btl-faq__list">
+          <?php foreach ( jj_btl_faqs() as $btl_faq ) : ?>
+            <details class="btl-faq__item">
+              <summary class="btl-faq__question"><?php echo esc_html( $btl_faq['question'] ); ?></summary>
+              <p class="btl-faq__answer"><?php echo esc_html( $btl_faq['answer'] ); ?></p>
+            </details>
+          <?php endforeach; ?>
+        </div>
+      </div>
+    </div>
+  </section><!-- /.btl-faq -->
+
+
+  <!-- ============================================================
+       9. WAITLIST CTA
        Deep green bg. Monogram, heading, body, salmon button.
        ============================================================ -->
   <section
@@ -930,10 +1142,9 @@ get_header();
   >
     <img
       src="<?php echo esc_url( get_template_directory_uri() . '/assets/images/btl-logo-green-dark.png' ); ?>"
-      alt=""
+      alt="<?php esc_attr_e( 'Between the Lines monogram', 'jaiye-journeys' ); ?>"
       class="btl-waitlist__logo"
       loading="lazy"
-      aria-hidden="true"
     >
     <h2 class="btl-waitlist__heading">
       <?php esc_html_e( 'The best stories begin with a single page.', 'jaiye-journeys' ); ?>

@@ -21,6 +21,9 @@ get_header();
   font-family: var(--font-heading);
   font-style: italic;
   font-size: var(--text-2xl);
+  font-weight: var(--fw-light);
+  line-height: 1.75;
+  letter-spacing: normal;
   color: var(--color-forest);
   margin-bottom: 48px;
 }
@@ -84,9 +87,9 @@ get_header();
     aria-label="<?php esc_attr_e( 'Contact introduction', 'jaiye-journeys' ); ?>"
   >
     <div class="container">
-      <p class="ct-intro__line">
+      <h1 class="ct-intro__line">
         <?php esc_html_e( 'Every great trip starts with a conversation.', 'jaiye-journeys' ); ?>
-      </p>
+      </h1>
     </div>
   </section><!-- /.ct-intro -->
 

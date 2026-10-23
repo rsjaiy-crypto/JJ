@@ -6,7 +6,8 @@
  *
  * Opened by any link with data-btl-waitlist on the Between the Lines page
  * and pages using the BTL Retreat template, and on arrival at
- * /between-the-lines/?waitlist=btl (the link-in-bio). It loads no Klaviyo
+ * /between-the-lines/?waitlist=btl (the link-in-bio) or #btl-waitlist
+ * (Journal posts). It loads no Klaviyo
  * script and sets no cookies, so it works whatever the visitor chose on
  * the cookie banner.
  *
