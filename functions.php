@@ -385,3 +385,35 @@ function jaiye_klaviyo_tracking() {
     <?php
 }
 add_action( 'wp_footer', 'jaiye_klaviyo_tracking' );
+
+
+// ============================================================
+// Redirects
+// Old addresses that should send visitors (and Google) to a
+// new page for good. Add a line to the list: old path => new
+// path, both starting and ending with a slash. Any ?query on
+// the old address (e.g. UTM tags) is carried across.
+// ============================================================
+
+function jaiye_redirects() {
+    return [
+        '/btl-essaouira-edit/' => '/trips/btl-marrakech/',
+    ];
+}
+
+function jaiye_do_redirects() {
+    $path = strtolower( (string) wp_parse_url( $_SERVER['REQUEST_URI'], PHP_URL_PATH ) );
+    $path = '/' . trim( $path, '/' ) . '/';
+
+    foreach ( jaiye_redirects() as $from => $to ) {
+        if ( '/' . trim( strtolower( $from ), '/' ) . '/' !== $path ) {
+            continue;
+        }
+        $query = wp_parse_url( $_SERVER['REQUEST_URI'], PHP_URL_QUERY );
+        wp_safe_redirect( home_url( $to ) . ( $query ? '?' . $query : '' ), 301 );
+        exit;
+    }
+}
+// Before WordPress's own canonical redirect, which might otherwise send an
+// old address somewhere else first.
+add_action( 'template_redirect', 'jaiye_do_redirects', 1 );

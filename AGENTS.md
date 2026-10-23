@@ -256,6 +256,12 @@ There's no WordPress test environment. At minimum:
 - Check layout in a headless browser at desktop width and at 390px.
 - After deploying, load the live pages and check for PHP errors and the change.
 
+## Redirects
+
+Permanent (301) redirects for old addresses live in `jaiye_redirects()` in
+`functions.php`: one line per old path => new path. Matching ignores case,
+a missing trailing slash, and keeps any query string (UTM tags).
+
 ## Rewrites
 
 If you change the trip post type's slug or rewrite settings, bump
