@@ -185,6 +185,7 @@ function jj_manage_booking( $id ) {
         'code'       => jj_booking_get( $id, 'code' ),
         'discount'   => (int) jj_booking_get( $id, 'discount' ),
         'plan'       => $plan,
+        'plan_kind'  => jj_booking_get( $id, 'plan_kind' ),
         'made'       => $made,
         'next'       => $next,
         'status'     => $status,
@@ -404,21 +405,24 @@ function jj_manage_save_trip( $trip_id ) {
         update_post_meta( $trip_id, JJ_TRIP_META_PREFIX . $key, $rows );
     }
 
-    // Payment plan dates: the whole list, blanks dropped, so a date can be
-    // added or removed.
-    if ( isset( $post['plan_dates'] ) && is_array( $post['plan_dates'] ) ) {
-        $field = jj_manage_field( 'instalment_dates', 'date' );
+    // Payment plan dates, monthly and twice a month: each whole list, blanks
+    // dropped, so a date can be added or removed.
+    $field = jj_manage_field( 'instalment_dates', 'date' );
+    foreach ( [ 'plan_dates' => 'instalment_dates', 'twice_dates' => 'instalment_dates_twice' ] as $input => $key ) {
+        if ( ! isset( $post[ $input ] ) || ! is_array( $post[ $input ] ) ) {
+            continue;
+        }
         $dates = [];
-        foreach ( $post['plan_dates'] as $raw ) {
+        foreach ( $post[ $input ] as $raw ) {
             $value = $field ? jj_trip_sanitise_value( $raw, $field['type'] ) : '';
             if ( '' !== $value ) {
                 $dates[] = [ 'date' => $value ];
             }
         }
         if ( $dates ) {
-            update_post_meta( $trip_id, JJ_TRIP_META_PREFIX . 'instalment_dates', $dates );
+            update_post_meta( $trip_id, JJ_TRIP_META_PREFIX . $key, $dates );
         } else {
-            delete_post_meta( $trip_id, JJ_TRIP_META_PREFIX . 'instalment_dates' );
+            delete_post_meta( $trip_id, JJ_TRIP_META_PREFIX . $key );
         }
     }
     // phpcs:enable

@@ -96,9 +96,14 @@
 	}
 
 	var symbols  = { gbp: '£', usd: '$' };
-	var dates    = JSON.parse( form.getAttribute( 'data-dates' ) || '[]' );
+	// Payment dates still ahead, per plan: "plan" (monthly) and "twice"
+	// (twice a month, when the trip offers it).
+	var datesFor = {
+		plan: JSON.parse( form.getAttribute( 'data-dates' ) || '[]' ),
+		twice: JSON.parse( form.getAttribute( 'data-dates-twice' ) || '[]' )
+	};
 	var currency = form.getAttribute( 'data-currency' ) || 'gbp';
-	var autoFull = false;
+	var autoFrom = null; // A plan we switched them off when it ran out of dates.
 
 	/* Discount code: what Stripe said about it, and the message to show. */
 	var codeBox   = form.querySelector( '.js-booking-code' );
@@ -223,31 +228,48 @@
 		var deposit   = num( form, 'data-deposit-' + currency ) * guests;
 		var planTotal = num( room, 'data-plan-' + currency ) * guests;
 		var fullTotal = num( room, 'data-full-' + currency ) * guests;
-		var payments  = deposit > 0 ? split( planTotal - deposit, dates.length ) : [];
+		var paymentsFor = {};
+		Object.keys( datesFor ).forEach( function ( kind ) {
+			paymentsFor[ kind ] = deposit > 0 ? split( planTotal - deposit, datesFor[ kind ].length ) : [];
+		} );
 
 		// Codes listed in Booking Settings also come off the pay-in-full price.
 		var fullOff = discount && discount.full ? codeOff( fullTotal, fullTotal - 100 ) : 0;
 
-		// Payment plan only where there are dates ahead and a balance to spread.
-		var planChoice = form.querySelector( '.js-booking-plan' );
-		if ( planChoice ) {
-			var planInput = planChoice.querySelector( 'input' );
+		// Each plan only where it has dates ahead and a balance to spread. A
+		// plan that runs out is swapped for the other plan or pay in full, and
+		// chosen again if it comes back.
+		var planChoices = form.querySelectorAll( '.js-booking-plan' );
+		if ( planChoices.length ) {
 			var fullInput = form.querySelector( 'input[name="payment"][value="full"]' );
-			planChoice.hidden  = ! payments.length;
-			planInput.disabled = ! payments.length;
-			if ( ! payments.length && planInput.checked ) {
-				fullInput.checked = true;
-				autoFull = true; // Switched for them; switch back when the plan returns.
-			} else if ( payments.length && autoFull ) {
-				planInput.checked = true;
-				autoFull = false;
+			var open      = [];
+			Array.prototype.forEach.call( planChoices, function ( choice ) {
+				var input = choice.querySelector( 'input' );
+				var count = paymentsFor[ input.value ].length;
+				choice.hidden  = ! count;
+				input.disabled = ! count;
+				if ( count ) {
+					open.push( input );
+					var note = choice.querySelector( '[data-note]' );
+					if ( note ) {
+						note.textContent = money( deposit ) + ' deposit today, then ' + count +
+							( 1 === count ? ' automatic payment' : ' automatic payments' );
+					}
+				}
+			} );
+
+			var picked = checked( 'payment' );
+			if ( picked && picked.disabled ) {
+				autoFrom = picked.value;
+				( open[0] || fullInput ).checked = true;
+			} else if ( autoFrom ) {
+				var back = form.querySelector( 'input[name="payment"][value="' + autoFrom + '"]' );
+				if ( back && ! back.disabled ) {
+					back.checked = true;
+					autoFrom = null;
+				}
 			}
 
-			var planNote = form.querySelector( '[data-note="plan"]' );
-			if ( planNote && payments.length ) {
-				planNote.textContent = money( deposit ) + ' deposit today, then ' + payments.length +
-					( 1 === payments.length ? ' automatic payment' : ' automatic payments' );
-			}
 			var fullNote = form.querySelector( '[data-note="full"]' );
 			if ( fullNote ) {
 				var fullPay = fullTotal - fullOff;
@@ -257,10 +279,13 @@
 			}
 		}
 
-		var payment = checked( 'payment' );
-		var onPlan  = payments.length && ( ! payment || 'plan' === payment.value );
+		var payment  = checked( 'payment' );
+		var kind     = payment && datesFor[ payment.value ] ? payment.value : ( payment ? 'full' : 'plan' );
+		var dates    = 'full' === kind ? [] : datesFor[ kind ];
+		var payments = 'full' === kind ? [] : paymentsFor[ kind ];
+		var onPlan   = payments.length > 0;
 
-		// On the plan a code comes off the balance, so the deposit stays the
+		// On a plan a code comes off the balance, so the deposit stays the
 		// same. Matches jj_booking_quote().
 		var off = 0;
 		if ( onPlan && discount ) {
@@ -409,7 +434,7 @@
 
 	form.addEventListener( 'change', function ( e ) {
 		if ( 'payment' === e.target.name ) {
-			autoFull = false;
+			autoFrom = null;
 		}
 		update();
 	} );

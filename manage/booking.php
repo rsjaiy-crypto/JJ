@@ -21,7 +21,9 @@ $rows   = [
     __( 'Dates', 'jaiye-journeys' )      => $b['departure'],
     __( 'Room', 'jaiye-journeys' )       => $b['room'],
     __( 'Travellers', 'jaiye-journeys' ) => $b['travellers'],
-    __( 'Paying', 'jaiye-journeys' )     => 'plan' === $b['payment'] ? __( 'Payment plan', 'jaiye-journeys' ) : __( 'In full', 'jaiye-journeys' ),
+    __( 'Paying', 'jaiye-journeys' )     => 'plan' === $b['payment']
+        ? ( 'twice' === $b['plan_kind'] ? __( 'Payment plan, twice a month', 'jaiye-journeys' ) : __( 'Payment plan', 'jaiye-journeys' ) )
+        : __( 'In full', 'jaiye-journeys' ),
     __( 'Total', 'jaiye-journeys' )      => $cur ? jj_booking_money( $b['total'], $cur ) : '',
     __( 'Paid so far', 'jaiye-journeys' ) => $cur ? jj_booking_money( $b['paid'], $cur ) : '',
     __( 'Still to pay', 'jaiye-journeys' ) => $cur ? jj_booking_money( max( 0, $b['total'] - $b['paid'] ), $cur ) : '',

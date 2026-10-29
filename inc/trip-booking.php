@@ -159,14 +159,18 @@ function jj_trip_booking_currencies( $post_id ) {
  * real dates for ones five minutes apart, so a whole plan can be watched
  * running in an afternoon.
  *
- * @param int $post_id Trip ID.
+ * Two plans: 'monthly' (Payment plan dates) and 'twice' (Twice-a-month
+ * plan dates, optional; offered only when it has dates ahead).
+ *
+ * @param int    $post_id Trip ID.
+ * @param string $kind    monthly|twice.
  * @return int[]
  */
-function jj_trip_plan_dates( $post_id ) {
+function jj_trip_plan_dates( $post_id, $kind = 'monthly' ) {
     $today = current_datetime()->setTime( 0, 0 );
     $dates = [];
 
-    foreach ( jj_trip_rows( 'instalment_dates', $post_id ) as $row ) {
+    foreach ( jj_trip_rows( 'twice' === $kind ? 'instalment_dates_twice' : 'instalment_dates', $post_id ) as $row ) {
         $date = DateTimeImmutable::createFromFormat( '!Y-m-d', isset( $row['date'] ) ? $row['date'] : '', wp_timezone() );
         if ( $date && $date > $today ) {
             $dates[] = $date->setTime( 9, 0 )->getTimestamp();
@@ -229,7 +233,7 @@ function jj_trip_departure_label( $post_id, $index, $departure ) {
  * @param array  $room     Room from jj_trip_rooms().
  * @param int    $guests   Travellers.
  * @param string $currency gbp|usd.
- * @param string $payment  plan|full.
+ * @param string $payment  plan (monthly)|twice (twice a month)|full.
  * @param array  $discount Optional, from jj_booking_discount(). On the payment
  *                         plan it comes off the balance, so the deposit stays
  *                         the same and every later payment is smaller. Paying
@@ -243,8 +247,8 @@ function jj_booking_quote( $post_id, $room, $guests, $currency, $payment, $disco
         return null;
     }
 
-    if ( 'plan' === $payment ) {
-        $dates   = jj_trip_plan_dates( $post_id );
+    if ( 'plan' === $payment || 'twice' === $payment ) {
+        $dates   = jj_trip_plan_dates( $post_id, 'twice' === $payment ? 'twice' : 'monthly' );
         $deposit = jj_trip_deposit( $post_id, $currency ) * $guests;
         $total   = $prices['plan'] * $guests;
         $off     = jj_booking_discount_amount( $discount, $total, $total - $deposit - count( $dates ) );
@@ -969,7 +973,7 @@ function jj_trip_start_checkout( $trip_id ) {
     $room_i   = isset( $_POST['room'] ) ? (int) $_POST['room'] : -1;
     $dep_i    = isset( $_POST['departure'] ) ? (int) $_POST['departure'] : -1;
     $guests   = isset( $_POST['guests'] ) ? (int) $_POST['guests'] : 0;
-    $payment  = isset( $_POST['payment'] ) && 'full' === $_POST['payment'] ? 'full' : 'plan';
+    $payment  = isset( $_POST['payment'] ) && in_array( $_POST['payment'], [ 'full', 'twice' ], true ) ? sanitize_key( $_POST['payment'] ) : 'plan';
     $currency = isset( $_POST['currency'] ) ? sanitize_key( wp_unslash( $_POST['currency'] ) ) : 'gbp';
     $terms    = ! empty( $_POST['terms'] );
     $code     = isset( $_POST['discount_code'] ) ? sanitize_text_field( wp_unslash( $_POST['discount_code'] ) ) : '';
@@ -1025,7 +1029,7 @@ function jj_trip_start_checkout( $trip_id ) {
     }
 
     $quote = jj_booking_quote( $trip_id, $room, $guests, $currency, $payment, $discount );
-    if ( ! $quote && 'plan' === $payment ) {
+    if ( ! $quote && 'full' !== $payment ) {
         // The last plan date passed while they were choosing: pay in full.
         $payment = 'full';
         $quote   = jj_booking_quote( $trip_id, $room, $guests, $currency, 'full' );
@@ -1036,7 +1040,9 @@ function jj_trip_start_checkout( $trip_id ) {
 
     $title     = jj_trip_volume_title( $trip_id );
     $dep_label = isset( $departures[ $dep_i ] ) ? jj_trip_departure_label( $trip_id, $dep_i, $departures[ $dep_i ] ) : '';
-    $is_plan   = 'plan' === $payment;
+    // Both instalment options are a payment plan from here on (Stripe
+    // schedule, reminders, dashboard); plan_kind records which one.
+    $is_plan   = 'full' !== $payment;
 
     $metadata = [
         'trip'       => $title,
@@ -1046,7 +1052,8 @@ function jj_trip_start_checkout( $trip_id ) {
         'departure'  => $dep_label,
         'room'       => $room['name'],
         'travellers' => $guests,
-        'payment'    => $payment,
+        'payment'    => $is_plan ? 'plan' : 'full',
+        'plan_kind'  => 'twice' === $payment ? 'twice' : ( $is_plan ? 'monthly' : '' ),
         'currency'   => $currency,
         'total'      => $quote['total'],
         'plan'       => jj_booking_pack_plan( $quote['plan'] ),
@@ -1273,6 +1280,7 @@ function jj_booking_record_checkout( $session ) {
             'currency'   => $meta['currency'],
             'total'      => (int) $meta['total'],
             'plan'       => $meta['plan'],
+            'plan_kind'  => isset( $meta['plan_kind'] ) ? $meta['plan_kind'] : '',
             'dep_i'      => isset( $meta['dep_i'] ) ? (int) $meta['dep_i'] : '',
             'room_i'     => isset( $meta['room_i'] ) ? (int) $meta['room_i'] : '',
             'code'       => isset( $meta['code'] ) ? $meta['code'] : '',
@@ -1297,7 +1305,7 @@ function jj_booking_record_checkout( $session ) {
                 'Paid today: ' . jj_booking_money( $session['amount_total'], $currency ),
                 ! empty( $meta['code'] ) ? sprintf( 'Discount code: %s, %s off', $meta['code'], jj_booking_money( $meta['discount'], $currency ) ) : null,
                 'plan' === $meta['payment']
-                    ? 'Payment plan: ' . jj_booking_plan_sentence( jj_booking_unpack_plan( $meta['plan'] ), $currency )
+                    ? ( 'twice' === ( isset( $meta['plan_kind'] ) ? $meta['plan_kind'] : '' ) ? 'Payment plan (twice a month): ' : 'Payment plan: ' ) . jj_booking_plan_sentence( jj_booking_unpack_plan( $meta['plan'] ), $currency )
                     : 'Paid in full.',
                 '',
                 admin_url( 'post.php?action=edit&post=' . $booking_id ),
@@ -1746,6 +1754,9 @@ function jj_booking_details_box( $post ) {
         __( 'Dates', 'jaiye-journeys' )      => jj_booking_get( $id, 'departure' ),
         __( 'Room', 'jaiye-journeys' )       => jj_booking_get( $id, 'room' ),
         __( 'Travellers', 'jaiye-journeys' ) => jj_booking_get( $id, 'travellers' ),
+        __( 'Paying', 'jaiye-journeys' )     => 'plan' === jj_booking_get( $id, 'payment' )
+            ? ( 'twice' === jj_booking_get( $id, 'plan_kind' ) ? __( 'Payment plan, twice a month', 'jaiye-journeys' ) : __( 'Payment plan', 'jaiye-journeys' ) )
+            : __( 'In full', 'jaiye-journeys' ),
         __( 'Total', 'jaiye-journeys' )      => $currency ? jj_booking_money( jj_booking_get( $id, 'total' ), $currency ) : '',
         __( 'Discount', 'jaiye-journeys' )   => jj_booking_get( $id, 'code' ) && $currency
             /* translators: 1: amount, 2: code */

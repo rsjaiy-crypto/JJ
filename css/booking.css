@@ -404,6 +404,11 @@
   font-size: var(--text-sm);
 }
 
+/* Rows with nothing to show (e.g. Discount before a code is applied) */
+.booking-summary__row[hidden] {
+  display: none;
+}
+
 .booking-summary__row--due {
   margin-top: var(--space-3);
   align-items: baseline;

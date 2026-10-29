@@ -75,6 +75,15 @@ or **pay in full** (the room's discounted pay-in-full price).
   trip's **Payment plan dates** still ahead (after today); the last payment
   takes any odd pence. With no dates ahead, only pay in full is offered.
   There is no "60 days before departure" rule; the dates are per trip.
+- **Two instalment options (October 2026):** "Monthly payments" uses
+  **Payment plan dates** (`instalment_dates`); "Twice a month" uses the
+  optional **Twice-a-month plan dates** (`instalment_dates_twice`, e.g. the
+  1st and 15th) and only appears when that list has dates ahead. Same
+  deposit and maths (`jj_trip_plan_dates( $id, 'twice' )`, quote payment
+  `twice`). The form posts `payment=twice`; from checkout on, both are stored
+  as `payment=plan` (one Stripe schedule phase per date, so everything
+  downstream is unchanged) plus `plan_kind` = `monthly` / `twice` for
+  display. Both lists are editable in Edit Trip and the /manage/ dashboard.
 - On `checkout.session.completed` the webhook (`/wp-json/jj/v1/stripe`,
   signature-checked) records a **Booking** (Trips → Bookings, CPT
   `jj_booking`, meta `_jj_bk_*`) and creates a Stripe subscription schedule:
@@ -222,7 +231,8 @@ triggers the "JJ: General welcome" flow.
   `data-btl-waitlist` and by `?waitlist=btl` (the owner's link in bio;
   `join=thelist` belongs to a Klaviyo pop-up). On submit it posts to
   Klaviyo's public client API (`client/subscriptions` first, for email
-  consent on list **Sq3GFK**, which triggers the BTL welcome flow, then
+  consent on list **Sq3GFK**, whose members the segment "The List: all"
+  (SgrdDi) holds, and that segment triggers the BTL welcome flow, then
   `client/profiles` for names and properties; a failed second step only
   logs). Logged-in editors see Klaviyo's reason under any error with the public company ID. No Klaviyo
   script, no cookies, so it works without cookie consent. Answers are saved

@@ -37,6 +37,7 @@ $effective    = jj_trip_status( $id );
 $rooms        = $rows( 'rooms' );
 $departures   = $rows( 'departures' );
 $plan_dates   = $rows( 'instalment_dates' );
+$twice_dates  = $rows( 'instalment_dates_twice' );
 $is_btl       = 'btl' === jj_trip_field( 'brand', $id, 'jj-edit' );
 ?>
 <p class="m-back"><a href="<?php echo esc_url( jj_manage_url( 'trips' ) ); ?>">← <?php esc_html_e( 'All trips', 'jaiye-journeys' ); ?></a></p>
@@ -159,7 +160,7 @@ $is_btl       = 'btl' === jj_trip_field( 'brand', $id, 'jj-edit' );
   <?php endif; ?>
 
   <section class="m-card">
-    <h2 class="m-card__title"><?php esc_html_e( 'Payment plan dates', 'jaiye-journeys' ); ?></h2>
+    <h2 class="m-card__title"><?php esc_html_e( 'Payment plan dates (monthly)', 'jaiye-journeys' ); ?></h2>
     <p class="m-hint"><?php esc_html_e( 'When the balance is collected after the deposit. New guests pay in equal parts on the dates still ahead. Changing these doesn’t change plans already booked. Clear a date to remove it.', 'jaiye-journeys' ); ?></p>
     <input type="hidden" name="plan_dates[]" value="">
     <div class="m-dates js-dates">
@@ -167,6 +168,19 @@ $is_btl       = 'btl' === jj_trip_field( 'brand', $id, 'jj-edit' );
         <input class="m-input" type="date" name="plan_dates[]" value="<?php echo esc_attr( $val( $row, 'date' ) ); ?>" aria-label="<?php esc_attr_e( 'Payment date', 'jaiye-journeys' ); ?>">
       <?php endforeach; ?>
       <input class="m-input" type="date" name="plan_dates[]" value="" aria-label="<?php esc_attr_e( 'Add a payment date', 'jaiye-journeys' ); ?>">
+    </div>
+    <button type="button" class="m-btn m-btn--quiet js-add-date"><?php esc_html_e( 'Add another date', 'jaiye-journeys' ); ?></button>
+  </section>
+
+  <section class="m-card">
+    <h2 class="m-card__title"><?php esc_html_e( 'Twice-a-month plan dates', 'jaiye-journeys' ); ?></h2>
+    <p class="m-hint"><?php esc_html_e( 'Optional. Add dates here (e.g. the 1st and 15th of each month) to also offer "Twice a month" on the booking page. Same deposit, then equal payments on the dates still ahead. Leave empty for the monthly plan only.', 'jaiye-journeys' ); ?></p>
+    <input type="hidden" name="twice_dates[]" value="">
+    <div class="m-dates js-dates">
+      <?php foreach ( $twice_dates as $row ) : ?>
+        <input class="m-input" type="date" name="twice_dates[]" value="<?php echo esc_attr( $val( $row, 'date' ) ); ?>" aria-label="<?php esc_attr_e( 'Payment date', 'jaiye-journeys' ); ?>">
+      <?php endforeach; ?>
+      <input class="m-input" type="date" name="twice_dates[]" value="" aria-label="<?php esc_attr_e( 'Add a payment date', 'jaiye-journeys' ); ?>">
     </div>
     <button type="button" class="m-btn m-btn--quiet js-add-date"><?php esc_html_e( 'Add another date', 'jaiye-journeys' ); ?></button>
   </section>

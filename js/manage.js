@@ -21,16 +21,18 @@
     });
   }
 
-  var add = document.querySelector('.js-add-date');
-  var dates = document.querySelector('.js-dates');
-  if (add && dates) {
+  // "Add another date" adds a box to the list in its own section (monthly
+  // and twice-a-month dates each have one).
+  document.querySelectorAll('.js-add-date').forEach(function (add) {
+    var dates = add.closest('section').querySelector('.js-dates');
+    if (!dates) return;
     add.addEventListener('click', function () {
       var input = dates.querySelector('input:last-child').cloneNode();
       input.value = '';
       dates.appendChild(input);
       input.focus();
     });
-  }
+  });
 
   // Show the tip on phones until it's dismissed, and never inside the
   // home-screen app itself.

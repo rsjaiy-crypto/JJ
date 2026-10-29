@@ -29,6 +29,7 @@ while ( have_posts() ) :
     $has_dates  = (bool) jj_trip_rows( 'departures', $trip_id );
     $terms_note = jj_trip_field( 'payment_terms', $trip_id );
     $plan_dates = jj_trip_plan_dates( $trip_id );
+    $twice_dates = jj_trip_plan_dates( $trip_id, 'twice' );
     $currencies = jj_trip_booking_currencies( $trip_id );
     $currency   = jj_booking_visitor_currency( $currencies );
     $symbols    = jj_booking_currencies();
@@ -98,14 +99,17 @@ while ( have_posts() ) :
 
     // First render, before JavaScript takes over the numbers.
     $first_room = isset( $rooms[ $sel_room ] ) ? $rooms[ $sel_room ] : null;
-    $first_plan = $first_room ? jj_booking_quote( $trip_id, $first_room, 1, $currency, 'plan' ) : null;
-    $first_full = $first_room ? jj_booking_quote( $trip_id, $first_room, 1, $currency, 'full' ) : null;
-    $first      = $first_plan ? $first_plan : $first_full;
+    $first_plan  = $first_room ? jj_booking_quote( $trip_id, $first_room, 1, $currency, 'plan' ) : null;
+    $first_twice = $first_room ? jj_booking_quote( $trip_id, $first_room, 1, $currency, 'twice' ) : null;
+    $first_full  = $first_room ? jj_booking_quote( $trip_id, $first_room, 1, $currency, 'full' ) : null;
+    $first       = $first_plan ? $first_plan : ( $first_twice ? $first_twice : $first_full );
     $first_dep  = isset( $departures[ $sel_dep ] ) ? jj_trip_departure_label( $trip_id, $sel_dep, $departures[ $sel_dep ] ) : '';
 
-    $date_labels = array_map( function ( $ts ) {
+    $date_label  = function ( $ts ) {
         return wp_date( 'j M Y', $ts );
-    }, $plan_dates );
+    };
+    $date_labels = array_map( $date_label, $plan_dates );
+    $twice_labels = array_map( $date_label, $twice_dates );
 
     // Room price lines, one per currency; CSS shows the chosen currency's.
     $room_price = function ( $room ) use ( $currencies ) {
@@ -252,6 +256,7 @@ while ( have_posts() ) :
         <form class="booking-form js-booking" method="post" action="<?php echo esc_url( $book_url ); ?>#booking"
               data-currency="<?php echo esc_attr( $currency ); ?>"
               data-dates="<?php echo esc_attr( wp_json_encode( $date_labels ) ); ?>"
+              data-dates-twice="<?php echo esc_attr( wp_json_encode( $twice_labels ) ); ?>"
               <?php foreach ( $currencies as $cur ) : ?>
                 data-deposit-<?php echo esc_attr( $cur ); ?>="<?php echo (int) jj_trip_deposit( $trip_id, $cur ); ?>"
               <?php endforeach; ?>>
@@ -371,33 +376,52 @@ while ( have_posts() ) :
             </fieldset>
 
             <?php /* ── Payment ── */ ?>
-            <?php if ( $first_plan ) : ?>
+            <?php if ( $first_plan || $first_twice ) : ?>
               <fieldset class="booking-step">
                 <legend class="booking-step__title">
                   <span class="booking-step__num"><?php echo (int) ++$step; ?></span>
                   <?php esc_html_e( 'How would you like to pay?', 'jaiye-journeys' ); ?>
                 </legend>
                 <div class="booking-choices">
-                  <label class="booking-choice js-booking-plan">
-                    <input type="radio" name="payment" value="plan" checked>
-                    <span class="booking-choice__text"><?php esc_html_e( 'Payment plan', 'jaiye-journeys' ); ?></span>
-                    <span class="booking-choice__note" data-note="plan">
-                      <?php
-                      echo esc_html( sprintf(
-                          /* translators: 1: deposit, 2: number of payments */
-                          _n( '%1$s deposit today, then %2$d automatic payment', '%1$s deposit today, then %2$d automatic payments', count( $plan_dates ), 'jaiye-journeys' ),
-                          jj_booking_money( $first_plan['today'], $currency ),
-                          count( $plan_dates )
-                      ) );
-                      ?>
-                    </span>
-                  </label>
+                  <?php
+                  // Monthly, and twice a month when the trip has those dates.
+                  // The first one on offer starts selected.
+                  $plan_choices = [
+                      'plan'  => [ $first_plan, $first_twice ? __( 'Monthly payments', 'jaiye-journeys' ) : __( 'Payment plan', 'jaiye-journeys' ) ],
+                      'twice' => [ $first_twice, __( 'Twice a month', 'jaiye-journeys' ) ],
+                  ];
+                  $plan_checked = $first_plan ? 'plan' : 'twice';
+                  ?>
+                  <?php foreach ( $plan_choices as $plan_key => $plan_choice ) : ?>
+                    <?php
+                    if ( 'twice' === $plan_key && ! $twice_dates ) {
+                        continue; // Not offered on this trip.
+                    }
+                    $plan_quote = $plan_choice[0];
+                    ?>
+                    <label class="booking-choice js-booking-plan"<?php echo $plan_quote ? '' : ' hidden'; ?>>
+                      <input type="radio" name="payment" value="<?php echo esc_attr( $plan_key ); ?>"<?php checked( $plan_checked, $plan_key ); ?><?php disabled( ! $plan_quote ); ?>>
+                      <span class="booking-choice__text"><?php echo esc_html( $plan_choice[1] ); ?></span>
+                      <span class="booking-choice__note" data-note="<?php echo esc_attr( $plan_key ); ?>">
+                        <?php
+                        if ( $plan_quote ) {
+                            echo esc_html( sprintf(
+                                /* translators: 1: deposit, 2: number of payments */
+                                _n( '%1$s deposit today, then %2$d automatic payment', '%1$s deposit today, then %2$d automatic payments', count( $plan_quote['plan'] ), 'jaiye-journeys' ),
+                                jj_booking_money( $plan_quote['today'], $currency ),
+                                count( $plan_quote['plan'] )
+                            ) );
+                        }
+                        ?>
+                      </span>
+                    </label>
+                  <?php endforeach; ?>
                   <label class="booking-choice">
                     <input type="radio" name="payment" value="full">
                     <span class="booking-choice__text"><?php esc_html_e( 'Pay in full', 'jaiye-journeys' ); ?></span>
                     <span class="booking-choice__note" data-note="full">
                       <?php
-                      $saving = $first_plan['total'] - $first_full['total'];
+                      $saving = ( $first_plan ? $first_plan['total'] : $first_twice['total'] ) - $first_full['total'];
                       echo esc_html(
                           $saving > 0
                               /* translators: 1: total, 2: saving */
@@ -452,7 +476,7 @@ while ( have_posts() ) :
               </p>
             </div>
 
-            <?php if ( $first_plan || jj_booking_full_codes() ) : ?>
+            <?php if ( $first_plan || $first_twice || jj_booking_full_codes() ) : ?>
               <div class="booking-code js-booking-code"
                    data-endpoint="<?php echo esc_url( rest_url( 'jj/v1/discount' ) ); ?>"
                    data-trip="<?php echo (int) $trip_id; ?>">

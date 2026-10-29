@@ -270,8 +270,17 @@ function jj_trip_schema() {
                 ],
                 'instalment_dates' => [
                     'type'      => 'repeater',
-                    'label'     => __( 'Payment plan dates', 'jaiye-journeys' ),
+                    'label'     => __( 'Payment plan dates (monthly)', 'jaiye-journeys' ),
                     'desc'      => __( 'The dates the balance is collected after the deposit, in any order; the latest is the final payment date. Guests are charged on the dates still ahead of them when they book, in equal payments. With none ahead, they pay in full at booking.', 'jaiye-journeys' ),
+                    'row_label' => __( 'Payment date', 'jaiye-journeys' ),
+                    'subfields' => [
+                        'date' => [ 'type' => 'date', 'label' => __( 'Date', 'jaiye-journeys' ) ],
+                    ],
+                ],
+                'instalment_dates_twice' => [
+                    'type'      => 'repeater',
+                    'label'     => __( 'Twice-a-month plan dates (optional)', 'jaiye-journeys' ),
+                    'desc'      => __( 'Add dates here to also offer "Twice a month" on the booking page, e.g. the 1st and 15th of each month up to the final payment date. It works like the monthly plan: the same deposit, then equal payments on the dates still ahead. Leave empty to offer the monthly plan only.', 'jaiye-journeys' ),
                     'row_label' => __( 'Payment date', 'jaiye-journeys' ),
                     'subfields' => [
                         'date' => [ 'type' => 'date', 'label' => __( 'Date', 'jaiye-journeys' ) ],
