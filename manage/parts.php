@@ -121,8 +121,18 @@ function jj_manage_notice() {
         'note'      => __( 'Note saved.', 'jaiye-journeys' ),
         'cancelled' => __( 'Booking cancelled and moved to the Bin. Its places are free again.', 'jaiye-journeys' ),
         'retry'     => __( 'Tried setting up the payment plan again. Check the status below.', 'jaiye-journeys' ),
+        'replan'    => __( 'Payment plan changed. The new dates are below, and Stripe will take the payments on them.', 'jaiye-journeys' ),
     ];
     $done = isset( $_GET['done'] ) ? sanitize_key( wp_unslash( $_GET['done'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+    if ( 'replan-failed' === $done ) {
+        $why = get_transient( 'jj_manage_replan_error_' . get_current_user_id() );
+        delete_transient( 'jj_manage_replan_error_' . get_current_user_id() );
+        echo '<p class="m-notice m-notice--alert" role="alert">' . esc_html(
+            /* translators: %s: reason */
+            sprintf( __( 'The plan wasn’t changed, and the guest is still on their old plan. %s', 'jaiye-journeys' ), $why ? $why : '' )
+        ) . '</p>';
+        return;
+    }
     if ( isset( $messages[ $done ] ) ) {
         echo '<p class="m-notice" role="status">' . esc_html( $messages[ $done ] ) . '</p>';
     }

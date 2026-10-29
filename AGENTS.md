@@ -84,6 +84,18 @@ or **pay in full** (the room's discounted pay-in-full price).
   as `payment=plan` (one Stripe schedule phase per date, so everything
   downstream is unchanged) plus `plan_kind` = `monthly` / `twice` for
   display. Both lists are editable in Edit Trip and the /manage/ dashboard.
+- **Changing a booking's plan (owner only):** the dashboard booking screen
+  has "Change payment plan" (`jj_booking_plan_options()`,
+  `jj_booking_change_plan()`): to the other plan kind, or "Pay the rest now".
+  Payments already made stay; what's still owed (`total - paid`) is split
+  over the new plan's dates more than a day ahead. It creates the new Stripe
+  schedule first (`jj_booking_schedule()`, numbered on from the payments
+  made, same booking_id metadata), then cancels the old one with no invoice
+  or proration, and cancels the new one again if that fails. The booking's
+  `plan` becomes the paid entries plus the new ones, `plan_kind` updates
+  (`now` for paying the rest), and `plan_log` records the change. Not
+  allowed while overdue, with no schedule, or within a day of a payment.
+  Guests can't change plans themselves (Stripe's customer portal is off).
 - On `checkout.session.completed` the webhook (`/wp-json/jj/v1/stripe`,
   signature-checked) records a **Booking** (Trips → Bookings, CPT
   `jj_booking`, meta `_jj_bk_*`) and creates a Stripe subscription schedule:
@@ -139,7 +151,7 @@ the site header or footer, so no tracking loads there.
   booked / received / still to come per currency (live bookings only), places
   sold per chapter and room, latest bookings.
 - **Bookings:** filter by trip and status, search name or email, optionally
-  include test bookings. A booking shows its plan, a private note
+  include test bookings. A booking shows its plan, Change payment plan, a private note
   (`_jj_bk_note`), Email guest, Open in Stripe, "Set up the payment plan
   again" for plan errors, and Cancel (moves it to the Bin so its places free
   up; refunds and cancelling the plan still happen in Stripe).

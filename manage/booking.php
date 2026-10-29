@@ -21,9 +21,7 @@ $rows   = [
     __( 'Dates', 'jaiye-journeys' )      => $b['departure'],
     __( 'Room', 'jaiye-journeys' )       => $b['room'],
     __( 'Travellers', 'jaiye-journeys' ) => $b['travellers'],
-    __( 'Paying', 'jaiye-journeys' )     => 'plan' === $b['payment']
-        ? ( 'twice' === $b['plan_kind'] ? __( 'Payment plan, twice a month', 'jaiye-journeys' ) : __( 'Payment plan', 'jaiye-journeys' ) )
-        : __( 'In full', 'jaiye-journeys' ),
+    __( 'Paying', 'jaiye-journeys' )     => jj_booking_plan_label( $id ),
     __( 'Total', 'jaiye-journeys' )      => $cur ? jj_booking_money( $b['total'], $cur ) : '',
     __( 'Paid so far', 'jaiye-journeys' ) => $cur ? jj_booking_money( $b['paid'], $cur ) : '',
     __( 'Still to pay', 'jaiye-journeys' ) => $cur ? jj_booking_money( max( 0, $b['total'] - $b['paid'] ), $cur ) : '',
@@ -115,6 +113,58 @@ $rows   = [
         </li>
       <?php endforeach; ?>
     </ol>
+  </section>
+<?php endif; ?>
+
+<?php
+$change = 'plan' === $b['payment'] && $cur ? jj_booking_plan_options( $id ) : null;
+?>
+<?php if ( $change && ( $change['options'] || $change['reason'] ) && 'paid' !== $b['status'] ) : ?>
+  <details class="m-card m-replan"<?php echo isset( $_GET['done'] ) && 'replan-failed' === $_GET['done'] ? ' open' : ''; // phpcs:ignore WordPress.Security.NonceVerification ?>>
+    <summary><?php esc_html_e( 'Change payment plan', 'jaiye-journeys' ); ?></summary>
+    <?php if ( $change['reason'] ) : ?>
+      <p class="m-muted"><?php echo esc_html( $change['reason'] ); ?></p>
+    <?php else : ?>
+      <p>
+        <?php
+        /* translators: %s: amount */
+        echo esc_html( sprintf( __( '%s still to pay. Payments already made stay as they are; the rest is spread over the new plan’s dates still ahead, on the same saved card. Nothing is charged today unless you choose "Pay the rest now".', 'jaiye-journeys' ), jj_booking_money( $change['owed'], $cur ) ) );
+        ?>
+      </p>
+      <form method="post" class="js-confirm" data-confirm="<?php esc_attr_e( 'Change this guest’s payment plan to the one you’ve chosen?', 'jaiye-journeys' ); ?>">
+        <?php wp_nonce_field( 'jj_manage_replan_' . $id ); ?>
+        <input type="hidden" name="jj_action" value="replan">
+        <?php $first_kind = array_key_first( $change['options'] ); ?>
+        <?php foreach ( $change['options'] as $kind => $option ) : ?>
+          <label class="m-replan__option">
+            <input type="radio" name="kind" value="<?php echo esc_attr( $kind ); ?>"<?php checked( $first_kind, $kind ); ?>>
+            <span>
+              <strong><?php echo esc_html( $option[0] ); ?></strong>
+              <span class="m-muted">
+                <?php
+                if ( 'now' === $kind ) {
+                    /* translators: %s: amount */
+                    echo esc_html( sprintf( __( '%s charged today', 'jaiye-journeys' ), jj_booking_money( $option[1][0][1], $cur ) ) );
+                } else {
+                    echo esc_html( jj_booking_plan_sentence( $option[1], $cur ) );
+                }
+                ?>
+              </span>
+            </span>
+          </label>
+        <?php endforeach; ?>
+        <button class="m-btn" type="submit"><?php esc_html_e( 'Change plan', 'jaiye-journeys' ); ?></button>
+      </form>
+      <p class="m-muted"><?php esc_html_e( 'Let the guest know their new dates. Stripe doesn’t email them about the change.', 'jaiye-journeys' ); ?></p>
+    <?php endif; ?>
+  </details>
+<?php endif; ?>
+
+<?php $plan_log = jj_booking_get( $id, 'plan_log' ); ?>
+<?php if ( $plan_log ) : ?>
+  <section class="m-card">
+    <h2 class="m-card__title"><?php esc_html_e( 'Plan changes', 'jaiye-journeys' ); ?></h2>
+    <p class="m-muted"><?php echo nl2br( esc_html( $plan_log ) ); // phpcs:ignore WordPress.Security.EscapeOutput -- escaped first. ?></p>
   </section>
 <?php endif; ?>
 

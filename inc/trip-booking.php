@@ -1389,10 +1389,30 @@ function jj_booking_create_schedule( $booking_id, $session ) {
         return $product;
     }
 
+    return jj_booking_schedule( $booking_id, $customer, $method, $product, $plan, 0, 'jj-plan-' . $session['id'] );
+}
+
+/**
+ * Create the Stripe subscription schedule that charges a booking's plan
+ * payments: one phase per payment, a yearly price so nothing renews inside
+ * a phase, cancelled after the last. Every phase and the schedule carry the
+ * booking ID, which is how the webhook counts the payments.
+ *
+ * @param int    $booking_id  Booking ID.
+ * @param string $customer    Stripe customer ID.
+ * @param string $method      Saved payment method ID.
+ * @param string $product     Stripe product ID.
+ * @param array  $payments    [[ts, minor], …] to charge.
+ * @param int    $already     Payments already made, so they're numbered on
+ *                            from there ("4 of 7").
+ * @param string $idempotency Idempotency key.
+ * @return array|WP_Error The schedule.
+ */
+function jj_booking_schedule( $booking_id, $customer, $method, $product, $payments, $already, $idempotency ) {
     $currency = jj_booking_get( $booking_id, 'currency' );
-    $count    = count( $plan );
+    $count    = $already + count( $payments );
     $phases   = [];
-    foreach ( $plan as $i => $payment ) {
+    foreach ( $payments as $i => $payment ) {
         $phases[] = [
             'items'              => [
                 [
@@ -1405,18 +1425,19 @@ function jj_booking_create_schedule( $booking_id, $session ) {
                     ],
                 ],
             ],
-            'end_date'           => isset( $plan[ $i + 1 ] ) ? $plan[ $i + 1 ][0] : $payment[0] + DAY_IN_SECONDS,
+            'end_date'           => isset( $payments[ $i + 1 ] ) ? $payments[ $i + 1 ][0] : $payment[0] + DAY_IN_SECONDS,
             'billing_cycle_anchor' => 'phase_start',
             'proration_behavior' => 'none',
             'metadata'           => [
                 'booking_id' => $booking_id,
-                'payment'    => ( $i + 1 ) . ' of ' . $count,
+                'payment'    => ( $already + $i + 1 ) . ' of ' . $count,
             ],
         ];
     }
 
-    // A first date that passed while the guest was paying is charged now.
-    $start = $plan[0][0] > time() + 60 ? $plan[0][0] : 'now';
+    // A first date that has already passed (or "pay the rest now") is
+    // charged now.
+    $start = $payments[0][0] > time() + 60 ? $payments[0][0] : 'now';
 
     return jj_stripe_request( 'POST', 'subscription_schedules', [
         'customer'         => $customer,
@@ -1433,7 +1454,187 @@ function jj_booking_create_schedule( $booking_id, $session ) {
             'room'       => jj_booking_get( $booking_id, 'room' ),
             'departure'  => jj_booking_get( $booking_id, 'departure' ),
         ],
-    ], 'jj-plan-' . $session['id'] );
+    ], $idempotency );
+}
+
+/* ── Changing a booking's payment plan (owner only) ────────────────── */
+
+/**
+ * How a booking is paying, for the dashboard and wp-admin.
+ *
+ * @param int $booking_id Booking ID.
+ * @return string
+ */
+function jj_booking_plan_label( $booking_id ) {
+    if ( 'plan' !== jj_booking_get( $booking_id, 'payment' ) ) {
+        return __( 'In full', 'jaiye-journeys' );
+    }
+    $labels = [
+        'twice' => __( 'Payment plan, twice a month', 'jaiye-journeys' ),
+        'now'   => __( 'Payment plan, rest paid in one go', 'jaiye-journeys' ),
+    ];
+    $kind = jj_booking_get( $booking_id, 'plan_kind' );
+    return isset( $labels[ $kind ] ) ? $labels[ $kind ] : __( 'Payment plan', 'jaiye-journeys' );
+}
+
+/**
+ * What a payment-plan booking could switch to, with the new payments, for
+ * the dashboard's "Change payment plan". Payments already made stay as they
+ * are; only what's still owed is spread again: over the trip's monthly or
+ * twice-a-month dates still ahead, or all now ("Pay the rest now").
+ *
+ * @param int $booking_id Booking ID.
+ * @return array [ 'reason' => why it can't change now ('' if it can),
+ *                 'owed' => minor units, 'options' => [ kind => [ label, payments ] ] ]
+ */
+function jj_booking_plan_options( $booking_id ) {
+    $out = [ 'reason' => '', 'owed' => 0, 'options' => [] ];
+
+    if ( 'plan' !== jj_booking_get( $booking_id, 'payment' ) ) {
+        $out['reason'] = __( 'This booking was paid in full.', 'jaiye-journeys' );
+        return $out;
+    }
+    $status = jj_booking_get( $booking_id, 'status' );
+    if ( 'paid' === $status ) {
+        $out['reason'] = __( 'Everything is already paid.', 'jaiye-journeys' );
+        return $out;
+    }
+    if ( 'overdue' === $status ) {
+        $out['reason'] = __( 'A payment is overdue. Once it’s paid, the plan can be changed.', 'jaiye-journeys' );
+        return $out;
+    }
+    if ( ! jj_booking_get( $booking_id, 'schedule' ) ) {
+        $out['reason'] = __( 'This booking has no payment plan set up in Stripe yet.', 'jaiye-journeys' );
+        return $out;
+    }
+
+    $plan = jj_booking_unpack_plan( jj_booking_get( $booking_id, 'plan' ) );
+    $made = (int) jj_booking_get( $booking_id, 'payments' );
+
+    // Stripe prepares each payment about an hour ahead, so leave the day of
+    // a payment alone.
+    if ( isset( $plan[ $made ] ) && $plan[ $made ][0] < time() + DAY_IN_SECONDS ) {
+        $out['reason'] = __( 'The next payment is due within a day. Change the plan after it has been taken.', 'jaiye-journeys' );
+        return $out;
+    }
+
+    $owed = (int) jj_booking_get( $booking_id, 'total' ) - (int) jj_booking_get( $booking_id, 'paid' );
+    if ( $owed <= 0 ) {
+        $out['reason'] = __( 'Nothing is left to pay.', 'jaiye-journeys' );
+        return $out;
+    }
+    $out['owed'] = $owed;
+
+    $trip_id = (int) jj_booking_get( $booking_id, 'trip_id' );
+    $current = jj_booking_get( $booking_id, 'plan_kind' );
+    $current = $current ? $current : 'monthly';
+    $labels  = [
+        'monthly' => __( 'Monthly payments', 'jaiye-journeys' ),
+        'twice'   => __( 'Twice a month', 'jaiye-journeys' ),
+    ];
+    foreach ( $labels as $kind => $label ) {
+        if ( $kind === $current ) {
+            continue;
+        }
+        $dates = array_values( array_filter( jj_trip_plan_dates( $trip_id, $kind ), function ( $ts ) {
+            return $ts > time() + DAY_IN_SECONDS;
+        } ) );
+        $split = jj_booking_split( $owed, count( $dates ) );
+        if ( $split ) {
+            $out['options'][ $kind ] = [ $label, array_map( null, $dates, $split ) ];
+        }
+    }
+    $out['options']['now'] = [ __( 'Pay the rest now', 'jaiye-journeys' ), [ [ time(), $owed ] ] ];
+
+    return $out;
+}
+
+/**
+ * Switch a payment-plan booking to another plan: set up the new Stripe
+ * schedule on the guest's saved card first, then stop the old one, so the
+ * guest is never left with two plans or none. Nothing already paid is
+ * refunded or charged again.
+ *
+ * @param int    $booking_id Booking ID.
+ * @param string $kind       monthly|twice|now.
+ * @return true|WP_Error
+ */
+function jj_booking_change_plan( $booking_id, $kind ) {
+    $choice = jj_booking_plan_options( $booking_id );
+    if ( $choice['reason'] ) {
+        return new WP_Error( 'jj_plan_locked', $choice['reason'] );
+    }
+    if ( ! isset( $choice['options'][ $kind ] ) ) {
+        return new WP_Error( 'jj_plan_kind', __( 'That plan has no payment dates left.', 'jaiye-journeys' ) );
+    }
+    $payments = $choice['options'][ $kind ][1];
+
+    // Quick test schedule, as at booking.
+    if ( 'now' !== $kind && 'test' === jj_stripe_mode() && get_option( JJ_BOOKING_FAST_TEST_OPTION ) ) {
+        foreach ( $payments as $i => $payment ) {
+            $payments[ $i ][0] = time() + 300 * ( $i + 1 );
+        }
+    }
+
+    $old = jj_booking_get( $booking_id, 'schedule' );
+    $sch = jj_stripe_request( 'GET', 'subscription_schedules/' . $old );
+    if ( is_wp_error( $sch ) ) {
+        return $sch;
+    }
+    $method   = isset( $sch['default_settings']['default_payment_method'] ) ? $sch['default_settings']['default_payment_method'] : '';
+    $customer = isset( $sch['customer'] ) ? $sch['customer'] : jj_booking_get( $booking_id, 'customer' );
+    if ( is_array( $method ) ) {
+        $method = $method['id'];
+    }
+    if ( is_array( $customer ) ) {
+        $customer = $customer['id'];
+    }
+    if ( ! $method || ! $customer ) {
+        return new WP_Error( 'jj_no_card', __( 'Stripe didn’t return the saved card for this plan.', 'jaiye-journeys' ) );
+    }
+    $product = jj_booking_product( (int) jj_booking_get( $booking_id, 'trip_id' ), jj_booking_get( $booking_id, 'trip' ) );
+    if ( is_wp_error( $product ) ) {
+        return $product;
+    }
+
+    $plan = jj_booking_unpack_plan( jj_booking_get( $booking_id, 'plan' ) );
+    $made = (int) jj_booking_get( $booking_id, 'payments' );
+
+    $new = jj_booking_schedule( $booking_id, $customer, $method, $product, $payments, $made, 'jj-replan-' . $booking_id . '-' . $kind . '-' . md5( wp_json_encode( $payments ) ) );
+    if ( is_wp_error( $new ) ) {
+        return $new;
+    }
+
+    // Stop the old plan without charging or refunding anything.
+    $stopped = jj_stripe_request( 'POST', 'subscription_schedules/' . $old . '/cancel', [ 'invoice_now' => 'false', 'prorate' => 'false' ] );
+    if ( is_wp_error( $stopped ) ) {
+        // Undo, so they aren't on two plans.
+        jj_stripe_request( 'POST', 'subscription_schedules/' . $new['id'] . '/cancel', [ 'invoice_now' => 'false', 'prorate' => 'false' ] );
+        return $stopped;
+    }
+
+    $labels = [
+        'monthly' => 'monthly payments',
+        'twice'   => 'twice a month',
+        'now'     => 'pay the rest now',
+    ];
+    $from   = jj_booking_get( $booking_id, 'plan_kind' );
+    $log    = (string) jj_booking_get( $booking_id, 'plan_log' );
+    $log   .= ( $log ? "\n" : '' ) . sprintf(
+        '%s: changed from %s to %s (%s still to pay).',
+        wp_date( 'j M Y' ),
+        $labels[ $from ? $from : 'monthly' ],
+        $labels[ $kind ],
+        jj_booking_money( $choice['owed'], jj_booking_get( $booking_id, 'currency' ) )
+    );
+
+    jj_booking_set( $booking_id, 'plan', jj_booking_pack_plan( array_merge( array_slice( $plan, 0, $made ), $payments ) ) );
+    jj_booking_set( $booking_id, 'plan_kind', $kind );
+    jj_booking_set( $booking_id, 'schedule', $new['id'] );
+    jj_booking_set( $booking_id, 'plan_log', $log );
+    jj_booking_set( $booking_id, 'status', 'on-plan' );
+
+    return true;
 }
 
 /**
@@ -1754,9 +1955,7 @@ function jj_booking_details_box( $post ) {
         __( 'Dates', 'jaiye-journeys' )      => jj_booking_get( $id, 'departure' ),
         __( 'Room', 'jaiye-journeys' )       => jj_booking_get( $id, 'room' ),
         __( 'Travellers', 'jaiye-journeys' ) => jj_booking_get( $id, 'travellers' ),
-        __( 'Paying', 'jaiye-journeys' )     => 'plan' === jj_booking_get( $id, 'payment' )
-            ? ( 'twice' === jj_booking_get( $id, 'plan_kind' ) ? __( 'Payment plan, twice a month', 'jaiye-journeys' ) : __( 'Payment plan', 'jaiye-journeys' ) )
-            : __( 'In full', 'jaiye-journeys' ),
+        __( 'Paying', 'jaiye-journeys' )     => jj_booking_plan_label( $id ),
         __( 'Total', 'jaiye-journeys' )      => $currency ? jj_booking_money( jj_booking_get( $id, 'total' ), $currency ) : '',
         __( 'Discount', 'jaiye-journeys' )   => jj_booking_get( $id, 'code' ) && $currency
             /* translators: 1: amount, 2: code */

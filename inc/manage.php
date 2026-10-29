@@ -318,6 +318,18 @@ function jj_manage_handle_post( $screen, $id ) {
             exit;
         }
 
+        if ( 'replan' === $action ) {
+            $kind   = isset( $_POST['kind'] ) ? sanitize_key( wp_unslash( $_POST['kind'] ) ) : '';
+            $result = jj_booking_change_plan( $id, $kind );
+            if ( is_wp_error( $result ) ) {
+                set_transient( 'jj_manage_replan_error_' . get_current_user_id(), $result->get_error_message(), 5 * MINUTE_IN_SECONDS );
+                wp_safe_redirect( jj_manage_url( 'booking/' . $id, [ 'done' => 'replan-failed' ] ) );
+                exit;
+            }
+            wp_safe_redirect( jj_manage_url( 'booking/' . $id, [ 'done' => 'replan' ] ) );
+            exit;
+        }
+
         if ( 'retry' === $action ) {
             $session = jj_stripe_request( 'GET', 'checkout/sessions/' . jj_booking_get( $id, 'session' ) );
             if ( ! is_wp_error( $session ) ) {

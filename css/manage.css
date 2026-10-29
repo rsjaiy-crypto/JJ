@@ -472,3 +472,46 @@
   border: 1px solid color-mix(in srgb, var(--color-forest) 25%, transparent);
   color: var(--color-text);
 }
+
+/* ── Change payment plan ───────────────────────────────────────── */
+
+.m-notice--alert { background: var(--m-alert); color: #fff; }
+
+.m-replan summary {
+  cursor: pointer;
+  color: var(--color-forest);
+  font-weight: var(--fw-semibold);
+}
+
+.m-replan[open] summary { margin-bottom: var(--space-3); }
+.m-replan p + form,
+.m-replan form + p { margin-top: var(--space-3); }
+
+.m-replan form {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.m label.m-replan__option {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-3);
+  border: 1px solid var(--m-line);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.m-replan__option:has(input:checked) { border-color: var(--color-forest); box-shadow: 0 0 0 1px var(--color-forest); }
+
+.m-replan__option input {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--color-forest);
+}
+
+.m-replan__option > span { display: grid; gap: 2px; min-width: 0; }
+.m-replan__option .m-muted { font-size: 0.875rem; overflow-wrap: anywhere; }
+.m-replan .m-btn { justify-self: start; margin-top: var(--space-2); }
