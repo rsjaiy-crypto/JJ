@@ -211,7 +211,7 @@ get_header();
         <div class="btlr-itin-item">
           <p class="btlr-itin-item__day"><?php esc_html_e( 'Day Four', 'jaiye-journeys' ); ?></p>
           <h3><?php esc_html_e( 'The Agafay', 'jaiye-journeys' ); ?></h3>
-          <p><?php esc_html_e( "The chapter's signature day. A private desert camp from mid-afternoon: camel or quad ride at sunset, hammam, fire dancing, and Gnawa music under the stars.", 'jaiye-journeys' ); ?></p>
+          <p><?php esc_html_e( "The chapter's signature day. A private desert camp from mid-afternoon: a hammam and a massage, fire dancing, and Gnawa music under the stars. Camel rides and quad biking at sunset are optional extras, at an additional cost.", 'jaiye-journeys' ); ?></p>
         </div>
         <div class="btlr-itin-item">
           <p class="btlr-itin-item__day"><?php esc_html_e( 'Day Five', 'jaiye-journeys' ); ?></p>
@@ -249,11 +249,11 @@ get_header();
 
         <details class="btlr-accordion-item" open>
           <summary><?php esc_html_e( "What's Included", 'jaiye-journeys' ); ?></summary>
-          <p><?php esc_html_e( 'Full riad buyout, all breakfasts and dinners, the Agafay desert day in full, guided souks and Secret Garden visit, Royal Mansour afternoon tea, all internal transfers.', 'jaiye-journeys' ); ?></p>
+          <p><?php esc_html_e( 'Full riad buyout, all meals, the Agafay desert day including a hammam and a massage, guided souks and Secret Garden visit, Royal Mansour afternoon tea, all internal transfers.', 'jaiye-journeys' ); ?></p>
         </details>
         <details class="btlr-accordion-item">
           <summary><?php esc_html_e( "What's Not Included", 'jaiye-journeys' ); ?></summary>
-          <p><?php esc_html_e( 'Flights, travel insurance, additional spa treatments, and shopping.', 'jaiye-journeys' ); ?></p>
+          <p><?php esc_html_e( 'Flights, travel insurance, camel rides and quad biking in the Agafay, additional spa treatments, and shopping.', 'jaiye-journeys' ); ?></p>
         </details>
         <details class="btlr-accordion-item">
           <summary><?php esc_html_e( 'Payment Terms', 'jaiye-journeys' ); ?></summary>
@@ -302,6 +302,14 @@ get_header();
         <details class="btlr-accordion-item">
           <summary><?php esc_html_e( 'Are dietary requirements catered for?', 'jaiye-journeys' ); ?></summary>
           <p><?php esc_html_e( "Yes, you'll receive a preference sheet ahead of the retreat.", 'jaiye-journeys' ); ?></p>
+        </details>
+        <details class="btlr-accordion-item">
+          <summary><?php esc_html_e( 'Are meals included?', 'jaiye-journeys' ); ?></summary>
+          <p><?php esc_html_e( 'Yes. All meals are included for the whole retreat.', 'jaiye-journeys' ); ?></p>
+        </details>
+        <details class="btlr-accordion-item">
+          <summary><?php esc_html_e( 'Is everything in the Agafay included?', 'jaiye-journeys' ); ?></summary>
+          <p><?php esc_html_e( 'The hammam and the massage are both included. Camel rides and quad biking are optional extras, paid for separately.', 'jaiye-journeys' ); ?></p>
         </details>
       </section>
 

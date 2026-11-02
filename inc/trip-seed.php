@@ -657,11 +657,11 @@ function jj_trip_seed_definitions() {
                 'included_groups' => [
                     [
                         'group_title' => 'The riad',
-                        'items'       => "Full private buyout of Palazzo Montefiore\n5 nights, twelve rooms around the courtyard\nAll breakfasts and dinners\nUse of the in-house hammam and sun terrace",
+                        'items'       => "Full private buyout of Palazzo Montefiore\n5 nights, twelve rooms around the courtyard\nAll meals\nUse of the in-house hammam and sun terrace",
                     ],
                     [
                         'group_title' => 'The chapter',
-                        'items'       => "The Agafay desert day in full\nGuided walk through the souks\nLe Jardin Secret, the Saadian-era garden\nAfternoon tea at the Royal Mansour\nRooftop book club",
+                        'items'       => "The Agafay desert day, including a hammam and a massage\nGuided walk through the souks\nLe Jardin Secret, the Saadian-era garden\nAfternoon tea at the Royal Mansour\nRooftop book club",
                     ],
                     [
                         'group_title' => 'Travel',
@@ -669,7 +669,7 @@ function jj_trip_seed_definitions() {
                     ],
                 ],
 
-                'not_included' => "Flights\nTravel insurance (required)\nAdditional spa treatments\nShopping in the souks\nTips and personal spending",
+                'not_included' => "Flights\nTravel insurance (required)\nCamel rides and quad biking in the Agafay\nAdditional spa treatments\nShopping in the souks\nTips and personal spending",
 
                 'route_copy' => 'Everything runs from the riad near Bab Aylane, apart from one day out to the Agafay, less than an hour from the medina.',
 
@@ -712,7 +712,7 @@ function jj_trip_seed_definitions() {
                         'day_name' => 'The Agafay',
                         'location' => 'Agafay desert',
                         'headline' => "The chapter's signature day",
-                        'body'     => 'A private desert camp from mid-afternoon: camel or quad ride at sunset, hammam, fire dancing, and Gnawa music under the stars.',
+                        'body'     => 'A private desert camp from mid-afternoon: a hammam and a massage, fire dancing, and Gnawa music under the stars. Camel rides and quad biking at sunset are optional extras, at an additional cost.',
                         'image_1'  => (string) jj_trip_seed_image( 'hero-desert.jpg' ),
                         'image_2'  => (string) jj_trip_seed_image( 'trip-morocco.jpg' ),
                     ],
@@ -809,6 +809,14 @@ function jj_trip_seed_definitions() {
                     [
                         'question' => 'Are dietary requirements catered for?',
                         'answer'   => 'Yes. You will receive a preference sheet ahead of the retreat and the riad kitchen is briefed in advance.',
+                    ],
+                    [
+                        'question' => 'Are meals included?',
+                        'answer'   => 'Yes. All meals are included for the whole retreat.',
+                    ],
+                    [
+                        'question' => 'Is everything in the Agafay included?',
+                        'answer'   => 'The hammam and the massage are both included. Camel rides and quad biking are optional extras, paid for separately.',
                     ],
                 ],
 
